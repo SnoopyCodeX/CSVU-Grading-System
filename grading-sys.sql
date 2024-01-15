@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 13, 2024 at 11:32 PM
+-- Generation Time: Jan 15, 2024 at 05:21 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -20,6 +20,25 @@ SET time_zone = "+00:00";
 --
 -- Database: `grading-sys`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ap_courses`
+--
+
+CREATE TABLE `ap_courses` (
+  `id` int(11) NOT NULL,
+  `course` varchar(255) NOT NULL,
+  `course_code` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ap_courses`
+--
+
+INSERT INTO `ap_courses` (`id`, `course`, `course_code`) VALUES
+(2, 'test', 123);
 
 -- --------------------------------------------------------
 
@@ -58,6 +77,12 @@ INSERT INTO `ap_userdetails` (`id`, `firstName`, `middleName`, `lastName`, `emai
 --
 
 --
+-- Indexes for table `ap_courses`
+--
+ALTER TABLE `ap_courses`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `ap_userdetails`
 --
 ALTER TABLE `ap_userdetails`
@@ -66,6 +91,12 @@ ALTER TABLE `ap_userdetails`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `ap_courses`
+--
+ALTER TABLE `ap_courses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `ap_userdetails`
