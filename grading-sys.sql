@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 15, 2024 at 05:21 PM
+-- Generation Time: Jan 15, 2024 at 07:09 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -38,7 +38,31 @@ CREATE TABLE `ap_courses` (
 --
 
 INSERT INTO `ap_courses` (`id`, `course`, `course_code`) VALUES
-(2, 'test', 123);
+(2, 'test', 123),
+(3, 'another course', 231);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ap_subjects`
+--
+
+CREATE TABLE `ap_subjects` (
+  `id` int(11) NOT NULL,
+  `course` int(11) NOT NULL,
+  `year_level` varchar(255) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `units` int(11) NOT NULL,
+  `credits_units` int(11) NOT NULL,
+  `term` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ap_subjects`
+--
+
+INSERT INTO `ap_subjects` (`id`, `course`, `year_level`, `name`, `units`, `credits_units`, `term`) VALUES
+(3, 2, '2nd year', 'another subject', 25, 25, '2nd Sem');
 
 -- --------------------------------------------------------
 
@@ -83,6 +107,13 @@ ALTER TABLE `ap_courses`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `ap_subjects`
+--
+ALTER TABLE `ap_subjects`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course` (`course`);
+
+--
 -- Indexes for table `ap_userdetails`
 --
 ALTER TABLE `ap_userdetails`
@@ -96,13 +127,29 @@ ALTER TABLE `ap_userdetails`
 -- AUTO_INCREMENT for table `ap_courses`
 --
 ALTER TABLE `ap_courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `ap_subjects`
+--
+ALTER TABLE `ap_subjects`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `ap_userdetails`
 --
 ALTER TABLE `ap_userdetails`
   MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `ap_subjects`
+--
+ALTER TABLE `ap_subjects`
+  ADD CONSTRAINT `course-subject-constraint` FOREIGN KEY (`course`) REFERENCES `ap_courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
