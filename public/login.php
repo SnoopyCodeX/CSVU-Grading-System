@@ -1,6 +1,10 @@
 <?php
 session_start();
 
+// Global variables for error handling
+$hasError = false;
+$message = "";
+
 require "../configuration/config.php";
 require("../auth/controller/verify-login.php");
 require("../auth/controller/auth.controller.php");
@@ -14,10 +18,6 @@ if (AuthController::isAuthenticated()) {
     header("Location: {$rootFolder}/" . AuthController::user()->roles);
     exit();
 }
-
-// Global variables for error handling
-$hasError = false;
-$message = "";
 ?>
 <main class="h-screen " style='background: url(assets/images/background19.png)'>
 
@@ -26,7 +26,7 @@ $message = "";
             <!-- Header -->
             <div class="flex flex-col justify-center items-center gap-4 mb-4 ">
                 <h1 class="text-[48px] font-bold">Login</h1>
-                <span class="text-base text-center">"Welcome to the LogIn portal! Whether you're a Student, Admin, or User, your journey begins here. Enter your credentials to unlock a world of possibilities. Let's get started!"</span>
+                <span class="text-base text-center">Welcome to the LogIn portal! Whether you're a Student, Admin, or User, your journey begins here. Enter your credentials to unlock a world of possibilities. Let's get started!</span>
             </div>
 
             <?php if ($hasError) { ?>
@@ -55,9 +55,9 @@ $message = "";
 
                     <!-- Break -->
                     <span class="border border-black my-2"></span>
-                    <p><a href="http://">Forgot Password</a></p>
+                    <p><a href="./forgot-password.php">Forgot Password</a></p>
                     <!-- Button -->
-                    <button type="submit" name="login" class="btn bg-slate-600 text-base text-white ">Submit</button>
+                    <button type="submit" name="login" class="btn bg-slate-600 text-base text-white ">Login</button>
                 </div>
             </form>
         </div>
