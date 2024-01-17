@@ -322,7 +322,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Middle Name</span>
-                                <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" required />
+                                <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" />
                             </label>
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Last Name</span>
