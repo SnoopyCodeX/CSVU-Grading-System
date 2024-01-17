@@ -6,10 +6,10 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../../components/header.php");
 
@@ -18,13 +18,13 @@ $hasError = false;
 $hasSuccess = false;
 $message = "";
 
-if(isset($_POST['create_course'])) {
+if (isset($_POST['create_course'])) {
     $course = $dbCon->real_escape_string($_POST['course']);
     $courseCode = $dbCon->real_escape_string($_POST['course_code']);
 
     $courseCodeExistQuery = $dbCon->query("SELECT * FROM ap_courses WHERE course_code = '$courseCode'");
 
-    if($courseCodeExistQuery->num_rows > 0) {
+    if ($courseCodeExistQuery->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Course code already exists!";
@@ -32,7 +32,7 @@ if(isset($_POST['create_course'])) {
         $query = "INSERT INTO ap_courses (course, course_code) VALUES ('$course', '$courseCode')";
         $result = mysqli_query($dbCon, $query);
 
-        if($result) {
+        if ($result) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Course created successfully!";
@@ -45,7 +45,7 @@ if(isset($_POST['create_course'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex" >
+<main class="w-screen h-screen overflow-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
@@ -55,16 +55,20 @@ if(isset($_POST['create_course'])) {
                 <h2 class="text-[38px] font-bold mb-8">Create Course</h2>
 
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                    <?php if($hasError)  { ?>
+                    <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
 
-                    <?php if($hasSuccess)  { ?>
+                    <?php if ($hasSuccess) { ?>
                         <div role="alert" class="alert alert-success mb-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
@@ -82,11 +86,11 @@ if(isset($_POST['create_course'])) {
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                       <div></div>
-                       <div class="flex flex-col gap-2">
-                           <button class="btn btn-success text-base" name="create_course">Create</button>
+                        <div></div>
+                        <div class="flex flex-col gap-2">
+                            <button class="btn btn-success text-base" name="create_course">Create</button>
                             <a class="btn btn-error text-base" href="../manage-course.php">Cancel</a>
-                       </div>
+                        </div>
                     </div>
                 </form>
             </div>

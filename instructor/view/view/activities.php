@@ -2,14 +2,14 @@
 // session_start();
 // // kung walang session mag reredirect sa login //
 
-// require("../../../configuration/config.php");
-// require('../../../auth/controller/auth.controller.php');
+require("../../../configuration/config.php");
+require('../../../auth/controller/auth.controller.php');
 
-// if (!AuthController::isAuthenticated()) {
-//     header("Location: ../public/login");
-//     exit();
-// }
-    
+if (!AuthController::isAuthenticated()) {
+    header("Location: ../../../public/login");
+    exit();
+}
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../../components/header.php");
 
@@ -17,79 +17,79 @@ require_once("../../../components/header.php");
 $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, sid FROM ap_userdetails WHERE roles='student'";
 ?>
 
-<main class="w-screen h-screen overflow-x-hidden flex" >
+<main class="w-screen h-screen overflow-x-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="w-full px-4 h-full">
         <?php require_once("../../layout/topbar.php") ?>
-            <div class="w-full h-full">
-                <div class="flex justify-center items-center flex-col p-8">
-                    <h2 class="text-[38px] font-bold mb-4">View Activity</h2>
-                    <form class="flex flex-col gap-[24px]  px-[32px]  w-[1000px] mb-auto flex">
-                        
-                        <!-- Details -->
+        <div class="w-full h-full">
+            <div class="flex justify-center items-center flex-col p-8">
+                <h2 class="text-[38px] font-bold mb-4">View Activity</h2>
+                <form class="flex flex-col gap-[24px]  px-[32px]  w-[1000px] mb-auto flex">
+
+                    <!-- Details -->
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Activity Name</span>
+                        <input class="input input-bordered" />
+                    </label>
+
+
+                    <!-- Main Grid -->
+                    <div class="grid grid-cols-2 gap-4">
+
+
                         <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Activity Name</span>
-                                <input class="input input-bordered" />
-                            </label>
+                            <span class="font-bold text-[18px]">Subject</span>
+                            <select class="select select-bordered">
+                                <!--Display all the subjects here-->
+                                <option value="">Select Subject</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </label>
 
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">School Year</span>
+                            <select class="select select-bordered">
+                                <!--Display all the School Year here-->
+                                <option value="">Select Subject</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </label>
 
-                            <!-- Main Grid -->
-                        <div class="grid grid-cols-2 gap-4">
-                        
-                        
-                            <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Subject</span>
-                                <select class="select select-bordered">
-                                    <!--Display all the subjects here-->
-                                    <option value="">Select Subject</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                </select>
-                            </label>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">School Term</span>
+                            <select class="select select-bordered">
+                                <!--Display all the Semister here-->
+                                <option value="">Select Semester</option>
+                                <option value="first-sem">First Semester</option>
+                                <option value="second-sem">Second Semester</option>
+                            </select>
+                        </label>
 
-                            <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">School Year</span>
-                                <select class="select select-bordered">
-                                    <!--Display all the School Year here-->
-                                    <option value="">Select Subject</option>
-                                    <option value="male">Male</option>
-                                    <option value="female">Female</option>
-                                </select>
-                            </label>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Year level</span>
+                            <select class="select select-bordered">
+                                <!--Display all the Year here-->
+                                <option value="">Select Semester</option>
+                                <option value="first-sem">First Semester</option>
+                                <option value="second-sem">Second Semester</option>
+                            </select>
+                        </label>
 
-                            <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">School Term</span>
-                                <select class="select select-bordered">
-                                    <!--Display all the Semister here-->
-                                    <option value="">Select Semester</option>
-                                    <option value="first-sem">First Semester</option>
-                                    <option value="second-sem">Second Semester</option>
-                                </select>
-                            </label>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Course</span>
+                            <select class="select select-bordered">
+                                <!--Display all the Course here-->
+                                <option value="">Select Semester</option>
+                                <option value="first-sem">First Semester</option>
+                                <option value="second-sem">Second Semester</option>
+                            </select>
+                        </label>
+                    </div>
 
-                            <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Year level</span>
-                                <select class="select select-bordered">
-                                    <!--Display all the Year here-->
-                                    <option value="">Select Semester</option>
-                                    <option value="first-sem">First Semester</option>
-                                    <option value="second-sem">Second Semester</option>
-                                </select>
-                            </label>
+                    <div class="grid grid-cols-2 gap-4">
 
-                            <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Course</span>
-                                <select class="select select-bordered">
-                                    <!--Display all the Course here-->
-                                    <option value="">Select Semester</option>
-                                    <option value="first-sem">First Semester</option>
-                                    <option value="second-sem">Second Semester</option>
-                                </select>
-                            </label>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Passing Rate</span>
                             <select class="select select-bordered">
@@ -104,48 +104,48 @@ $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, si
 
 
                         <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Max Score</span>
-                                <input type="number" class="input input-bordered" />
+                            <span class="font-bold text-[18px]">Max Score</span>
+                            <input type="number" class="input input-bordered" />
+                        </label>
+
+                    </div>
+
+                    <div class="divider">Students</div>
+
+                    <label class="flex flex-col gap-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-[18px]">Students</span>
+
+                            <label class="flex flex-col gap-2">
+                                <select class="select select-bordered select-sm">
+                                    <!--Display all the Year level here-->
+                                    <option value="">Select Year level</option>
+                                    <option value="male">Fist Year</option>
+                                    <option value="female">Female</option>
+                                </select>
                             </label>
-                            
                         </div>
+                        <div class="border border-black rounded-[5px] w-full h-[400px] grid grid-cols-2 gap-4 p-4 overflow-y-scroll ">
 
-                        <div class="divider">Students</div>
-                        
-                        <label class="flex flex-col gap-2">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-[18px]">Students</span>
-
-                                <label class="flex flex-col gap-2">
-                                    <select class="select select-bordered select-sm">
-                                        <!--Display all the Year level here-->
-                                        <option value="">Select Year level</option>
-                                        <option value="male">Fist Year</option>
-                                        <option value="female">Female</option>
-                                    </select>
-                                </label>
-                            </div>
-                            <div class="border border-black rounded-[5px] w-full h-[400px] grid grid-cols-2 gap-4 p-4 overflow-y-scroll ">
-                               
                             <div class="h-[72px] flex gap-4 justify-start px-4 items-center  gap-4 border border-gray-400 rounded-[5px]">
                                 <input type="text" class="input input-sm w-[48px] h-[38px] input-bordered text-center" value="0" />
                                 <span>Criztian Jade M Tuplano</span>
                                 <div class="flex gap-4">
-                                <button class="btn btn-sm">Save</button>
-                                <button class="btn btn-sm">Reset</button>
+                                    <button class="btn btn-sm">Save</button>
+                                    <button class="btn btn-sm">Reset</button>
                                 </div>
                             </div>
 
 
-                            </div>
-                        </label>
-
-                        <!-- Actions -->
-                        <div class="">
-                            <button class="btn text-base w-full">Save</button>
                         </div>
-                    </form>
-                </div>
+                    </label>
+
+                    <!-- Actions -->
+                    <div class="">
+                        <button class="btn text-base w-full">Save</button>
+                    </div>
+                </form>
             </div>
+        </div>
     </section>
 </main>

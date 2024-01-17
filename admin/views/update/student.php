@@ -6,10 +6,10 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../../components/header.php");
 
@@ -17,7 +17,7 @@ require_once("../../../components/header.php");
 $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, sid FROM ap_userdetails WHERE roles='student'";
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex" >
+<main class="w-screen h-screen overflow-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
@@ -46,12 +46,12 @@ $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, si
                 </div>
 
                 <div class="grid grid-cols-3 gap-4">
-                    
+
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Gender</span>
                         <input class="input input-bordered" />
                     </label>
-                    
+
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Contact</span>
                         <input class="input input-bordered" />

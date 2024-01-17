@@ -6,7 +6,7 @@ require("../../configuration/config.php");
 require('../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../public/login");
     exit();
 }
 

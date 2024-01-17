@@ -26,10 +26,10 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 }
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
 
@@ -68,23 +68,23 @@ $pages = ceil($total / $limit);
 $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limit";
 ?>
 
-<main class="w-screen h-[95%] overflow-x-hidden flex" >
+<main class="w-screen h-[95%] overflow-x-hidden flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
 
 
         <div class="px-4 flex justify-between flex-col gap-4">
-              <!-- Table Header -->
-              <div class="flex justify-between items-center">
+            <!-- Table Header -->
+            <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
                     <h1 class="text-[32px] font-bold">Promote Students</h1>
                 </div>
-               <div class="flex gap-4">
-               <label class="btn" for="reset-academic">Promote Batch</label>
-                <a href="./create/student.php" class="btn">Create</a>
-               </div>
+                <div class="flex gap-4">
+                    <label class="btn" for="reset-academic">Promote Batch</label>
+                    <a href="./create/student.php" class="btn">Create</a>
+                </div>
             </div>
 
             <!-- Table Content -->
@@ -92,17 +92,17 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th class="bg-slate-500 text-white" >ID</th> 
-                            <td class="bg-slate-500 text-white" >Student ID</td> 
-                            <td class="bg-slate-500 text-white" >Name</td> 
-                            <td class="bg-slate-500 text-white" >Email</td> 
-                            <td class="bg-slate-500 text-white" >Gender</td> 
-                            <td class="bg-slate-500 text-white" >Contact</td> 
+                            <th class="bg-slate-500 text-white">ID</th>
+                            <td class="bg-slate-500 text-white">Student ID</td>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Email</td>
+                            <td class="bg-slate-500 text-white">Gender</td>
+                            <td class="bg-slate-500 text-white">Contact</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
-                    </thead> 
+                    </thead>
                     <tbody>
-                    <?php
+                        <?php
                         $result = $dbCon->query($query);
 
                         if ($result->num_rows > 0) {
@@ -135,20 +135,20 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         mysqli_free_result($result);
                         ?>
                         <tr>
-                    </tbody> 
+                    </tbody>
                 </table>
             </div>
-            
+
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if($page - 1 <= 0) { ?> disabled <?php } ?>> 
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
-                
+
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right' ></i>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                    <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
         </div>
@@ -156,8 +156,8 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
     <!-- Modals -->
     <?php $result = $dbCon->query($query); ?>
-    <?php  if($result->num_rows > 0) { ?>
-        <?php while($row = $result->fetch_assoc()) { ?>
+    <?php if ($result->num_rows > 0) { ?>
+        <?php while ($row = $result->fetch_assoc()) { ?>
 
             <!-- View modal -->
             <input type="checkbox" id="view-student-<?= $row['id'] ?>" class="modal-toggle" />
@@ -193,11 +193,11 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             <label class="flex flex-col gap-2">
                                 <span class="font-bold text-[18px]">Gender</span>
                                 <select class="select select-bordered" name="gender" required disabled>
-                                    <option value="male" <?php if($row['gender'] == 'male') { ?>  selected  <?php } ?>>Male</option>
-                                    <option value="female" <?php if($row['gender'] == 'female') { ?>  selected  <?php } ?>>Female</option>
+                                    <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
+                                    <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                                 </select>
                             </label>
-                            
+
                             <label class="flex flex-col gap-2">
                                 <span class="font-bold text-[18px]">Contact</span>
                                 <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required disabled />
@@ -227,10 +227,10 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Year level</span>
                             <select class="select select-bordered" name="year_level" required disabled>
-                                <option value="1st year" <?php if($row['year_level'] == '1st year') { ?>  selected  <?php } ?>>1st year</option>
-                                <option value="2nd year" <?php if($row['year_level'] == '2nd year') { ?>  selected  <?php } ?>>2nd year</option>
-                                <option value="3rd year" <?php if($row['year_level'] == '3rd year') { ?>  selected  <?php } ?>>3rd year</option>
-                                <option value="4th year" <?php if($row['year_level'] == '4th year') { ?>  selected  <?php } ?>>4th year</option>
+                                <option value="1st year" <?php if ($row['year_level'] == '1st year') { ?> selected <?php } ?>>1st year</option>
+                                <option value="2nd year" <?php if ($row['year_level'] == '2nd year') { ?> selected <?php } ?>>2nd year</option>
+                                <option value="3rd year" <?php if ($row['year_level'] == '3rd year') { ?> selected <?php } ?>>3rd year</option>
+                                <option value="4th year" <?php if ($row['year_level'] == '4th year') { ?> selected <?php } ?>>4th year</option>
                             </select>
                         </label>
                     </div>
@@ -250,13 +250,13 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             <span class="font-bold text-[18px]">Promote to year level</span>
                             <select class="select select-bordered" name="year_level" required>
                                 <option value="" selected disabled>Select year</option>
-                                <?php if($row['year_level'] != '1st year') { ?>  <option vaue="1st Year">1st Year</option>  <?php } ?>
-                                <?php if($row['year_level'] != '2nd year') { ?>  <option vaue="2nd Year">2nd Year</option>  <?php } ?>
-                                <?php if($row['year_level'] != '3rd year') { ?>  <option vaue="3rd Year">3rd Year</option>  <?php } ?>
-                                <?php if($row['year_level'] != '4th year') { ?>  <option vaue="4th Year">4th Year</option>  <?php } ?>
+                                <?php if ($row['year_level'] != '1st year') { ?> <option vaue="1st Year">1st Year</option> <?php } ?>
+                                <?php if ($row['year_level'] != '2nd year') { ?> <option vaue="2nd Year">2nd Year</option> <?php } ?>
+                                <?php if ($row['year_level'] != '3rd year') { ?> <option vaue="3rd Year">3rd Year</option> <?php } ?>
+                                <?php if ($row['year_level'] != '4th year') { ?> <option vaue="4th Year">4th Year</option> <?php } ?>
                             </select>
                         </label>
-                        
+
                         <div class="grid grid-cols-2 gap-4">
                             <label class="btn w-full btn-error" for="promote-student-<?= $row['id'] ?>">Cancel</label>
                             <button class="btn w-full btn-success" name="promote-student">Promote</button>
@@ -265,7 +265,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 </div>
                 <label class="modal-backdrop" for="promote-student-<?= $row['id'] ?>">Close</label>
             </div>
-                
+
         <?php } ?>
         <?php mysqli_free_result($result); ?>
     <?php } ?>
@@ -296,9 +296,9 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 </div>
 
                 <div class="border border-black rounded-[5px] w-full h-[300px] grid grid-cols-2 gap-4 p-4 overflow-y-scroll" id="batch-promote-body">
-                    
+
                     <?php $students = $dbCon->query($query); ?>
-                    <?php while($student = $students->fetch_assoc()) { ?>
+                    <?php while ($student = $students->fetch_assoc()) { ?>
                         <div class="h-[48px] flex gap-4 justify-start px-4 items-center  gap-4 border border-gray-400 rounded-[5px]">
                             <input type="checkbox" class="checkbox checkbox-sm" />
                             <span><?= $student['firstName'] ?> <?= $student['middleName'] ?> <?= $student['lastName'] ?></span>
@@ -318,49 +318,47 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const select = document.querySelector('#batch-year-level-selector');
+        const body = document.querySelector('#batch-promote-body');
+        const selectAll = document.querySelector('#batch-select-all');
 
-document.addEventListener('DOMContentLoaded', function() {
-    const select = document.querySelector('#batch-year-level-selector');
-    const body = document.querySelector('#batch-promote-body');
-    const selectAll = document.querySelector('#batch-select-all');
+        // Select all students
+        selectAll.addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('#batch-promote-body .checkbox');
+            selectAll.textContent = selectAll.textContent == "Select All" ? "Unselect All" : "Select All";
 
-    // Select all students
-    selectAll.addEventListener('click', () => {
-        const checkboxes = document.querySelectorAll('#batch-promote-body .checkbox');
-        selectAll.textContent = selectAll.textContent == "Select All" ? "Unselect All" : "Select All";
-
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = !checkbox.checked;
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !checkbox.checked;
+            });
         });
-    });
 
-    // Year level filter dropdown
-    select.addEventListener('change', (e) => {
-        const yearLevel = e.target.value;
+        // Year level filter dropdown
+        select.addEventListener('change', (e) => {
+            const yearLevel = e.target.value;
 
-        // Fetch all students with the same year level
-        fetch(`<?= $_SERVER['PHP_SELF'] ?>?year_level=${encodeURIComponent(yearLevel)}`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'content-type': 'application/json'
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            // Clear the body
-            body.innerHTML = "";
+            // Fetch all students with the same year level
+            fetch(`<?= $_SERVER['PHP_SELF'] ?>?year_level=${encodeURIComponent(yearLevel)}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'content-type': 'application/json'
+                    }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    // Clear the body
+                    body.innerHTML = "";
 
-            // Append the students
-            data.forEach(student => {
-                body.innerHTML += `
+                    // Append the students
+                    data.forEach(student => {
+                        body.innerHTML += `
                     <div class="h-[48px] flex gap-4 justify-start px-4 items-center  gap-4 border border-gray-400 rounded-[5px]">
                         <input type="checkbox" class="checkbox checkbox-sm" />
                         <span>${student.firstName} ${student.middleName} ${student.lastName}</span>
                     </div>
                 `;
-            });
+                    });
+                });
         });
     });
-});
-
 </script>
