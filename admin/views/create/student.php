@@ -111,7 +111,7 @@ if (isset($_POST['create_student'])) {
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middle_name" placeholder="Enter Middle Name" required />
+                            <input class="input input-bordered" name="middle_name" placeholder="Enter Middle Name" />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
