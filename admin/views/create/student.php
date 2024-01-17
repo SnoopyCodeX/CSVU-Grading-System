@@ -35,7 +35,7 @@ if (isset($_POST['create_student'])) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
-    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE sid = '$studentId' OR email = '$email' AND roles = 'student'")->num_rows > 0) {
+    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE sid = '$studentId' OR email = '$email'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "A student with the same Student ID or email address already exists!";

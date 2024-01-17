@@ -33,10 +33,10 @@ if (isset($_POST['create-admin'])) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
-    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email' AND roles = 'admin'")->num_rows > 0) {
+    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "An admin with that email address already exists!";
+        $message = "A user with that email address already exists!";
     } else {
         $insertAdminQuery = "INSERT INTO ap_userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, roles) VALUES(
             '$firstName',
