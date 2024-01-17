@@ -104,10 +104,9 @@ $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, si
 
 
                         <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Max Score</span>
-                                <input type="number" class="input input-bordered" />
-                            </label>
-                            
+                            <span class="font-bold text-[18px]">Max Score</span>
+                            <input type="number" class="input input-bordered" />
+                        </label>
                         </div>
 
                         

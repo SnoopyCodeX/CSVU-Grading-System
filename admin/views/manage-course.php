@@ -86,9 +86,9 @@ $pages = ceil($total / $limit);
 $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
 ?>
 
-<main class="h-[95%]overflow-x-hidden flex">
+<main class="overflow-hidden flex h-screen">
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
@@ -110,33 +110,37 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">Course</h1>
+                    <h1 class="text-[28px] font-bold">Course</h1>
                 </div>
                 <a href="./create/course.php" class="btn">Create</a>
             </div>
 
             <!-- Table Content -->
             <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
-                    <thead>
+                <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
+                    <thead class="">
                         <tr>
-                            <th>ID</th> 
-                            <td>Code</td> 
-                            <td>Name</td>
-                            <td class="text-center">Action</td>
+                            <th class="bg-slate-500 text-white" >ID</th> 
+                            <td class="bg-slate-500 text-white" >Code</td> 
+                            <td class="bg-slate-500 text-white" >Name</td>
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead> 
                     <tbody>
                         <?php while($course = $courses->fetch_assoc()) { ?>
                             <tr>
                                 <td><?= $course['id'] ?></td>
-                                <td><?= $course['course'] ?></td>
-                                <td><?= $course['course_code'] ?></td>
+                                <td class="capitalize text-[18px]"><?= $course['course'] ?></td>
+                                <td>
+                                    <span class="badge bg-yellow-200 font-bold p-4">
+                                    <?= $course['course_code'] ?>
+                                    </span>
+                                </td>
                                 <td>
                                     <div class="flex justify-center gap-2">
-                                        <label for="view-course-<?= $course['id'] ?>" class="btn btn-small">View</label>
-                                        <label for="edit-course-<?= $course['id'] ?>" class="btn btn-small">Edit</label>
-                                        <label for="delete-modal-<?= $course['id'] ?>" class="btn btn-small">Delete</label>
+                                        <label for="view-course-<?= $course['id'] ?>" class="btn btn-sm bg-blue-300">View</label>
+                                        <label for="edit-course-<?= $course['id'] ?>" class="btn btn-sm bg-gray-300">Edit</label>
+                                        <label for="delete-modal-<?= $course['id'] ?>" class="btn btn-sm bg-red-500 text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>
@@ -184,21 +188,21 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
                 <form class="flex flex-col gap-4  px-[32px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <!-- Name -->
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Course</span>
-                        <input type="text" class="border border-gray-400 input input-bordered" placeholder="Course Name" name="course" value="<?= $course['course'] ?>">
+                        <span class="font-bold text-base">Course</span>
+                        <input type="text" class="border border-gray-400 input input-bordere capitalize" placeholder="Course Name" name="course" value="<?= $course['course'] ?>">
                     </label>
 
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Course Code</span>
+                        <span class="font-bold text-base">Course Code</span>
                         <input type="text" class="border border-gray-400 input input-bordered" placeholder="123456" name="course_code" value="<?= $course['course_code'] ?>">
                     </label>
 
                     <input type="hidden" name="id" value="<?= $course['id'] ?>">
 
                     <!-- Actions -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="btn btn-error text-base" for="edit-course-<?= $course['id'] ?>">Cancel</label>
-                        <button class="btn btn-success text-base" name="edit_course">Edit</button>
+                    <div class="flex flex-col gap-2">
+                        <button class="btn btn-success text-base text-white" name="edit_course">Edit</button>
+                        <label class="btn btn-error text-base text-white" for="edit-course-<?= $course['id'] ?>">Cancel</label>
                     </div>
                 </form>
             </div>
@@ -214,7 +218,6 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <input type="hidden" name="id" value="<?= $course['id'] ?>">
-                    
                     <label class="btn" for="delete-modal-<?= $course['id'] ?>">Close</label>
                     <button class="btn btn-error" name="delete-course">Delete</button>
                 </form> 

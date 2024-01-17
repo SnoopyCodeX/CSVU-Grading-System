@@ -113,11 +113,11 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
               <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">School Year</h1>
+                    <h1 class="text-[24px] font-bold">School Year</h1>
                 </div>
                <div class="flex gap-4">
-                    <label for="reset-academic" class="btn btn-error btn-small">Reset School Year</label>
-                    <a href="./create/academic-year.php" class="btn btn-info">Create</a>
+                    <label for="reset-academic" class="btn btn-sm ">Reset School Year</label>
+                    <a href="./create/academic-year.php" class="btn btn-sm ">Create</a>
                </div>
             </div>
 
@@ -140,9 +140,9 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                     <tr>
-                        <td>ID</td> 
-                        <td>Academic Year</td> 
-                        <td class="text-center">Action</td>
+                        <td class="bg-slate-500 text-white">ID</td> 
+                        <td class="bg-slate-500 text-white">Academic Year</td> 
+                        <td class="bg-slate-500 text-white text-center">Action</td>
                     </tr>
                     </thead> 
                     <tbody>
@@ -158,8 +158,8 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                                 </td> 
                                 <td>
                                     <div class="flex justify-center gap-2">
-                                        <label for="edit-school-year-<?= $row['id'] ?>" class="btn btn-sm">Edit</label>
-                                        <label for="delete-school-year-<?= $row['id'] ?>" class="btn btn-sm">Delete</label>
+                                        <label for="edit-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-gray-400">Edit</label>
+                                        <label for="delete-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-red-400">Delete</label>
                                     </div>
                                 </td>
                             </tr>

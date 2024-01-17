@@ -53,13 +53,13 @@ if(isset($_POST['create_subject'])) {
 $courses = $dbCon->query("SELECT * FROM ap_courses");
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex" >
+<main class="w-screen h-screen overflow-scroll overflow-x-hidden flex" >
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center">
+            <div class="flex justify-center items-center flex-col gap-4 p-4">
                 <h2 class="text-[38px] font-bold mb-8">Create Subject</h2>
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
@@ -129,8 +129,11 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
-                        <button class="btn btn-success" name="create_subject">Create</button>
+                        <div></div>
+                        <div class="flex flex-col gap-2">
+                            <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
+                            <button class="btn btn-success" name="create_subject">Create</button>
+                        </div>
                     </div>
                 </form>
             </div>

@@ -114,9 +114,9 @@ if(isset($_POST['delete-student'])) {
 $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limit";
 ?>
 
-<main class="w-screen h-[95%] overflow-x-hidden flex" >
+<main class="w-screen overflow-x-hidden flex" >
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="h-screen w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
 
 
@@ -125,7 +125,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">Section</h1>
+                    <h1 class="text-[24px] font-semibold">Student</h1>
                 </div>
                 <a href="./create/student.php" class="btn">Create</a>
             </div>
@@ -149,13 +149,13 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th>ID</th> 
-                            <td>Name</td> 
-                            <td>Email</td> 
-                            <td>Gender</td> 
-                            <td>Contact</td> 
-                            <td>Student ID</td> 
-                            <td class="text-center">Action</td>
+                            <th class="bg-slate-500 text-white" >ID</th> 
+                            <td class="bg-slate-500 text-white" >Name</td> 
+                            <td class="bg-slate-500 text-white" >Email</td> 
+                            <td class="bg-slate-500 text-white" >Gender</td> 
+                            <td class="bg-slate-500 text-white" >Contact</td> 
+                            <td class="bg-slate-500 text-white" >Student ID</td> 
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead> 
                     <tbody>
@@ -174,9 +174,9 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                                         <td>{$row['sid']}</td>
                                         <td>
                                             <div class='flex gap-2 justify-center items-center'>
-                                                <label for='view-student-{$row['id']}' class='btn btn-small'>View</label>
-                                                <label for='edit-student-{$row['id']}' class='btn btn-small'>Edit</label>
-                                                <label for='delete-student-{$row['id']}' class='btn btn-small'>Delete</label>
+                                                <label for='view-student-{$row['id']}' class='btn btn-sm bg-blue-400 '>View</label>
+                                                <label for='edit-student-{$row['id']}' class='btn btn-sm bg-gray-400 '>Edit</label>
+                                                <label for='delete-student-{$row['id']}' class='btn btn-sm bg-red-400'>Delete</label>
                                             </div>
                                         </td>
                                     </tr>
@@ -225,23 +225,23 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
                         <!-- Student ID -->
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Student ID</span>
+                            <span class="font-semibold text-base">Student ID</span>
                             <input class="input input-bordered" name="student_id" value="<?= $row['sid'] ?>" required disabled />
                         </label>
 
                         <!-- Name -->
                         <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">First Name</span>
+                                <span class="font-semibold text-base">First Name</span>
                                 <input class="input input-bordered" name="first_name" value="<?= $row['firstName'] ?>" required disabled />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Middle Name</span>
+                                <span class="font-semibold text-base">Middle Name</span>
                                 <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" required disabled />
                             </label>
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Last Name</span>
+                                <span class="font-semibold text-base">Last Name</span>
                                 <input class="input input-bordered" name="last_name" value="<?= $row['lastName'] ?>" required disabled />
                             </label>
                         </div>
@@ -249,7 +249,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <!-- Details -->
                         <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Gender</span>
+                                <span class="font-semibold text-base">Gender</span>
                                 <select class="select select-bordered" name="gender" required disabled>
                                     <option value="male" <?php if($row['gender'] == 'male') { ?>  selected  <?php } ?>>Male</option>
                                     <option value="female" <?php if($row['gender'] == 'female') { ?>  selected  <?php } ?>>Female</option>
@@ -257,12 +257,12 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             </label>
                             
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Contact</span>
+                                <span class="font-semibold text-base">Contact</span>
                                 <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required disabled />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Birthdate</span>
+                                <span class="font-semibold text-base">Birthdate</span>
                                 <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>" required disabled />
                             </label>
                         </div>
@@ -272,18 +272,18 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <!-- Account -->
                         <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Email</span>
+                                <span class="font-semibold text-base">Email</span>
                                 <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required disabled />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Password</span>
+                                <span class="font-semibold text-base">Password</span>
                                 <input class="input input-bordered" name="password" value="" required disabled />
                             </label>
                         </div>
 
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Year level</span>
+                            <span class="font-semibold text-base">Year level</span>
                             <select class="select select-bordered" name="year_level" required disabled>
                                 <option value="1st year" <?php if($row['year_level'] == '1st year') { ?>  selected  <?php } ?>>1st year</option>
                                 <option value="2nd year" <?php if($row['year_level'] == '2nd year') { ?>  selected  <?php } ?>>2nd year</option>
@@ -305,23 +305,23 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
                         <!-- Student ID -->
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Student ID</span>
+                            <span class="font-semibold text-base">Student ID</span>
                             <input class="input input-bordered" name="student_id" value="<?= $row['sid'] ?>" required />
                         </label>
 
                         <!-- Name -->
                         <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">First Name</span>
+                                <span class="font-semibold text-base">First Name</span>
                                 <input class="input input-bordered" name="first_name" value="<?= $row['firstName'] ?>"  required />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Middle Name</span>
+                                <span class="font-semibold text-base">Middle Name</span>
                                 <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>"  required />
                             </label>
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Last Name</span>
+                                <span class="font-semibold text-base">Last Name</span>
                                 <input class="input input-bordered" name="last_name" value="<?= $row['lastName'] ?>"  required />
                             </label>
                         </div>
@@ -329,7 +329,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <!-- Details -->
                         <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Gender</span>
+                                <span class="font-semibold text-base">Gender</span>
                                 <select class="select select-bordered" name="gender" required>
                                     <option value="" selected disabled>Select Gender</option>
                                     <option value="male" <?php if($row['gender'] == 'male') { ?>  selected  <?php } ?>>Male</option>
@@ -338,12 +338,12 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             </label>
                             
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Contact</span>
+                                <span class="font-semibold text-base">Contact</span>
                                 <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>"  required />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Birthdate</span>
+                                <span class="font-semibold text-base">Birthdate</span>
                                 <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>"  required />
                             </label>
                         </div>
@@ -353,18 +353,18 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <!-- Account -->
                         <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Email</span>
+                                <span class="font-semibold text-base">Email</span>
                                 <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>"  required />
                             </label>
 
                             <label class="flex flex-col gap-2">
-                                <span class="font-bold text-[18px]">Password</span>
+                                <span class="font-semibold text-base">Password</span>
                                 <input class="input input-bordered" name="password" />
                             </label>
                         </div>
 
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Year level</span>
+                            <span class="font-semibold text-base">Year level</span>
                             <select class="select select-bordered" name="year_level" required>
                                 <option value="" selected disabled>Select year level</option>
                                 <option value="1st year" <?php if($row['year_level'] == '1st year') { ?>  selected  <?php } ?>>1st year</option>

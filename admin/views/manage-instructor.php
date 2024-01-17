@@ -119,7 +119,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
 ?>
 
 
-<main class="w-screen h-[95%] overflow-x-hidden flex" >
+<main class=" overflow-hidden h-screen flex" >
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -155,13 +155,13 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td>ID</td> 
-                            <td>Name</td> 
-                            <td>Gender</td> 
-                            <td>Contact</td> 
-                            <td>Email</td> 
-                            <td>Birthday</td> 
-                            <td class="text-center">Action</td>
+                            <td class="bg-slate-500 text-white">ID</td> 
+                            <td class="bg-slate-500 text-white">Name</td> 
+                            <td class="bg-slate-500 text-white">Gender</td> 
+                            <td class="bg-slate-500 text-white">Contact</td> 
+                            <td class="bg-slate-500 text-white">Email</td> 
+                            <td class="bg-slate-500 text-white">Birthday</td> 
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead> 
                     <tbody>
@@ -176,9 +176,9 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                                 <td><?= $row['birthday'] ?></td>
                                 <td>
                                     <div class="flex gap-2">
-                                        <label for="view-instructor-<?= $row['id'] ?>" class="btn btn-small">View</label>
-                                        <label for="edit-instructor-<?= $row['id'] ?>" class="btn btn-small">Edit</label>
-                                        <label for="delete-instructor-<?= $row['id'] ?>" class="btn btn-small">Delete</label>
+                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
+                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
+                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
                                     </div>
                                 </td>
                             </tr>
@@ -355,6 +355,5 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
             </div>
             <label class="modal-backdrop" for="delete-modal">Close</label>
         </div>
-
     <?php } ?>
 </main>

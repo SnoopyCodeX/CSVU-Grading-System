@@ -27,13 +27,13 @@ require_once("../../components/header.php");
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                     <tr>
-                        <th></th> 
-                        <td>ID</td> 
-                        <td>Name</td> 
-                        <td>Year</td> 
-                        <td>Subject</td> 
-                        <td>Term</td> 
-                        <td class="text-center">Action</td>
+                        <th class="bg-slate-500 text-white" ></th> 
+                        <td class="bg-slate-500 text-white" >ID</td> 
+                        <td class="bg-slate-500 text-white" >Name</td> 
+                        <td class="bg-slate-500 text-white" >Year</td> 
+                        <td class="bg-slate-500 text-white" >Subject</td> 
+                        <td class="bg-slate-500 text-white" >Term</td> 
+                        <td class="bg-slate-500 text-white text-center">Action</td>
                     </tr>
                     </thead> 
                     <tbody>

@@ -68,12 +68,12 @@ if(isset($_POST['create_student'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex" >
+<main class="w-screen h-screen overflow-x-hidden flex" >
     <?php require_once("../../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
+        <div class="flex flex-col gap-4 justify-center items-center">
             <div class="flex justify-center items-center flex-col gap-4">
                 <h2 class="text-[38px] font-bold">Create Student</h2>
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
@@ -95,23 +95,23 @@ if(isset($_POST['create_student'])) {
                     <!-- Student ID -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Student ID</span>
-                        <input class="input input-bordered" name="student_id" required />
+                        <input class="input input-bordered" name="student_id" placeholder="Enter Student ID" required />
                     </label>
 
                     <!-- Name -->
                     <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
-                            <input class="input input-bordered" name="first_name" required />
+                            <input class="input input-bordered" name="first_name" placeholder="Enter First name"  required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middle_name" required />
+                            <input class="input input-bordered" name="middle_name" placeholder="Enter Middle Name" required />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered" name="last_name" required />
+                            <input class="input input-bordered" name="last_name" placeholder="Enter Last name" required />
                         </label>
                     </div>
 
@@ -143,12 +143,12 @@ if(isset($_POST['create_student'])) {
                     <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input class="input input-bordered" type="email" name="email" required />
+                            <input type="email" placeholder="Enter email" class="input input-bordered" type="email" name="email" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input class="input input-bordered" name="password" required />
+                            <input type="password" placeholder="Enter Password" class="input input-bordered" name="password" required />
                         </label>
                     </div>
 

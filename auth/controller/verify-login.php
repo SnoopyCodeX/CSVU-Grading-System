@@ -19,10 +19,9 @@ class LoginHandler
 
         $userRole = $this->loginValidator($email, $password);
         
-        if ($userRole == "admin" || $userRole == "user") {
+        if ($userRole == "admin" || $userRole == "student" || $userRole == "instructor") {
             $this->saveSession($userRole, $email);
             header("Location: {$rootFolder}/{$userRole}");
-
             exit();
         } else {
             $hasError = true;
@@ -37,11 +36,11 @@ class LoginHandler
         $result = $this->dbCon->query($sql);
         $fetch = mysqli_fetch_assoc($result);
 
-        if ($fetch !== null) {
-            return $fetch['roles'];
-        } else {
-            return "invalid";
+        if($fetch === null){
+            return "Inalid";
         }
+
+        return $fetch['roles'];
     } //potek di na naman ako makalogin
 
     private function saveSession($userRole, $email)

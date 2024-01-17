@@ -1,8 +1,7 @@
 <?php
-// session_start();
+session_start();
 // kung walang session mag reredirect sa login //
 
-// require("../../configuration/config.php");
 // require '../../auth/controller/auth.controller.php';
 
 // if (!AuthController::isAuthenticated()) {
@@ -40,14 +39,14 @@ require_once("../../components/header.php");
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                     <tr>
-                        <th></th> 
-                        <td>Name</td> 
-                        <td>Term</td> 
-                        <td>Students</td> 
-                        <td>Subject</td> 
-                        <td>Passing Score</td> 
-                        <td>Status</td> 
-                        <td class="text-center">Action</td>
+                        <th  class="bg-slate-500 text-white" ></th> 
+                        <td  class="bg-slate-500 text-white" >Name</td> 
+                        <td  class="bg-slate-500 text-white" >Term</td> 
+                        <td  class="bg-slate-500 text-white" >Students</td> 
+                        <td  class="bg-slate-500 text-white" >Subject</td> 
+                        <td  class="bg-slate-500 text-white" >Passing Score</td> 
+                        <td  class="bg-slate-500 text-white" >Status</td> 
+                        <td class="bg-slate-500 text-white text-center">Action</td>
                     </tr>
                     </thead> 
                     <tbody>
@@ -59,7 +58,7 @@ require_once("../../components/header.php");
                         <td>DSA-101</td> 
                         <td>50</td> 
                         <td>
-                            <div class="badge p-4 text-base bg-green-400 font-semibold">
+                            <div class="badge p-4  bg-blue-300">
                             On going
                             </div>
                         </td> 
@@ -129,16 +128,13 @@ require_once("../../components/header.php");
         <label class="flex flex-col gap-2">
             <span class="font-bold text-[18px]">Subject</span>
             <select class="select select-bordered">
-                <!--Display all the Course here-->
+                <!-- Display all the subject related to the instructor -->
                 <option value="">Select Subject </option>
-                <option value="first-sem">25%</option>
-                <option value="second-sem">50%</option>
-                <option value="second-sem">75%</option>
-                <option value="second-sem">100%</option>
+               
             </select>
         </label>
 
-        <label class="flex flex-col gap-2">
+        <label class="flex flex-col gap-2 my-4">
             <span class="font-bold text-[18px]">Term</span>
             <select class="select select-bordered">
                 <!--Display all the Course here-->

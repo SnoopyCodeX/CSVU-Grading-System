@@ -82,8 +82,11 @@ if(isset($_POST['create_course'])) {
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <a class="btn btn-error text-base" href="../manage-course.php">Cancel</a>
-                        <button class="btn btn-success text-base" name="create_course">Create</button>
+                       <div></div>
+                       <div class="flex flex-col gap-2">
+                           <button class="btn btn-success text-base" name="create_course">Create</button>
+                            <a class="btn btn-error text-base" href="../manage-course.php">Cancel</a>
+                       </div>
                     </div>
                 </form>
             </div>

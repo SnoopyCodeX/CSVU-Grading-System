@@ -1,8 +1,8 @@
 <?php
-// session_start();
+session_start();
+require ("../../configuration/config.php");
 // kung walang session mag reredirect sa login //
 
-// require("../../configuration/config.php");
 // require '../../auth/controller/auth.controller.php';
 
 // if (!AuthController::isAuthenticated()) {
@@ -11,13 +11,23 @@
 // }
     
 // pag meron session mag rerender yung dashboard//
+
+// get user details
+$email = $_SESSION['email'];
+$detailsQuery = $dbCon->query("SELECT * FROM ap_userdetails WHERE email='$email'");
+$result = $detailsQuery->fetch_assoc();
+
+$UID = $result['id'] ?? "";
+
+// add also the following students count, subject title and instructor name
+$sectionQuery = $dbCon->query("SELECT * FROM ap_sections WHERE instructor='$UID'");
 require_once("../../components/header.php");
 ?>
 
 
-<main class="h-[95%] overflow-x-hidden flex" >
+<main class="flex overflow-hidden" >
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="h-screen w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
@@ -34,33 +44,46 @@ require_once("../../components/header.php");
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                     <tr>
-                        <th></th> 
-                        <td>Name</td> 
-                        <td>Term</td> 
-                        <td>Students</td> 
-                        <td>Subject</td> 
-                        <td>Instructor</td> 
-                        <td>Status</td> 
-                        <td class="text-center">Action</td>
+                        <th class="bg-slate-500 text-white" ></th> 
+                        <td class="bg-slate-500 text-white" >Name</td> 
+                        <td class="bg-slate-500 text-white" >Term</td> 
+                        <td class="bg-slate-500 text-white" >Students</td> 
+                        <td class="bg-slate-500 text-white" >Subject</td> 
+                        <td class="bg-slate-500 text-white" >Instructor</td> 
+                        <td class="bg-slate-500 text-white" >Status</td> 
                     </tr>
                     </thead> 
                     <tbody>
+                  <?php
+                  while($row = $sectionQuery->fetch_assoc()){
+                    
+                    ?>
                     <tr>
-                        <th>20</th> 
-                        <td>Course ni Albert</td> 
-                        <td>1st</td> 
-                        <td>32</td> 
+                        <th><?= $row['id'] ?></th> 
+                        <td><?= $row['name'] ?></td> 
+                        <td><?= $row['term'] ?></td> 
+                        <!-- Student Count -->
+                        <td>1</td> 
+                        <!-- Subject Name -->
                         <td>DSA-101</td> 
-                        <td>John Roy 123</td> 
-                        <td>On going</td> 
+
                         <td>
-                           <div class="flex justify-center items-center gap-2">
-                            <a class="btn btn-sm" href="./view/section.php">View</a>
-                            <a class="btn btn-sm" href="./view/section.php">Edit</a>
-                           <label for="delete-modal" class="btn btn-sm">Delete</label>
-                           </div>
-                        </td>
+                            <?= $result['lastName'] ?>,
+                            <?= $result['firstName'] ?>
+                            <?= $result['middleName'] ?>
+                        </td> 
+                        <td>
+                            <span class='badge p-4 bg-blue-300'>
+                                On going
+                            </span>
+                        </td> 
                     </tr>
+                    <?php
+                  }
+                  
+                  
+                  
+                  ?>
                     </tbody> 
                 </table>
             </div>

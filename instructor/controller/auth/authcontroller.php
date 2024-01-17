@@ -26,10 +26,12 @@ class AuthController {
             $user = $result->fetch_assoc();
 
             // check role
-            if($user['roles'] == 'admin' || $user['roles'] == 'instructor' || $user['roles'] == 'student') {
+            if($user['roles'] == 'admin') {
                 $result = $dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'");
                 $user = $result->fetch_assoc();
             }
+
+            
             return ((object) $user) ?? null;
         }
 

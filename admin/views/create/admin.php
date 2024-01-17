@@ -65,12 +65,12 @@ if (isset($_POST['create-admin'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex">
+<main class="w-screen h-screen overflow-scroll flex">
     <?php require_once("../../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
+        <div class="flex flex-col gap-4 justify-center items-center">
             <div class="flex justify-center items-center flex-col gap-4">
                 <h2 class="text-[38px] font-bold mb-8">Create Admin</h2>
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
@@ -94,24 +94,24 @@ if (isset($_POST['create-admin'])) {
                     <?php } ?>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
-                            <input class="input input-bordered" name="firstName" required />
+                            <input class="input input-bordered" name="firstName" placeholder="Enter First name" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middleName" />
+                            <input class="input input-bordered" name="middleName" placeholder="Enter Middle name"  />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered" name="lastName" required />
+                            <input class="input input-bordered" name="lastName" required placeholder="Enter Last name"  />
                         </label>
                     </div>
 
                     <!-- Details -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Gender</span>
                             <select class="select select-bordered" name="gender" required>
@@ -123,7 +123,7 @@ if (isset($_POST['create-admin'])) {
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" name="contact" required />
+                            <input typ="tel" class="input input-bordered" name="contact" placeholder="Enter Contact name"  required />
                         </label>
 
                         <label class="flex flex-col gap-2">
@@ -138,19 +138,22 @@ if (isset($_POST['create-admin'])) {
                     <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input class="input input-bordered" type="email" name="email" required />
+                            <input type="email" class="input input-bordered" type="email" name="email" placeholder="Enter Email name"  required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input class="input input-bordered" name="password" required />
+                            <input type="password" class="input input-bordered" name="password" placeholder="Enter Password name"  required />
                         </label>
                     </div>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <a href="../manage-admin.php" class="btn btn-error text-base">Cancel</a>
-                        <button class="btn btn-success text-base" name="create-admin">Create</button>
+                       <div></div>
+                       <div class="flex flex-col gap-2">
+                           <button class="btn btn-success text-lg text-semibold text-white" name="create-admin">Create</button>
+                           <a href="../manage-admin.php" class="btn btn-error text-lg text-semibold text-white">Cancel</a>
+                       </div>
                     </div>
                 </form>
             </div>

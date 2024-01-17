@@ -92,13 +92,13 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th>ID</th> 
-                            <td>Student ID</td> 
-                            <td>Name</td> 
-                            <td>Email</td> 
-                            <td>Gender</td> 
-                            <td>Contact</td> 
-                            <td class="text-center">Action</td>
+                            <th class="bg-slate-500 text-white" >ID</th> 
+                            <td class="bg-slate-500 text-white" >Student ID</td> 
+                            <td class="bg-slate-500 text-white" >Name</td> 
+                            <td class="bg-slate-500 text-white" >Email</td> 
+                            <td class="bg-slate-500 text-white" >Gender</td> 
+                            <td class="bg-slate-500 text-white" >Contact</td> 
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead> 
                     <tbody>

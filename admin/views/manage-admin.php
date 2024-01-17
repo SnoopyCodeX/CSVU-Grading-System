@@ -110,9 +110,9 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
 ?>
 
 
-<main class="h-[95%] overflow-x-hidden flex">
+<main class="overflow-hidden flex">
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
@@ -144,34 +144,36 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
             <?php } ?>
 
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
+            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 230px)">
+                <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td>ID</td>
-                            <td>Name</td>
-                            <td>Email</td>
-                            <td>Gender</td>
-                            <td>Contact</td>
-                            <td>Birthday</td>
-                            <td class="text-center">Action</td>
+                            <td class="bg-slate-500 text-white" >ID</td>
+                            <td class="bg-slate-500 text-white" >Name</td>
+                            <td class="bg-slate-500 text-white" >Email</td>
+                            <td class="bg-slate-500 text-white" >Gender</td>
+                            <td class="bg-slate-500 text-white" >Contact</td>
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $adminsResult = $dbCon->query($adminsQuery); ?>
                         <?php while ($admin = $adminsResult->fetch_assoc()) { ?>
                             <tr>
-                                <th><?= $admin['id'] ?></th>
-                                <th><?= $admin['firstName'] ?> <?= $admin['middleName'] ?> <?= $admin['lastName'] ?></th>
-                                <th><?= $admin['email'] ?></th>
-                                <th><?= ucfirst($admin['gender']) ?></th>
-                                <th><?= $admin['contact'] ?></th>
-                                <th><?= $admin['birthday'] ?></th>
+                                <th class="font-normal"><?= $admin['id'] ?></th>
+                                <th class="font-normal"><?= $admin['firstName'] ?> <?= $admin['middleName'] ?> <?= $admin['lastName'] ?></th>
+                                <th class="font-normal"><?= $admin['email'] ?></th>
+                                <th class="font-normal">
+                                    <div class="badge p-3 bg-blue-200">
+                                    <?= ucfirst($admin['gender']) ?>
+                                    </div>
+                                </th>
+                                <th class="font-normal"><?= $admin['contact'] ?></th>
                                 <td>
                                     <div class="flex gap-2">
-                                        <label for="view-admin-<?= $admin['id'] ?>" class="btn btn-small">View</label>
-                                        <label for="edit-admin-<?= $admin['id'] ?>" class="btn btn-small">Edit</label>
-                                        <label for="delete-admin-<?= $admin['id'] ?>" class="btn btn-small">Delete</label>
+                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
+                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
+                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
                                     </div>
                                 </td>
                             </tr>
@@ -182,13 +184,13 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
 
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn btn-sm" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -206,18 +208,18 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                 <form class="flex flex-col gap-4  px-[32px] mb-auto" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">First Name</span>
+                            <span class="font-bold text-[16px]">First Name</span>
                             <input class="input input-bordered" name="firstName" value="<?= $admin['firstName'] ?>" required disabled />
                         </label>
 
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Middle Name</span>
+                            <span class="font-bold text-[16px]">Middle Name</span>
                             <input class="input input-bordered" name="middleName" value="<?= $admin['middleName'] ?>" disabled />
                         </label>
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Last Name</span>
+                            <span class="font-bold text-[16px]">Last Name</span>
                             <input class="input input-bordered" name="lastName" value="<?= $admin['lastName'] ?>" required disabled />
                         </label>
                     </div>
@@ -266,7 +268,7 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                     <input type="hidden" name="id" value="<?= $admin['id'] ?>" />
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
                             <input class="input input-bordered" name="firstName" value="<?= $admin['firstName'] ?>" required />
@@ -340,6 +342,5 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
             </div>
             <label class="modal-backdrop" for="delete-admin-<?= $admin['id'] ?>">Close</label>
         </div>
-
     <?php } ?>
 </main>

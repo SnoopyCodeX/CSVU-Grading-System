@@ -126,7 +126,7 @@ $courseQuery = "SELECT * FROM ap_courses";
                     <!-- Details -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Section Name</span>
-                        <input class="input input-bordered" name="section_name" required />
+                        <input class="input input-bordered" name="section_name" placeholder="Enter section name" required />
                     </label>
 
 

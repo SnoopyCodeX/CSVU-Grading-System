@@ -92,9 +92,9 @@ $subjects = $dbCon->query("SELECT * FROM ap_subjects LIMIT $start, $limit");
 ?>
 
 
-<main class="h-[95%] overflow-x-hidden flex" >
+<main class="overflow-hidden h-screen flex" >
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
             <!-- Table Header -->
@@ -125,31 +125,36 @@ $subjects = $dbCon->query("SELECT * FROM ap_subjects LIMIT $start, $limit");
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td>ID</td> 
-                            <td>Name</td> 
-                            <td>Course</td> 
-                            <td>Units</td> 
-                            <td>Credits</td> 
-                            <td>Yearlevel</td> 
-                            <td>Term</td> 
-                            <td class="text-center">Action</td>
+                            <td class="bg-slate-500 text-white">ID</td> 
+                            <td class="bg-slate-500 text-white">Name</td> 
+                            <td class="bg-slate-500 text-white">Course</td> 
+                            <td class="bg-slate-500 text-white">Units</td> 
+                            <td class="bg-slate-500 text-white">Credits</td> 
+                            <td class="bg-slate-500 text-white">Yearlevel</td> 
+                            <td class="bg-slate-500 text-white">Term</td> 
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead> 
                     <tbody>
                         <?php while($subject = $subjects->fetch_assoc()) { ?>
+                            
                             <tr>
                                 <th><?= $subject['id'] ?></th> 
-                                <td><?= $subject['name'] ?></td> 
-                                <td><?= $dbCon->query("SELECT * FROM ap_courses WHERE id='{$subject['course']}'")->fetch_assoc()['course'] ?></td>
+                                <td class="capitalize"><?= $subject['name'] ?></td> 
+                                <td class="capitalize">
+                                    <span class="badge p-4 bg-blue-200 text-semibold">
+                                        <?= $dbCon->query("SELECT * FROM ap_courses WHERE id='{$subject['course']}'")->fetch_assoc()['course'] ?>
+                                    </span>
+                                </td>
                                 <td><?= $subject['units'] ?></td> 
                                 <td><?= $subject['credits_units'] ?></td> 
                                 <td><?= $subject['year_level'] ?></td>
                                 <td><?= $subject['term'] ?></td> 
                                 <td>
                                     <div class="flex justify-center gap-2">
-                                        <label for="view-subject-<?= $subject['id'] ?>" class="btn btn-sm">View</label>
-                                        <label for="edit-subject-<?= $subject['id'] ?>" class="btn btn-sm">Edit</label>
-                                        <label for="delete-subject-<?= $subject['id'] ?>" class="btn btn-sm">Delete</label>
+                                        <label for="view-subject-<?= $subject['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
+                                        <label for="edit-subject-<?= $subject['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
+                                        <label for="delete-subject-<?= $subject['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
                                     </div>
                                 </td>
                             </tr>
@@ -184,15 +189,15 @@ $subjects = $dbCon->query("SELECT * FROM ap_subjects LIMIT $start, $limit");
                 <div class="flex flex-col gap-4 px-[32px] mb-auto">
 
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Course</span>
-                        <select class="select select-bordered" name="course" required aria-readonly="true" disabled>
+                        <span class=" text-[18px] font-semibold"></span>
+                        <select class="p-4 rounded-[5px] border border-gray-200 capitalize" name="course" required aria-readonly="true" disabled>
                             <option value="" selected><?= $dbCon->query("SELECT * FROM ap_courses WHERE id='{$subject['course']}'")->fetch_assoc()['course'] ?></option>
                         </select>
                     </label>
 
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Year level</span>
-                        <select class="select select-bordered" name="year_level" required aria-readonly="true" disabled>
+                        <span class=" text-[18px]">Year level</span>
+                        <select class="p-4 rounded-[5px] border border-gray-200 capitalize" name="year_level" required aria-readonly="true" disabled>
                             <option value="" selected><?= $subject['year_level'] ?></option>
                         </select>
                     </label>
@@ -200,23 +205,23 @@ $subjects = $dbCon->query("SELECT * FROM ap_subjects LIMIT $start, $limit");
                     <!-- Name -->
                     <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Subject Name</span>
-                            <input class="input input-bordered" placeholder="Enter Subject Name" name="subject_name" value="<?= $subject['name'] ?>" required readonly disabled/>
+                            <span class=" text-[18px]">Subject</span>
+                            <input class="p-4 rounded-[5px] border border-gray-200 capitalize" placeholder="Enter Subject Name" name="subject_name" value="<?= $subject['name'] ?>" required readonly disabled />
                         </label>
 
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Units</span>
-                            <input class="input input-bordered"  placeholder="Enter Subject Units" name="units" value="<?= $subject['units'] ?>" required readonly disabled />
+                            <span class=" text-[18px]">Units</span>
+                            <input class="p-4 rounded-[5px] border border-gray-200 capitalize"  placeholder="Enter Subject Units" name="units" value="<?= $subject['units'] ?>" required readonly disabled />
                         </label>
 
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Credits Units</span>
-                            <input class="input input-bordered"  placeholder="Enter Subject Credits" name="credits_units" value="<?= $subject['credits_units'] ?>" required readonly disabled />
+                            <span class=" text-[18px]">Credits Units</span>
+                            <input class="p-4 rounded-[5px] border border-gray-200 capitalize"  placeholder="Enter Subject Credits" name="credits_units" value="<?= $subject['credits_units'] ?>" required readonly disabled />
                         </label>
 
                         <label class="flex flex-col gap-2 col-span-3">
-                            <span class="font-bold text-[18px]">Term</span>
-                            <select class="select select-bordered" name="term" aria-readonly="true" disabled>
+                            <span class=" text-[18px]">Term</span>
+                            <select class="p-4 rounded-[5px] border border-gray-200 capitalize" name="term" aria-readonly="true" disabled>
                                 <option value="" selected><?= $subject['term'] ?></option>
                             </select>
                         </label>

@@ -47,9 +47,9 @@ $sectionsQuery = "SELECT
 ?>
 
 
-<main class="h-[95%] overflow-x-hidden flex">
+<main class="overflow-hidden flex">
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="w-full px-4 h-screen">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
@@ -67,14 +67,14 @@ $sectionsQuery = "SELECT
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td>ID</td>
-                            <td>Name</td>
-                            <td>Subject</td>
-                            <td>School Year</td>
-                            <td>Term</td>
-                            <td>Year Level</td>
-                            <td>Instructor</td>
-                            <td class="text-center">Action</td>
+                            <td class="bg-slate-500 text-white">ID</td>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Subject</td>
+                            <td class="bg-slate-500 text-white">School Year</td>
+                            <td class="bg-slate-500 text-white">Term</td>
+                            <td class="bg-slate-500 text-white">Year Level</td>
+                            <td class="bg-slate-500 text-white">Instructor</td>
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
