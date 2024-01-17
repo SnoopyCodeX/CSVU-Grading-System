@@ -268,7 +268,7 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                     <input type="hidden" name="id" value="<?= $admin['id'] ?>" />
 
                     <!-- Name -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
                             <input class="input input-bordered" name="firstName" value="<?= $admin['firstName'] ?>" required />
