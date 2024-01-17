@@ -9,7 +9,7 @@ if (!AuthController::isAuthenticated()) {
     header("Location: ../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
 
@@ -19,14 +19,14 @@ $hasSuccess = false;
 $message = "";
 
 // Edit course
-if(isset($_POST['edit_course'])) {
+if (isset($_POST['edit_course'])) {
     $course = $dbCon->real_escape_string($_POST['course']);
     $courseCode = $dbCon->real_escape_string($_POST['course_code']);
     $id = $dbCon->real_escape_string($_POST['id']);
 
     $courseCodeExistQuery = $dbCon->query("SELECT * FROM ap_courses WHERE id = '$id'");
 
-    if($courseCodeExistQuery->num_rows == 0) {
+    if ($courseCodeExistQuery->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Course does not exist!";
@@ -34,7 +34,7 @@ if(isset($_POST['edit_course'])) {
         $query = "UPDATE ap_courses SET course = '$course', course_code = '$courseCode' WHERE id = '$id'";
         $result = mysqli_query($dbCon, $query);
 
-        if($result) {
+        if ($result) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Course updated successfully!";
@@ -47,12 +47,12 @@ if(isset($_POST['edit_course'])) {
 }
 
 // Delete course
-if(isset($_POST['delete-course'])) {
+if (isset($_POST['delete-course'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
     $courseCodeExistQuery = $dbCon->query("SELECT * FROM ap_courses WHERE id = '$id'");
 
-    if($courseCodeExistQuery->num_rows == 0) {
+    if ($courseCodeExistQuery->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Course does not exist!";
@@ -60,7 +60,7 @@ if(isset($_POST['delete-course'])) {
         $query = "DELETE FROM ap_courses WHERE id = '$id'";
         $result = mysqli_query($dbCon, $query);
 
-        if($result) {
+        if ($result) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Course deleted successfully!";
@@ -92,16 +92,20 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
-            <?php if($hasError)  { ?>
+            <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
 
-            <?php if($hasSuccess)  { ?>
+            <?php if ($hasSuccess) { ?>
                 <div role="alert" class="alert alert-success mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
@@ -120,45 +124,45 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead class="">
                         <tr>
-                            <th class="bg-slate-500 text-white" >ID</th> 
-                            <td class="bg-slate-500 text-white" >Code</td> 
-                            <td class="bg-slate-500 text-white" >Name</td>
+                            <th class="bg-slate-500 text-white">ID</th>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Code</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
-                    </thead> 
+                    </thead>
                     <tbody>
-                        <?php while($course = $courses->fetch_assoc()) { ?>
+                        <?php while ($course = $courses->fetch_assoc()) { ?>
                             <tr>
                                 <td><?= $course['id'] ?></td>
                                 <td class="capitalize text-[18px]"><?= $course['course'] ?></td>
                                 <td>
-                                    <span class="badge bg-yellow-200 font-bold p-4">
-                                    <?= $course['course_code'] ?>
+                                    <span class="badge bg-yellow-200 font-bold p-4 text-black">
+                                        <?= $course['course_code'] ?>
                                     </span>
                                 </td>
                                 <td>
                                     <div class="flex justify-center gap-2">
-                                        <label for="view-course-<?= $course['id'] ?>" class="btn btn-sm bg-blue-300">View</label>
-                                        <label for="edit-course-<?= $course['id'] ?>" class="btn btn-sm bg-gray-300">Edit</label>
+                                        <label for="view-course-<?= $course['id'] ?>" class="btn btn-sm bg-blue-300 text-white">View</label>
+                                        <label for="edit-course-<?= $course['id'] ?>" class="btn btn-sm bg-gray-300 text-white">Edit</label>
                                         <label for="delete-modal-<?= $course['id'] ?>" class="btn btn-sm bg-red-500 text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>
                         <?php } ?>
-                    </tbody> 
+                    </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if($page - 1 <= 0) { ?> disabled <?php } ?>> 
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
-                
+
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right' ></i>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                    <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
         </div>
@@ -166,9 +170,9 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
 
     <!-- Fetch all courses again -->
     <?php $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit"); ?>
-    
+
     <!-- Modals -->
-    <?php while($course = $courses->fetch_assoc()) { ?>
+    <?php while ($course = $courses->fetch_assoc()) { ?>
 
         <!-- View Course Modal -->
         <input type="checkbox" id="view-course-<?= $course['id'] ?>" class="modal-toggle" />
@@ -220,7 +224,7 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
                     <input type="hidden" name="id" value="<?= $course['id'] ?>">
                     <label class="btn" for="delete-modal-<?= $course['id'] ?>">Close</label>
                     <button class="btn btn-error" name="delete-course">Delete</button>
-                </form> 
+                </form>
             </div>
             <label class="modal-backdrop" for="delete-modal-<?= $course['id'] ?>">Close</label>
         </div>

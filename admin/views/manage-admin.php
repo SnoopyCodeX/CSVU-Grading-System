@@ -148,11 +148,11 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white" >ID</td>
-                            <td class="bg-slate-500 text-white" >Name</td>
-                            <td class="bg-slate-500 text-white" >Email</td>
-                            <td class="bg-slate-500 text-white" >Gender</td>
-                            <td class="bg-slate-500 text-white" >Contact</td>
+                            <td class="bg-slate-500 text-white">ID</td>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Email</td>
+                            <td class="bg-slate-500 text-white">Gender</td>
+                            <td class="bg-slate-500 text-white">Contact</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
@@ -164,16 +164,16 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                                 <th class="font-normal"><?= $admin['firstName'] ?> <?= $admin['middleName'] ?> <?= $admin['lastName'] ?></th>
                                 <th class="font-normal"><?= $admin['email'] ?></th>
                                 <th class="font-normal">
-                                    <div class="badge p-3 bg-blue-200">
-                                    <?= ucfirst($admin['gender']) ?>
+                                    <div class="badge p-3 bg-blue-200 text-black">
+                                        <?= ucfirst($admin['gender']) ?>
                                     </div>
                                 </th>
                                 <th class="font-normal"><?= $admin['contact'] ?></th>
                                 <td>
                                     <div class="flex gap-2">
-                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
-                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
-                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
+                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm text-white">View</label>
+                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm text-white">Edit</label>
+                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>

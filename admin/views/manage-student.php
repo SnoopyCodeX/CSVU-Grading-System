@@ -9,7 +9,7 @@ if (!AuthController::isAuthenticated()) {
     header("Location: ../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
 
@@ -30,7 +30,7 @@ $total = $students[0]['id'];
 $pages = ceil($total / $limit);
 
 // update student
-if(isset($_POST['update_student'])) {
+if (isset($_POST['update_student'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
     $studentId = $dbCon->real_escape_string($_POST['student_id']);
     $firstName = $dbCon->real_escape_string($_POST['first_name']);
@@ -43,11 +43,11 @@ if(isset($_POST['update_student'])) {
     $password = $dbCon->real_escape_string($_POST['password']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
 
-    if(!$email) {
+    if (!$email) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
-    } else if($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
+    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Student does not exist!";
@@ -65,15 +65,15 @@ if(isset($_POST['update_student'])) {
             year_level='$yearLevel'
         ";
 
-        if($password) {
-            $query .= ", password='" . crypt($password,'$6$Crypt$') . "'";
+        if ($password) {
+            $query .= ", password='" . crypt($password, '$6$Crypt$') . "'";
         }
 
         $query .= " WHERE id='$id'";
 
         $update = $dbCon->query($query);
 
-        if($update) {
+        if ($update) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Successfully updated student!";
@@ -86,10 +86,10 @@ if(isset($_POST['update_student'])) {
 }
 
 // delete student
-if(isset($_POST['delete-student'])) {
+if (isset($_POST['delete-student'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    if($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
+    if ($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Student does not exist!";
@@ -98,7 +98,7 @@ if(isset($_POST['delete-student'])) {
 
         $delete = $dbCon->query($query);
 
-        if($delete) {
+        if ($delete) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Successfully deleted student!";
@@ -114,7 +114,7 @@ if(isset($_POST['delete-student'])) {
 $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limit";
 ?>
 
-<main class="w-screen overflow-x-hidden flex" >
+<main class="w-screen overflow-x-hidden flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="h-screen w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -130,16 +130,20 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 <a href="./create/student.php" class="btn">Create</a>
             </div>
 
-            <?php if($hasError)  { ?>
+            <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
 
-            <?php if($hasSuccess)  { ?>
+            <?php if ($hasSuccess) { ?>
                 <div role="alert" class="alert alert-success mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
@@ -149,17 +153,17 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th class="bg-slate-500 text-white" >ID</th> 
-                            <td class="bg-slate-500 text-white" >Name</td> 
-                            <td class="bg-slate-500 text-white" >Email</td> 
-                            <td class="bg-slate-500 text-white" >Gender</td> 
-                            <td class="bg-slate-500 text-white" >Contact</td> 
-                            <td class="bg-slate-500 text-white" >Student ID</td> 
+                            <th class="bg-slate-500 text-white">ID</th>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Email</td>
+                            <td class="bg-slate-500 text-white">Gender</td>
+                            <td class="bg-slate-500 text-white">Contact</td>
+                            <td class="bg-slate-500 text-white">Student ID</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
-                    </thead> 
+                    </thead>
                     <tbody>
-                    <?php
+                        <?php
                         $result = $dbCon->query($query);
 
                         if ($result->num_rows > 0) {
@@ -174,9 +178,9 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                                         <td>{$row['sid']}</td>
                                         <td>
                                             <div class='flex gap-2 justify-center items-center'>
-                                                <label for='view-student-{$row['id']}' class='btn btn-sm bg-blue-400 '>View</label>
-                                                <label for='edit-student-{$row['id']}' class='btn btn-sm bg-gray-400 '>Edit</label>
-                                                <label for='delete-student-{$row['id']}' class='btn btn-sm bg-red-400'>Delete</label>
+                                                <label for='view-student-{$row['id']}' class='btn btn-sm bg-blue-400 text-white'>View</label>
+                                                <label for='edit-student-{$row['id']}' class='btn btn-sm bg-gray-400 text-white'>Edit</label>
+                                                <label for='delete-student-{$row['id']}' class='btn btn-sm bg-red-400 text-white'>Delete</label>
                                             </div>
                                         </td>
                                     </tr>
@@ -193,20 +197,20 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         mysqli_free_result($result);
                         ?>
                         <tr>
-                    </tbody> 
+                    </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if($page - 1 <= 0) { ?> disabled <?php } ?>> 
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
-                
+
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right' ></i>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                    <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
         </div>
@@ -214,8 +218,8 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
     <!-- Modals -->
     <?php $result = $dbCon->query($query); ?>
-    <?php  if($result->num_rows > 0) { ?>
-        <?php while($row = $result->fetch_assoc()) { ?>
+    <?php if ($result->num_rows > 0) { ?>
+        <?php while ($row = $result->fetch_assoc()) { ?>
 
             <!-- View modal -->
             <input type="checkbox" id="view-student-<?= $row['id'] ?>" class="modal-toggle" />
@@ -251,11 +255,11 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Gender</span>
                                 <select class="select select-bordered" name="gender" required disabled>
-                                    <option value="male" <?php if($row['gender'] == 'male') { ?>  selected  <?php } ?>>Male</option>
-                                    <option value="female" <?php if($row['gender'] == 'female') { ?>  selected  <?php } ?>>Female</option>
+                                    <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
+                                    <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                                 </select>
                             </label>
-                            
+
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Contact</span>
                                 <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required disabled />
@@ -285,10 +289,10 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <label class="flex flex-col gap-2">
                             <span class="font-semibold text-base">Year level</span>
                             <select class="select select-bordered" name="year_level" required disabled>
-                                <option value="1st year" <?php if($row['year_level'] == '1st year') { ?>  selected  <?php } ?>>1st year</option>
-                                <option value="2nd year" <?php if($row['year_level'] == '2nd year') { ?>  selected  <?php } ?>>2nd year</option>
-                                <option value="3rd year" <?php if($row['year_level'] == '3rd year') { ?>  selected  <?php } ?>>3rd year</option>
-                                <option value="4th year" <?php if($row['year_level'] == '4th year') { ?>  selected  <?php } ?>>4th year</option>
+                                <option value="1st year" <?php if ($row['year_level'] == '1st year') { ?> selected <?php } ?>>1st year</option>
+                                <option value="2nd year" <?php if ($row['year_level'] == '2nd year') { ?> selected <?php } ?>>2nd year</option>
+                                <option value="3rd year" <?php if ($row['year_level'] == '3rd year') { ?> selected <?php } ?>>3rd year</option>
+                                <option value="4th year" <?php if ($row['year_level'] == '4th year') { ?> selected <?php } ?>>4th year</option>
                             </select>
                         </label>
                     </div>
@@ -313,16 +317,16 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">First Name</span>
-                                <input class="input input-bordered" name="first_name" value="<?= $row['firstName'] ?>"  required />
+                                <input class="input input-bordered" name="first_name" value="<?= $row['firstName'] ?>" required />
                             </label>
 
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Middle Name</span>
-                                <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>"  required />
+                                <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" required />
                             </label>
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Last Name</span>
-                                <input class="input input-bordered" name="last_name" value="<?= $row['lastName'] ?>"  required />
+                                <input class="input input-bordered" name="last_name" value="<?= $row['lastName'] ?>" required />
                             </label>
                         </div>
 
@@ -332,19 +336,19 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                                 <span class="font-semibold text-base">Gender</span>
                                 <select class="select select-bordered" name="gender" required>
                                     <option value="" selected disabled>Select Gender</option>
-                                    <option value="male" <?php if($row['gender'] == 'male') { ?>  selected  <?php } ?>>Male</option>
-                                    <option value="female" <?php if($row['gender'] == 'female') { ?>  selected  <?php } ?>>Female</option>
+                                    <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
+                                    <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                                 </select>
                             </label>
-                            
+
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Contact</span>
-                                <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>"  required />
+                                <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required />
                             </label>
 
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Birthdate</span>
-                                <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>"  required />
+                                <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>" required />
                             </label>
                         </div>
 
@@ -354,7 +358,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                         <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Email</span>
-                                <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>"  required />
+                                <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required />
                             </label>
 
                             <label class="flex flex-col gap-2">
@@ -367,10 +371,10 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
                             <span class="font-semibold text-base">Year level</span>
                             <select class="select select-bordered" name="year_level" required>
                                 <option value="" selected disabled>Select year level</option>
-                                <option value="1st year" <?php if($row['year_level'] == '1st year') { ?>  selected  <?php } ?>>1st year</option>
-                                <option value="2nd year" <?php if($row['year_level'] == '2nd year') { ?>  selected  <?php } ?>>2nd year</option>
-                                <option value="3rd year" <?php if($row['year_level'] == '3rd year') { ?>  selected  <?php } ?>>3rd year</option>
-                                <option value="4th year" <?php if($row['year_level'] == '4th year') { ?>  selected  <?php } ?>>4th year</option>
+                                <option value="1st year" <?php if ($row['year_level'] == '1st year') { ?> selected <?php } ?>>1st year</option>
+                                <option value="2nd year" <?php if ($row['year_level'] == '2nd year') { ?> selected <?php } ?>>2nd year</option>
+                                <option value="3rd year" <?php if ($row['year_level'] == '3rd year') { ?> selected <?php } ?>>3rd year</option>
+                                <option value="4th year" <?php if ($row['year_level'] == '4th year') { ?> selected <?php } ?>>4th year</option>
                             </select>
                         </label>
 
@@ -393,14 +397,14 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
                     <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                         <input type="hidden" name="id" value="<?= $row['id'] ?>" />
-                        
+
                         <label class="btn" for="delete-student-<?= $row['id'] ?>">Cancel</label>
                         <button class="btn btn-error" name="delete-student">Delete</button>
                     </form>
                 </div>
                 <label class="modal-backdrop" for="delete-student-<?= $row['id'] ?>">Close</label>
             </div>
-                
+
         <?php } ?>
         <?php mysqli_free_result($result); ?>
     <?php } ?>
