@@ -9,7 +9,7 @@ if (!AuthController::isAuthenticated()) {
     header("Location: ../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
 
@@ -19,7 +19,7 @@ $hasSuccess = false;
 $message = "";
 
 // update instructor
-if(isset($_POST['update_instructor'])) {
+if (isset($_POST['update_instructor'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
     $firstName = $dbCon->real_escape_string($_POST['first_name']);
     $middleName = $dbCon->real_escape_string($_POST['middle_name']);
@@ -30,7 +30,7 @@ if(isset($_POST['update_instructor'])) {
     $email = filter_var($dbCon->real_escape_string($_POST['email']), FILTER_VALIDATE_EMAIL);
     $password = $dbCon->real_escape_string($_POST['password']);
 
-    if(!$email) {
+    if (!$email) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Invalid email address";
@@ -39,7 +39,7 @@ if(isset($_POST['update_instructor'])) {
         $checkIdQuery = "SELECT * FROM ap_userdetails WHERE id = '$id' AND roles = 'instructor'";
         $checkIdResult = $dbCon->query($checkIdQuery);
 
-        if($checkIdResult->num_rows <= 0) {
+        if ($checkIdResult->num_rows <= 0) {
             $hasError = true;
             $hasSuccess = false;
             $message = "Instructor does not exist";
@@ -54,14 +54,14 @@ if(isset($_POST['update_instructor'])) {
                 email = '$email'
             ";
 
-            if($password) {
-                $updateQuery .= ", password = '" . crypt($password,'$6$Crypt$') . "' ";
+            if ($password) {
+                $updateQuery .= ", password = '" . crypt($password, '$6$Crypt$') . "' ";
             }
 
             $updateQuery .= "WHERE id = '$id'";
             $result = $dbCon->query($updateQuery);
 
-            if($result) {
+            if ($result) {
                 $hasError = false;
                 $hasSuccess = true;
                 $message = "Instructor updated successfully";
@@ -75,14 +75,14 @@ if(isset($_POST['update_instructor'])) {
 }
 
 // delete instructor
-if(isset($_POST['delete_instructor'])) {
+if (isset($_POST['delete_instructor'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
     // check if id exists in ap_userdetails and has a role of 'instructor' query
     $checkIdQuery = "SELECT * FROM ap_userdetails WHERE id = '$id' AND roles = 'instructor'";
     $checkIdResult = $dbCon->query($checkIdQuery);
 
-    if($checkIdResult->num_rows <= 0) {
+    if ($checkIdResult->num_rows <= 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Instructor does not exist";
@@ -90,7 +90,7 @@ if(isset($_POST['delete_instructor'])) {
         $deleteQuery = "DELETE FROM ap_userdetails WHERE id = '$id'";
         $result = $dbCon->query($deleteQuery);
 
-        if($result) {
+        if ($result) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Instructor deleted successfully";
@@ -119,7 +119,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
 ?>
 
 
-<main class=" overflow-hidden h-screen flex" >
+<main class=" overflow-hidden h-screen flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -135,16 +135,20 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
             </div>
 
 
-            <?php if($hasError)  { ?>
+            <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
 
-            <?php if($hasSuccess)  { ?>
+            <?php if ($hasSuccess) { ?>
                 <div role="alert" class="alert alert-success mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
@@ -155,48 +159,48 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white">ID</td> 
-                            <td class="bg-slate-500 text-white">Name</td> 
-                            <td class="bg-slate-500 text-white">Gender</td> 
-                            <td class="bg-slate-500 text-white">Contact</td> 
-                            <td class="bg-slate-500 text-white">Email</td> 
-                            <td class="bg-slate-500 text-white">Birthday</td> 
+                            <td class="bg-slate-500 text-white">ID</td>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Gender</td>
+                            <td class="bg-slate-500 text-white">Contact</td>
+                            <td class="bg-slate-500 text-white">Email</td>
+                            <td class="bg-slate-500 text-white">Birthday</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
-                    </thead> 
+                    </thead>
                     <tbody>
                         <?php $instructors = $dbCon->query($query); ?>
-                        <?php while($row = $instructors->fetch_assoc()) { ?>
+                        <?php while ($instructor = $instructors->fetch_assoc()) { ?>
                             <tr>
-                                <td><?= $row['id'] ?></td>
-                                <td><?= $row['firstName'] ?> <?= $row['middleName'] ?> <?= $row['lastName'] ?></td>
-                                <td><?= ucfirst($row['gender']) ?></td>
-                                <td><?= $row['contact'] ?></td>
-                                <td><?= $row['email'] ?></td>
-                                <td><?= $row['birthday'] ?></td>
+                                <td><?= $instructor['id'] ?></td>
+                                <td><?= $instructor['firstName'] ?> <?= $instructor['middleName'] ?> <?= $instructor['lastName'] ?></td>
+                                <td><?= ucfirst($instructor['gender']) ?></td>
+                                <td><?= $instructor['contact'] ?></td>
+                                <td><?= $instructor['email'] ?></td>
+                                <td><?= $instructor['birthday'] ?></td>
                                 <td>
                                     <div class="flex gap-2">
-                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
-                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
-                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
+                                        <label for="view-instructor-<?= $instructor['id'] ?>" class="bg-blue-400 btn btn-sm text-white">View</label>
+                                        <label for="edit-instructor-<?= $instructor['id'] ?>" class="bg-gray-400 btn btn-sm text-white">Edit</label>
+                                        <label for="delete-instructor-<?= $instructor['id'] ?>" class="bg-red-400 btn btn-sm text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>
                         <?php } ?>
-                    </tbody> 
+                    </tbody>
                 </table>
             </div>
-            
+
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if($page - 1 <= 0) { ?> disabled <?php } ?>> 
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
-                
+
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right' ></i>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                    <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
         </div>
@@ -204,7 +208,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
 
     <!-- Modals -->
     <?php $instructors = $dbCon->query($query); ?>
-    <?php while($row = $instructors->fetch_assoc()) { ?>
+    <?php while ($row = $instructors->fetch_assoc()) { ?>
 
         <!-- View modal -->
         <input type="checkbox" id="view-instructor-<?= $row['id'] ?>" class="modal-toggle" />
@@ -221,11 +225,11 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered"  name="middle_name" value="<?= $row['middleName'] ?>" disabled />
+                            <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" disabled />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered"  name="lastname_name" value="<?= $row['lastName'] ?>" disabled required />
+                            <input class="input input-bordered" name="lastname_name" value="<?= $row['lastName'] ?>" disabled required />
                         </label>
                     </div>
 
@@ -234,19 +238,19 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Gender</span>
                             <select class="select select-bordered" name="gender" disabled required>
-                                <option value="male" <?php if($row['gender'] == 'male') { ?> disabled <?php } ?>>Male</option>
-                                <option value="female" <?php if($row['gender'] == 'female') { ?> disabled <?php } ?>>Female</option>
+                                <option value="male" <?php if ($row['gender'] == 'male') { ?> disabled <?php } ?>>Male</option>
+                                <option value="female" <?php if ($row['gender'] == 'female') { ?> disabled <?php } ?>>Female</option>
                             </select>
                         </label>
-                        
+
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" disabled required/>
+                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" disabled required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" disabled required/>
+                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" disabled required />
                         </label>
                     </div>
 
@@ -256,12 +260,12 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                     <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input class="input input-bordered" type="email"  name="email" value="<?= $row['email'] ?>" disabled required/>
+                            <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" disabled required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input class="input input-bordered" name="password" value="<?= $row['password'] ?>" disabled required/>
+                            <input class="input input-bordered" name="password" value="<?= $row['password'] ?>" disabled required />
                         </label>
                     </div>
                 </div>
@@ -286,11 +290,11 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered"  name="middle_name" value="<?= $row['middleName'] ?>" />
+                            <input class="input input-bordered" name="middle_name" value="<?= $row['middleName'] ?>" />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered"  name="lastname_name" value="<?= $row['lastName'] ?>" required />
+                            <input class="input input-bordered" name="lastname_name" value="<?= $row['lastName'] ?>" required />
                         </label>
                     </div>
 
@@ -298,8 +302,8 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                         <span class="font-bold text-[18px]">Gender</span>
                         <select class="select select-bordered" name="gender" required>
                             <option value="" selected disabled>Select Gender</option>
-                            <option value="male" <?php if($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
-                            <option value="female" <?php if($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
+                            <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
+                            <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                         </select>
                     </label>
 
@@ -307,12 +311,12 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                     <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" required/>
+                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" required/>
+                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" required />
                         </label>
                     </div>
 
@@ -321,12 +325,12 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                     <!-- Account -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Email</span>
-                        <input class="input input-bordered" type="email"  name="email" value="<?= $row['email'] ?>" required/>
+                        <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required />
                     </label>
 
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Password</span>
-                        <input class="input input-bordered" name="password"/>
+                        <input class="input input-bordered" name="password" />
                     </label>
 
                     <!-- Actions -->
@@ -353,7 +357,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, 
                     <button class="btn btn-error" name="delete_instructor">Delete</button>
                 </form>
             </div>
-            <label class="modal-backdrop" for="delete-modal">Close</label>
+            <label class="modal-backdrop" for="delete-instructor-<?= $row['id'] ?>">Close</label>
         </div>
     <?php } ?>
 </main>
