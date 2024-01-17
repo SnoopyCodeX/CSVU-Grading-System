@@ -309,18 +309,18 @@ $subjects = $dbCon->query("SELECT * FROM ap_subjects LIMIT $start, $limit");
         <!-- Delete Modal -->
         <input type="checkbox" id="delete-subject-<?= $subject['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">Notice!</h3>
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Notice!</h3>
                 <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <input type="hidden" name="id" value="<?= $subject['id'] ?>">
 
-                    <label class="btn" for="delete-modal-<?= $subject['id'] ?>">Close</label>
+                    <label class="btn" for="delete-subject-<?= $subject['id'] ?>">Close</label>
                     <button class="btn btn-error" name="delete_subject">Delete</button>
                 </form>
             </div>
-            <label class="modal-backdrop" for="delete-subject">Close</label>
+            <label class="modal-backdrop" for="delete-subject-<?= $subject['id'] ?>">Close</label>
         </div>]
 
     <?php } ?>

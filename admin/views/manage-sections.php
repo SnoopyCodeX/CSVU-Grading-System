@@ -125,15 +125,15 @@ $sectionsQuery = "SELECT
         <!-- Delete Modal -->
         <input type="checkbox" id="delete-section-<?= $section['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">Notice!</h3>
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Notice!</h3>
                 <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <input type="hidden" name="id" value="<?= $section['id'] ?>">
 
                     <label class="btn" for="delete-section-<?= $section['id'] ?>">Close</label>
-                    <button class="btn btn-error">Confirm</button>
+                    <button class="btn btn-error">Delete</button>
                 </form>
             </div>
             <label class="modal-backdrop" for="delete-section-<?= $section['id'] ?>">Close</label>
