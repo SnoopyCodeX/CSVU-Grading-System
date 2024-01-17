@@ -11,7 +11,7 @@ $FirstDir = explode('/', trim($currentDir, '/'));
 $rootFolder = "//" . $_SERVER['SERVER_NAME'] . "/" . $FirstDir['0'];
 
 if (AuthController::isAuthenticated()) {
-    header("Location: {$rootFolder}/{AuthController::user()->roles}");
+    header("Location: {$rootFolder}/" . AuthController::user()->roles);
     exit();
 }
 
