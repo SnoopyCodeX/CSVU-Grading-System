@@ -433,7 +433,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
             selectAll.textContent = selectAll.textContent == "Select All" ? "Unselect All" : "Select All";
 
             checkboxes.forEach(checkbox => {
-                checkbox.checked = !checkbox.checked;
+                checkbox.checked = selectAll.textContent == "Select All" ? false : true;
             });
         });
 
