@@ -90,7 +90,7 @@ $sectionCount = $sectionQuery->num_rows;
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[24px] font-bold">Recent Applicant</h1>
+                    <h1 class="text-[24px] font-bold">Recent Applicants</h1>
                 </div>
             </div>
 
@@ -106,7 +106,6 @@ $sectionCount = $sectionQuery->num_rows;
                             <td class="bg-slate-500 text-white">Gender</td>
                             <td class="bg-slate-500 text-white">Contact</td>
                             <td class="bg-slate-500 text-white">Student ID</td>
-                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,13 +122,6 @@ $sectionCount = $sectionQuery->num_rows;
                                         <td>" . ucfirst($row['gender']) . "</td>
                                         <td>{$row['contact']}</td>
                                         <td>{$row['sid']}</td>
-                                        <td>
-                                            <div class='flex gap-2 justify-center items-center'>
-                                                <label for='view-student-{$row['id']}' class='btn btn-sm bg-blue-400 text-white'>View</label>
-                                                <label for='edit-student-{$row['id']}' class='btn btn-sm bg-gray-400 text-white'>Edit</label>
-                                                <label for='delete-student-{$row['id']}' class='btn btn-sm bg-red-400 text-white'>Delete</label>
-                                            </div>
-                                        </td>
                                     </tr>
                                 ";
                             }
