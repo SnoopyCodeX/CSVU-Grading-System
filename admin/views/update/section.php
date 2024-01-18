@@ -15,7 +15,12 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         $yearLevel = $dbCon->real_escape_string($data['year_level']);
         $selectedStudentIds = $data['selectedStudentIds'];
 
-        $studentQuery = "SELECT * FROM ap_userdetails WHERE year_level='$yearLevel' AND roles='student'";
+        if ($yearLevel === "All") {
+            $studentQuery = "SELECT * FROM ap_userdetails WHERE roles='student'";
+        } else {
+            $studentQuery = "SELECT * FROM ap_userdetails WHERE year_level='$yearLevel' AND roles='student'";
+        }
+
         $sectionStudentsQuery = "SELECT * FROM ap_section_students WHERE section_id='$id'";
 
         $result = $dbCon->query($studentQuery);
@@ -29,9 +34,13 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 array_push($sectionStudentIds, $sectionStudent['student_id']);
             }
 
-            $filteredStudents = array_filter($students, function ($student) use ($sectionStudentIds, $selectedStudentIds) {
-                return !in_array($student['id'], $sectionStudentIds) || in_array($student['id'], $selectedStudentIds);
-            });
+            // filter students using foreach loop
+            $filteredStudents = [];
+            foreach ($students as $student) {
+                if (!in_array($student['id'], $sectionStudentIds) || !in_array($student['id'], $selectedStudentIds)) {
+                    array_push($filteredStudents, $student);
+                }
+            }
 
             echo json_encode($filteredStudents);
         } else {
@@ -55,6 +64,9 @@ $hasError = false;
 $hasSuccess = false;
 $message = "";
 
+// Get id from url
+$id = $dbCon->real_escape_string($_GET['id']) ? $dbCon->real_escape_string($_GET['id']) : header("Location: ../manage-sections.php");
+
 // update section
 if (isset($_POST['update_section'])) {
     $sectionName = $dbCon->real_escape_string($_POST['section_name']);
@@ -64,6 +76,7 @@ if (isset($_POST['update_section'])) {
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $course = $dbCon->real_escape_string($_POST['course']);
     $instructor = $dbCon->real_escape_string($_POST['instructor']);
+    $selectedStudents = json_decode($_POST['selected_students']);
 
     // Update section query
     $updateSectionQuery = "UPDATE ap_sections SET 
@@ -74,8 +87,30 @@ if (isset($_POST['update_section'])) {
         year_level = '$yearLevel',
         course = '$course',
         instructor = '$instructor'
-        WHERE id = $id
+        WHERE id = '$id'
     ";
+
+    // Delete all students from ap_section_students table
+    $deleteSectionStudentsQuery = "DELETE FROM ap_section_students WHERE section_id = $id";
+
+    // Execute delete query
+    $dbCon->query($deleteSectionStudentsQuery);
+
+    // check if there are selected students
+    if (count($selectedStudents) > 0) {
+        // Insert all selected students to ap_section_students table
+        $insertSectionStudentsQuery = "INSERT INTO ap_section_students (section_id, student_id) VALUES ";
+
+        foreach ($selectedStudents as $studentId) {
+            $insertSectionStudentsQuery .= "($id, $studentId),";
+        }
+
+        // Remove last comma
+        $insertSectionStudentsQuery = substr($insertSectionStudentsQuery, 0, -1);
+
+        // Execute insert query
+        $dbCon->query($insertSectionStudentsQuery);
+    }
 
     // Update section
     if ($dbCon->query($updateSectionQuery)) {
@@ -83,12 +118,9 @@ if (isset($_POST['update_section'])) {
         $message = "Section updated successfully!";
     } else {
         $hasError = true;
-        $message = "There was an error updating the section!";
+        $message = "There was an error updating the section! {$dbCon->error}";
     }
 }
-
-// Get id from url
-$id = $dbCon->real_escape_string($_GET['id']) ? $dbCon->real_escape_string($_GET['id']) : header("Location: ../manage-sections.php");
 
 // Fetch section details query joining ap_userdetails, ap_sections, ap_subjects, ap_schoolyear and ap_courses tables
 $sectionQuery = "SELECT 
@@ -158,7 +190,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
         <div class="w-full h-full">
             <div class="flex justify-center items-center flex-col p-8">
                 <h2 class="text-[38px] font-bold mb-4">Update Section</h2>
-                <form class="flex flex-col gap-[24px]  px-[32px]  w-[1000px] mb-auto flex" id="update-section-form">
+                <form class="flex flex-col gap-[24px]  px-[32px]  w-[1000px] mb-auto flex" id="update-section-form" method="post" action="<?= $_SERVER['PHP_SELF'] ?>?id=<?= $id ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -181,7 +213,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                     <!-- Details -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Section Name</span>
-                        <input class="input input-bordered" value="<?= $sectionResult['sectionName'] ?>" required />
+                        <input class="input input-bordered" value="<?= $sectionResult['sectionName'] ?>" name="section_name" required />
                     </label>
 
                     <!-- Main Grid -->
@@ -189,7 +221,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Subject</span>
-                            <select class="select select-bordered" required>
+                            <select class="select select-bordered" name="subject" required>
                                 <!--Display all the subjects here-->
                                 <option value="" disabled>Select Subject</option>
                                 <option value="<?= $sectionResult['subjectId'] ?>" selected><?= $sectionResult['subjectName'] ?></option>
@@ -203,7 +235,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">School Year</span>
-                            <select class="select select-bordered" required>
+                            <select class="select select-bordered" name="school_year" required>
                                 <!--Display all the subjects here-->
                                 <option value="" disabled>Select School Year</option>
                                 <option value="<?= $sectionResult['schoolYearId'] ?>" selected><?= $sectionResult['schoolYear'] ?></option>
@@ -217,7 +249,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">School Term</span>
-                            <select class="select select-bordered" required>
+                            <select class="select select-bordered" name="term" required>
                                 <!--Display all the Semister here-->
                                 <option value="" disabled>Select School Term</option>
 
@@ -229,7 +261,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Year level</span>
-                            <select class="select select-bordered" required>
+                            <select class="select select-bordered" name="year_level" required>
                                 <!--Display all the Year here-->
                                 <option value="" selected>Select Year Level</option>
 
@@ -240,12 +272,12 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                             </select>
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col col-span-2 gap-2">
                             <span class="font-bold text-[18px]">Course</span>
-                            <select class="select select-bordered" required>
+                            <select class="select select-bordered" name="course" required>
                                 <!--Display all the Course here-->
                                 <option value="" disabled>Select Course</option>
-                                <option value="<?= $sectionResult['courseName'] ?>" selected><?= $sectionResult['courseName'] ?></option>
+                                <option value="<?= $sectionResult['courseId'] ?>" selected><?= $sectionResult['courseName'] ?></option>
 
                                 <?php $courses = $dbCon->query($coursesQuery); ?>
                                 <?php while ($course = $courses->fetch_assoc()) { ?>
@@ -261,10 +293,10 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Instructor</span>
-                        <select class="select select-bordered" required>
+                        <select class="select select-bordered" name="instructor" required>
                             <!--Display all the subjects here-->
                             <option value="" disabled>Select Instructor</option>
-                            <option value="<?= $sectionResult['instructorName'] ?>"><?= $sectionResult['instructorName'] ?></option>
+                            <option value="<?= $sectionResult['instructorId'] ?>"><?= $sectionResult['instructorName'] ?></option>
 
                             <?php $instructors = $dbCon->query($instructorsQuery); ?>
                             <?php while ($instructor = $instructors->fetch_assoc()) { ?>
@@ -282,6 +314,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                                     <!--Display all the Year level here-->
                                     <option value="" selected disabled>Select Year level</option>
 
+                                    <option value="All">All</option>
                                     <option value="1st Year">1st Year</option>
                                     <option value="2nd Year">2nd Year</option>
                                     <option value="3rd Year">3rd Year</option>
@@ -297,12 +330,14 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                             <?php while ($student = $studentsResult->fetch_assoc()) { ?>
                                 <div class="h-[48px] flex gap-4 justify-start px-4 items-center  gap-4 border border-gray-400 rounded-[5px]">
                                     <input type="checkbox" class="checkbox checkbox-sm" checked />
-                                    <span data-studentId="<?= $student['studentId'] ?>" data-default="yes"><?= $student['studentName'] ?></span>
+                                    <span data-studentId="<?= $student['studentId'] ?>"><?= $student['studentName'] ?></span>
                                 </div>
                             <?php } ?>
 
                         </div>
                     </label>
+
+                    <input type="hidden" id="selected-students" name="selected_students" />
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
@@ -323,9 +358,9 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
         // Year level filter for student selection
         yearLevelSelect.addEventListener("change", (e) => {
-            // Get all students that has an attribute data-default="yes"
-            const selectedStudents = Array.from(studentContainer.querySelectorAll("span[data-default='yes']"));
-            const selectedStudentIds = selectedStudents.map(student => student.dataset.studentid);
+            // Get all students that has been checked
+            const selectedStudents = Array.from(studentContainer.querySelectorAll("input[type='checkbox']:checked"));
+            const selectedStudentIds = selectedStudents.map(student => student.parentElement.querySelector('span').dataset.studentid);
 
             const yearLevel = e.target.value;
             const data = {
