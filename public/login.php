@@ -55,7 +55,7 @@ if (AuthController::isAuthenticated()) {
 
                     <!-- Break -->
                     <span class="border border-black my-2"></span>
-                    <p><a href="./forgot-password.php">Forgot Password</a></p>
+                    <!-- <p><a href="./forgot-password.php">Forgot Password</a></p> -->
                     <!-- Button -->
                     <button type="submit" name="login" class="btn bg-slate-600 text-base text-white ">Login</button>
                 </div>
