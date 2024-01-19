@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 18, 2024 at 06:18 AM
+-- Generation Time: Jan 19, 2024 at 09:37 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.0.28
 
@@ -20,6 +20,33 @@ SET time_zone = "+00:00";
 --
 -- Database: `grading-sys`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ap_activities`
+--
+
+CREATE TABLE `ap_activities` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `subject` int(11) NOT NULL,
+  `school_year` int(11) NOT NULL,
+  `term` varchar(255) NOT NULL,
+  `year_level` varchar(255) NOT NULL,
+  `course` int(11) NOT NULL,
+  `passing_rate` double NOT NULL,
+  `max_score` int(11) NOT NULL,
+  `instructor` int(11) NOT NULL,
+  `section` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ap_activities`
+--
+
+INSERT INTO `ap_activities` (`id`, `name`, `subject`, `school_year`, `term`, `year_level`, `course`, `passing_rate`, `max_score`, `instructor`, `section`) VALUES
+(2, 'test activity', 3, 2, '1st Sem', '1st Year', 2, 0.25, 50, 23, 11);
 
 -- --------------------------------------------------------
 
@@ -84,7 +111,7 @@ CREATE TABLE `ap_sections` (
 --
 
 INSERT INTO `ap_sections` (`id`, `name`, `subject`, `school_year`, `term`, `year_level`, `course`, `instructor`) VALUES
-(10, 'Section Sampaguita', 4, 2, '1st Sem', '1st Year', 2, 23);
+(11, 'Section Sampaguita', 4, 2, '1st Sem', '1st Year', 3, 23);
 
 -- --------------------------------------------------------
 
@@ -103,8 +130,63 @@ CREATE TABLE `ap_section_students` (
 --
 
 INSERT INTO `ap_section_students` (`id`, `section_id`, `student_id`) VALUES
-(17, 10, 24),
-(18, 10, 25);
+(47, 11, 1),
+(50, 11, 19),
+(48, 11, 24),
+(49, 11, 25);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ap_student_final_grades`
+--
+
+CREATE TABLE `ap_student_final_grades` (
+  `id` int(11) NOT NULL,
+  `subject` int(11) NOT NULL,
+  `term` varchar(255) NOT NULL,
+  `year_level` varchar(255) NOT NULL,
+  `section` int(11) NOT NULL,
+  `student` int(11) NOT NULL,
+  `school_year` int(11) NOT NULL,
+  `grade` decimal(10,0) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ap_student_final_grades`
+--
+
+INSERT INTO `ap_student_final_grades` (`id`, `subject`, `term`, `year_level`, `section`, `student`, `school_year`, `grade`) VALUES
+(9, 3, '1st Sem', '1st Year', 11, 1, 2, 76),
+(10, 3, '1st Sem', '1st Year', 11, 19, 2, 90),
+(11, 3, '1st Sem', '1st Year', 11, 24, 2, 100),
+(12, 3, '1st Sem', '1st Year', 11, 25, 2, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `ap_student_grades`
+--
+
+CREATE TABLE `ap_student_grades` (
+  `id` int(11) NOT NULL,
+  `student_id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  `instructor_id` int(11) NOT NULL,
+  `section_id` int(11) NOT NULL,
+  `grade` decimal(10,0) NOT NULL,
+  `term` varchar(255) NOT NULL,
+  `year_level` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `ap_student_grades`
+--
+
+INSERT INTO `ap_student_grades` (`id`, `student_id`, `activity_id`, `instructor_id`, `section_id`, `grade`, `term`, `year_level`) VALUES
+(15, 1, 2, 23, 11, 38, '1st Sem', '1st Year'),
+(16, 19, 2, 23, 11, 45, '1st Sem', '1st Year'),
+(17, 24, 2, 23, 11, 50, '1st Sem', '1st Year');
 
 -- --------------------------------------------------------
 
@@ -165,11 +247,24 @@ INSERT INTO `ap_userdetails` (`id`, `firstName`, `middleName`, `lastName`, `emai
 (19, 'Albert', '', 'Pogi', 'albertpogi123@gmail.com', '$6$Crypt$EsHmqkQvmwperb8BCLW071h5wYsb/nu6wrJospA4bBOedphtupEzPs7.Xj6G2O.jrZg6VDrzA7zy0PHPTkcOG1', 'male', 2147483647, '1900-01-01', '3rd Year', 'student', '780870948572'),
 (23, 'Albert', '', 'Winkler', 'albert@instructor.com', '$6$Crypt$PZeqbcn2b92pYsPbMIaJM6JIORhx4WCJm0GPWHc/pXnxAmaRdfyhTEZSCMOBipJpMFfto5x75FtH3LgWghiFS0', 'male', 2147483647, '1900-01-01', NULL, 'instructor', NULL),
 (24, 'Louise', '', 'Rouxe', 'louiserouxe@gmail.com', '$6$Crypt$6VtryvO3DqQgz32i5hEQsNs43DwdTbEmlcxNe1816FMWVBWrMYb0kvb.JWz4/YN.fEXMEH2b8JqgBsVHQYVIk1', 'female', 2147483647, '1900-01-01', '1st year', 'student', '5423413'),
-(25, 'Rex', '', 'Rider', 'rexrider@gmail.com', '$6$Crypt$AdOgW1ELa7yGkykBpgkQPrpjo1iPyrV06NZvokMNvmfPCWVZJe1HXueA7m.IZ7gjSAfPJ5p6By7X4C06e2s6T.', 'male', 2147483647, '1900-01-01', '1st year', 'student', '0987687');
+(25, 'Rex', '', 'Rider', 'rexrider@gmail.com', '$6$Crypt$AdOgW1ELa7yGkykBpgkQPrpjo1iPyrV06NZvokMNvmfPCWVZJe1HXueA7m.IZ7gjSAfPJ5p6By7X4C06e2s6T.', 'male', 2147483647, '1900-01-01', '1st year', 'student', '0987687'),
+(26, 'Dummy', '', 'Student', 'dummystudent@gmail.com', '$6$Crypt$l9s07CApiXIAhWVHoOKGAmwp5WPuJioK50k3cdJ8qWF4vcr1q0j2nnyPO/nRGZoO7mNn8UOJbU8mabJm1ZQyA/', 'male', 2147483647, '1900-01-01', '1st year', 'student', '57856234534');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `ap_activities`
+--
+ALTER TABLE `ap_activities`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `subject` (`subject`,`school_year`,`course`,`instructor`),
+  ADD KEY `subject_2` (`subject`,`school_year`,`course`,`instructor`),
+  ADD KEY `activity-schoolyear-constraint` (`school_year`),
+  ADD KEY `activity-course-constraint` (`course`),
+  ADD KEY `activity-instructor-constraint` (`instructor`),
+  ADD KEY `section` (`section`);
 
 --
 -- Indexes for table `ap_courses`
@@ -190,9 +285,9 @@ ALTER TABLE `ap_sections`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `subject` (`subject`,`school_year`,`course`,`instructor`),
   ADD KEY `subject_2` (`subject`,`school_year`,`course`,`instructor`),
-  ADD KEY `section-schoolyear-constraint` (`school_year`),
   ADD KEY `section-course-constraint` (`course`),
-  ADD KEY `section-instructor-constraint` (`instructor`);
+  ADD KEY `section-instructor-constraint` (`instructor`),
+  ADD KEY `section-schoolyear-constraint` (`school_year`);
 
 --
 -- Indexes for table `ap_section_students`
@@ -202,6 +297,26 @@ ALTER TABLE `ap_section_students`
   ADD UNIQUE KEY `section_id` (`section_id`,`student_id`),
   ADD KEY `section_id_2` (`section_id`,`student_id`),
   ADD KEY `section-students-student-constraint` (`student_id`);
+
+--
+-- Indexes for table `ap_student_final_grades`
+--
+ALTER TABLE `ap_student_final_grades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `subject` (`subject`,`section`,`student`),
+  ADD KEY `final-grade-section-constraint` (`section`),
+  ADD KEY `final-grade-student-constraint` (`student`),
+  ADD KEY `school_year` (`school_year`);
+
+--
+-- Indexes for table `ap_student_grades`
+--
+ALTER TABLE `ap_student_grades`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `student_id_2` (`student_id`),
+  ADD KEY `activity_id_2` (`activity_id`),
+  ADD KEY `instructor_id_2` (`instructor_id`),
+  ADD KEY `section_id` (`section_id`);
 
 --
 -- Indexes for table `ap_subjects`
@@ -221,6 +336,12 @@ ALTER TABLE `ap_userdetails`
 --
 
 --
+-- AUTO_INCREMENT for table `ap_activities`
+--
+ALTER TABLE `ap_activities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `ap_courses`
 --
 ALTER TABLE `ap_courses`
@@ -236,13 +357,25 @@ ALTER TABLE `ap_school_year`
 -- AUTO_INCREMENT for table `ap_sections`
 --
 ALTER TABLE `ap_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `ap_section_students`
 --
 ALTER TABLE `ap_section_students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=51;
+
+--
+-- AUTO_INCREMENT for table `ap_student_final_grades`
+--
+ALTER TABLE `ap_student_final_grades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+
+--
+-- AUTO_INCREMENT for table `ap_student_grades`
+--
+ALTER TABLE `ap_student_grades`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `ap_subjects`
@@ -254,11 +387,21 @@ ALTER TABLE `ap_subjects`
 -- AUTO_INCREMENT for table `ap_userdetails`
 --
 ALTER TABLE `ap_userdetails`
-  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(12) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `ap_activities`
+--
+ALTER TABLE `ap_activities`
+  ADD CONSTRAINT `activity-course-constraint` FOREIGN KEY (`course`) REFERENCES `ap_courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `activity-instructor-constraint` FOREIGN KEY (`instructor`) REFERENCES `ap_userdetails` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `activity-schoolyear-constraint` FOREIGN KEY (`school_year`) REFERENCES `ap_school_year` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `activity-section-constraint` FOREIGN KEY (`section`) REFERENCES `ap_sections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `activity-subject-contstaint` FOREIGN KEY (`subject`) REFERENCES `ap_subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `ap_sections`
@@ -275,6 +418,24 @@ ALTER TABLE `ap_sections`
 ALTER TABLE `ap_section_students`
   ADD CONSTRAINT `section-students-section-constraint` FOREIGN KEY (`section_id`) REFERENCES `ap_sections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `section-students-student-constraint` FOREIGN KEY (`student_id`) REFERENCES `ap_userdetails` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ap_student_final_grades`
+--
+ALTER TABLE `ap_student_final_grades`
+  ADD CONSTRAINT `final-grade-schoolyear-constraint` FOREIGN KEY (`school_year`) REFERENCES `ap_school_year` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `final-grade-section-constraint` FOREIGN KEY (`section`) REFERENCES `ap_sections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `final-grade-student-constraint` FOREIGN KEY (`student`) REFERENCES `ap_userdetails` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `final-grade-subject-constraint` FOREIGN KEY (`subject`) REFERENCES `ap_subjects` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `ap_student_grades`
+--
+ALTER TABLE `ap_student_grades`
+  ADD CONSTRAINT `student-grade-activity-constraint` FOREIGN KEY (`activity_id`) REFERENCES `ap_activities` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student-grade-instructor-constraint` FOREIGN KEY (`instructor_id`) REFERENCES `ap_userdetails` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student-grade-section-constraint` FOREIGN KEY (`section_id`) REFERENCES `ap_sections` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student-grade-student-constraint` FOREIGN KEY (`student_id`) REFERENCES `ap_userdetails` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `ap_subjects`
