@@ -29,9 +29,8 @@ require_once("../../../components/header.php");
                 </div>
 
                 <div class="flex gap-4">
-
                     <label class="flex flex-col gap-2">
-                        <select class="select select-bordered bg-gray-300/20">
+                        <select class="select select-bordered">
                             <option value="">Select Term</option>
                             <option value="female">Prelim</option>
                             <option value="male">Midterm</option>
