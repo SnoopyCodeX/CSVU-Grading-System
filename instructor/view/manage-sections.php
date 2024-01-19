@@ -12,15 +12,29 @@ if (!AuthController::isAuthenticated()) {
 
 // pag meron session mag rerender yung dashboard//
 
-// get user details
-$email = $_SESSION['email'];
-$detailsQuery = $dbCon->query("SELECT * FROM ap_userdetails WHERE email='$email'");
-$result = $detailsQuery->fetch_assoc();
+// pagination
+$limit = 10;
+$page = isset($_GET['page']) ? $_GET['page'] : 1;
+$start = ($page - 1) * $limit;
 
-$UID = $result['id'] ?? "";
+// total pages
+$result2 = mysqli_query($dbCon, "SELECT COUNT(*) AS id FROM ap_sections WHERE instructor = " . AuthController::user()->id);
+$sectionsCount = mysqli_fetch_array($result2);
+$total = $sectionsCount['id'];
+$pages = ceil($total / $limit);
 
-// add also the following students count, subject title and instructor name
-$sectionQuery = $dbCon->query("SELECT * FROM ap_sections WHERE instructor='$UID'");
+// get all sections that the instructor is handling. the sections are in ap_sections table and has a column referencing to ap_userdetails table where the instructor's details are stored. use join to get the instructor's details.
+$sectionQuery = "SELECT 
+    ap_sections.*,
+    ap_userdetails.firstName,
+    ap_userdetails.lastName,
+    ap_userdetails.middleName,
+    ap_subjects.name as subjectName
+    FROM ap_sections 
+    JOIN ap_userdetails ON ap_sections.instructor = ap_userdetails.id 
+    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id
+    WHERE ap_sections.instructor = " . AuthController::user()->id;
+
 require_once("../../components/header.php");
 ?>
 
@@ -44,7 +58,7 @@ require_once("../../components/header.php");
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th class="bg-slate-500 text-white"></th>
+                            <td class="bg-slate-500 text-white">ID</td>
                             <td class="bg-slate-500 text-white">Name</td>
                             <td class="bg-slate-500 text-white">Term</td>
                             <td class="bg-slate-500 text-white">Students</td>
@@ -55,81 +69,47 @@ require_once("../../components/header.php");
                     </thead>
                     <tbody>
                         <?php
-                        while ($row = $sectionQuery->fetch_assoc()) {
-
+                        $sectionQueryResult = $dbCon->query($sectionQuery);
+                        while ($row = $sectionQueryResult->fetch_assoc()) {
                         ?>
                             <tr>
                                 <th><?= $row['id'] ?></th>
                                 <td><?= $row['name'] ?></td>
                                 <td><?= $row['term'] ?></td>
                                 <!-- Student Count -->
-                                <td>1</td>
+                                <td><?= $dbCon->query("SELECT COUNT(*) as count FROM ap_section_students JOIN ap_sections ON ap_section_students.section_id = ap_sections.id WHERE ap_section_students.section_id={$row['id']}")->fetch_assoc()['count'] ?></td>
                                 <!-- Subject Name -->
-                                <td>DSA-101</td>
-
+                                <td><?= $row['subjectName'] ?></td>
+                                <!-- Instructor Name -->
                                 <td>
-                                    <?= $result['lastName'] ?>,
-                                    <?= $result['firstName'] ?>
-                                    <?= $result['middleName'] ?>
+                                    <?= $row['lastName'] ?>,
+                                    <?= $row['firstName'] ?>
+                                    <?= $row['middleName'] ?>
                                 </td>
+                                <!-- Status -->
                                 <td>
-                                    <span class='badge p-4 bg-blue-300'>
+                                    <span class='badge p-4 bg-blue-300 text-black'>
                                         On going
                                     </span>
                                 </td>
                             </tr>
-                        <?php
-                        }
-
-
-
-                        ?>
+                        <?php } ?>
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <button class="btn text-[24px]">
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
-                </button>
-                <button class="btn">Page 22</button>
-                <button class="btn text-[24px]">
+                </a>
+
+                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
-                </button>
+                </a>
             </div>
         </div>
     </section>
-
-
-    <!-- Put this part before </body> tag -->
-    <input type="checkbox" id="view-student" class="modal-toggle" />
-    <div class="modal" role="dialog">
-        <div class="modal-box">
-            <h3 class="text-lg font-bold">Hello!</h3>
-            <p class="py-4">This modal works with a hidden checkbox!</p>
-        </div>
-        <label class="modal-backdrop" for="view-student">Close</label>
-    </div>
-
-    <input type="checkbox" id="edit-student" class="modal-toggle" />
-    <div class="modal" role="dialog">
-        <div class="modal-box">
-            <h3 class="text-lg font-bold">Hello!</h3>
-            <p class="py-4">This modal works with a hidden checkbox!</p>
-        </div>
-        <label class="modal-backdrop" for="edit-student">Close</label>
-    </div>
-
-    <input type="checkbox" id="delete-modal" class="modal-toggle" />
-    <div class="modal" role="dialog">
-        <div class="modal-box">
-            <h3 class="text-lg font-bold">Notice!</h3>
-            <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
-
-            <div class="flex justify-end gap-4 items-center">
-                <label class="btn" for="delete-modal">Close</label>
-                <button class="btn">Confirm</button>
-            </div>
-        </div>
-        <label class="modal-backdrop" for="delete-modal">Close</label>
-    </div>
 </main>
