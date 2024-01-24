@@ -74,13 +74,13 @@ if (isset($_POST['create_instructor'])) {
 
 <main class="w-screen h-screen overflow-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class=" w-full px-4 lg:w-[700px] mx-auto">
         <?php require_once("../../layout/topbar.php") ?>
 
         <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
             <div class="flex justify-center items-center flex-col gap-4">
                 <h2 class="text-[38px] font-bold mb-8">Create Instructor</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4  mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -101,27 +101,27 @@ if (isset($_POST['create_instructor'])) {
                     <?php } ?>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
-                            <input class="input input-bordered" name="first_name" required />
+                            <input class="input input-bordered" name="first_name" placeholder='Enter first name' required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middle_name" />
+                            <input class="input input-bordered" name="middle_name"  placeholder='Enter middle name' />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered" name="lastname_name" required />
+                            <input class="input input-bordered" name="lastname_name"  placeholder='Enter last name' required />
                         </label>
                     </div>
 
                     <!-- Details -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Gender</span>
-                            <select class="select select-bordered" name="gender" required>
+                            <select class="select select-bordered" name="gender"  required>
                                 <option value="" selected disabled>Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
@@ -130,7 +130,7 @@ if (isset($_POST['create_instructor'])) {
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" name="contact" required />
+                            <input class="input input-bordered" name="contact"  placeholder='Enter Contact'  required />
                         </label>
 
                         <label class="flex flex-col gap-2">
@@ -145,12 +145,12 @@ if (isset($_POST['create_instructor'])) {
                     <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input class="input input-bordered" type="email" name="email" required />
+                            <input class="input input-bordered" type="email"  placeholder='Email Password'  name="email" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input class="input input-bordered" name="password" required />
+                            <input class="input input-bordered" placeholder='Enter Password'  name="password" required />
                         </label>
                     </div>
 

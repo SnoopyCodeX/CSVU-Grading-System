@@ -18,15 +18,17 @@ if (AuthController::isAuthenticated()) {
     header("Location: {$rootFolder}/" . AuthController::user()->roles);
     exit();
 }
-?>
-<main class="h-screen " style='background: url(assets/images/background19.png)'>
 
-    <div class="w-full h-full flex justify-center items-center">
-        <div class="w-[500px] h-[500px]">
+?>
+<main class="h-screen ">
+
+
+    <div class="w-full h-full grid grid-cols-2 gap-4">
+        <div class="px-[120px] flex justify-center  gap-4 flex-col">
             <!-- Header -->
             <div class="flex flex-col justify-center items-center gap-4 mb-4 ">
                 <h1 class="text-[48px] font-bold">Login</h1>
-                <span class="text-base text-center">Welcome to the LogIn portal! Whether you're a Student, Admin, or User, your journey begins here. Enter your credentials to unlock a world of possibilities. Let's get started!</span>
+                <span class="text-base text-center">Welcome to the LogIn portal! Navigate your academic journey with the web-based grading system of Cavite State University - General Triasl City, Campus, Lets get started</span>
             </div>
 
             <?php if ($hasError) { ?>
@@ -57,10 +59,12 @@ if (AuthController::isAuthenticated()) {
                     <span class="border border-black my-2"></span>
                     <!-- <p><a href="./forgot-password.php">Forgot Password</a></p> -->
                     <!-- Button -->
-                    <button type="submit" name="login" class="btn bg-slate-600 text-base text-white ">Login</button>
+                    <button type="submit" name="login" class="btn bg-[#1b651b] text-base text-white ">Login</button>
                 </div>
             </form>
         </div>
+
+        <div  style='background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../assets/images/background.jpg); background-size: cover;'></div>
     </div>
 
 </main>

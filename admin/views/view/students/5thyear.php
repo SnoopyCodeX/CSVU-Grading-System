@@ -2,16 +2,15 @@
 session_start();
 // kung walang session mag reredirect sa login //
 
-require("../../configuration/config.php");
-require('../../auth/controller/auth.controller.php');
+require_once("../../../../configuration/config.php");
+require_once("../../../../auth/controller/auth.controller.php");
 
 if (!AuthController::isAuthenticated()) {
     header("Location: ../../public/login");
     exit();
 }
+require_once("../../../../components/header.php");
 
-// pag meron session mag rerender yung dashboard//
-require_once("../../components/header.php");
 
 // Error and success handlers
 $hasError = false;
@@ -115,9 +114,9 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 ?>
 
 <main class="w-screen overflow-x-hidden flex">
-    <?php require_once("../layout/sidebar.php")  ?>
+<?php require_once("../../../layout/sidebar.php")  ?>
     <section class="h-screen w-full px-4">
-        <?php require_once("../layout/topbar.php") ?>
+        <?php require_once("../../../layout/topbar.php") ?>
 
 
         <div class="px-4 flex justify-between flex-col gap-4">
@@ -125,7 +124,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[24px] font-semibold">Student</h1>
+                    <h1 class="text-[24px] font-semibold">DSA-101</h1>
                 </div>
                 <a href="./create/student.php" class="btn">Create</a>
             </div>
@@ -355,20 +354,15 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
 
                         <!-- Account -->
-                        <label class="flex flex-col gap-2">
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Email</span>
                                 <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required />
                             </label>
 
-                        <div class="grid grid-cols-2 gap-4">
-                            
                             <label class="flex flex-col gap-2">
                                 <span class="font-semibold text-base">Password</span>
-                                <input class="input input-bordered" name="password" placeholder="Enter password here" />
-                            </label>
-                            <label class="flex flex-col gap-2">
-                                <span class="font-semibold text-base">New Password</span>
-                                <input class="input input-bordered" name="new-password" placeholder="Enter new password here" />
+                                <input class="input input-bordered" name="password" />
                             </label>
                         </div>
 

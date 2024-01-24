@@ -44,7 +44,7 @@ $sectionCount = $sectionQuery->num_rows;
 ?>
 
 
-<main class="h-screen flex overflow-hidden">
+<main class="h-screen flex overflow-hidden xm:bg-red-500 sm:bg-black md:bg-blue-400">
     <?php require_once("./layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("./layout/topbar.php") ?>
@@ -68,6 +68,18 @@ $sectionCount = $sectionQuery->num_rows;
                 </div>
                 <div class="stat-title">Subjects</div>
                 <div class="stat-value"><?php echo $subjectCount ?></div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                    </svg>
+                </div>
+                <div class="stat-title">Sections</div>
+                <div class="stat-value">
+                    <div class="stat-value"><?php echo $sectionCount ?></div>
+                </div>
             </div>
 
             <div class="stat">

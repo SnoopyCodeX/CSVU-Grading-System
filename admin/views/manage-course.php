@@ -90,7 +90,7 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
-        <div class="px-4 flex justify-between flex-col gap-4">
+        <div class="px-4 flex justify-between flex-col gap-4 mt-6">
 
             <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">

@@ -68,7 +68,7 @@ $sectionsQuery = "SELECT
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="w-full px-4 h-screen">
         <?php require_once("../layout/topbar.php") ?>
-        <div class="px-4 flex justify-between flex-col gap-4">
+        <div class="px-4 flex justify-between flex-col gap-4 mt-6">
 
             <!-- Table Header -->
             <div class="flex justify-between items-center">

@@ -73,10 +73,10 @@ if (isset($_POST['create_student'])) {
     <section class="w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold">Create Student</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4 w-full " method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -103,7 +103,7 @@ if (isset($_POST['create_student'])) {
                     </label>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
                             <input class="input input-bordered" name="first_name" placeholder="Enter First name" required />
@@ -120,7 +120,7 @@ if (isset($_POST['create_student'])) {
                     </div>
 
                     <!-- Details -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Gender</span>
                             <select class="select select-bordered" name="gender" required>
@@ -144,10 +144,10 @@ if (isset($_POST['create_student'])) {
 
 
                     <!-- Account -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input type="email" placeholder="Enter email" class="input input-bordered" type="email" name="email" required />
+                            <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
@@ -164,6 +164,7 @@ if (isset($_POST['create_student'])) {
                             <option value="2nd year">2nd year</option>
                             <option value="3rd year">3rd year</option>
                             <option value="4th year">4th year</option>
+                            <option value="4th year">5th year</option>
                         </select>
                     </label>
 

@@ -103,11 +103,11 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
 ?>
 
 
-<main class="overflow-hidden flex">
+<main class="overflow-hidden h-screen flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
-        <div class="px-4 flex justify-between flex-col gap-4">
+        <div class="px-4 flex justify-between flex-col gap-4 mt-6">
 
             <!-- Table Header -->
             <div class="flex justify-between items-center">
@@ -115,7 +115,7 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                 <div class="flex justify-between items-center">
                     <h1 class="text-[24px] font-bold">School Year</h1>
                 </div>
-                <div class="flex gap-4">
+                <div class="flex gap-4 flex-col md:flex-row">
                     <label for="reset-academic" class="btn btn-sm ">Reset School Year</label>
                     <a href="./create/academic-year.php" class="btn btn-sm ">Create</a>
                 </div>

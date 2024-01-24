@@ -315,6 +315,10 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                         <span class="font-bold text-[18px]">Password</span>
                         <input class="input input-bordered" name="password" value="" />
                     </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">New Password</span>
+                        <input class="input input-bordered" name="new-password" value="" />
+                    </label>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
