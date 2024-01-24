@@ -9,5 +9,5 @@ if (!AuthController::isAuthenticated()) {
     exit();
 }
 
-header("Location: ./dashboard/");
+header("Location: ./dashboard.php");
 exit();

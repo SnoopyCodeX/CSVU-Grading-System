@@ -6,10 +6,10 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../../components/header.php");
 
@@ -22,7 +22,7 @@ $message = "";
 if (isset($_POST['create_school_year'])) {
     $school_year = $_POST['school_year'];
 
-    if($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year'")->num_rows > 0){
+    if ($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "School year already exists";
@@ -43,7 +43,7 @@ if (isset($_POST['create_school_year'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex" >
+<main class="w-screen h-screen overflow-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
@@ -53,20 +53,24 @@ if (isset($_POST['create_school_year'])) {
                 <h2 class="text-[38px] font-bold mb-8">Create School year</h2>
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
-                    <?php if($hasError)  { ?>
+                    <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
 
-                    <?php if($hasSuccess)  { ?>
+                    <?php if ($hasSuccess) { ?>
                         <div role="alert" class="alert alert-success mb-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
-                    
+
                     <!-- Name -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">School Year</span>
@@ -74,11 +78,11 @@ if (isset($_POST['create_school_year'])) {
                             <option disabled="disabled" selected="selected">Select an option</option>
                             // school year options 2022 - 2023 using item //
                             <?php
-                                $earlyYear = 2022;
-                                $lateYear = 2030;
-                                for ($i = $earlyYear; $i <= $lateYear; $i++) {
-                                    echo "<option value='$i - " . ($i + 1) . "'>$i - " . ($i + 1) . "</option>";
-                                }
+                            $earlyYear = 2022;
+                            $lateYear = 2030;
+                            for ($i = $earlyYear; $i <= $lateYear; $i++) {
+                                echo "<option value='$i - " . ($i + 1) . "'>$i - " . ($i + 1) . "</option>";
+                            }
                             ?>
                         </select>
                     </label>

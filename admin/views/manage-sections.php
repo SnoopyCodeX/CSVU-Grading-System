@@ -6,7 +6,7 @@ require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../public/login");
     exit();
 }
 
@@ -17,6 +17,23 @@ require_once("../../components/header.php");
 $hasError = false;
 $hasSuccess = false;
 $message = "";
+
+// Delete section from ap_sections table and from ap_section_students table
+if (isset($_POST['delete-section'])) {
+    $id = $dbCon->real_escape_string($_POST['id']);
+
+    $deleteSectionQuery = "DELETE FROM ap_sections WHERE id = $id";
+    $deleteSectionStudentsQuery = "DELETE FROM ap_section_students WHERE section_id = $id";
+
+    if ($dbCon->query($deleteSectionStudentsQuery) && $dbCon->query($deleteSectionQuery)) {
+        $hasSuccess = true;
+        $message = "Section deleted successfully!";
+    } else {
+        $hasError = true;
+        $message = "Error deleting section!";
+    }
+}
+
 
 // pagination
 $limit = 10;
@@ -61,6 +78,24 @@ $sectionsQuery = "SELECT
                 </div>
                 <a href="./create/sections.php" class="btn">Create</a>
             </div>
+
+            <?php if ($hasError) { ?>
+                <div role="alert" class="alert alert-error mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><?= $message ?></span>
+                </div>
+            <?php } ?>
+
+            <?php if ($hasSuccess) { ?>
+                <div role="alert" class="alert alert-success mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><?= $message ?></span>
+                </div>
+            <?php } ?>
 
             <!-- Table Content -->
             <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
@@ -125,15 +160,15 @@ $sectionsQuery = "SELECT
         <!-- Delete Modal -->
         <input type="checkbox" id="delete-section-<?= $section['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">Notice!</h3>
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Notice!</h3>
                 <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <input type="hidden" name="id" value="<?= $section['id'] ?>">
 
                     <label class="btn" for="delete-section-<?= $section['id'] ?>">Close</label>
-                    <button class="btn btn-error">Confirm</button>
+                    <button class="btn btn-error" name="delete-section">Delete</button>
                 </form>
             </div>
             <label class="modal-backdrop" for="delete-section-<?= $section['id'] ?>">Close</label>

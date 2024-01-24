@@ -9,7 +9,7 @@ if (!AuthController::isAuthenticated()) {
     header("Location: ../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
 
@@ -23,7 +23,7 @@ if (isset($_POST['update_school_year'])) {
     $school_year = $dbCon->real_escape_string($_POST['school_year']);
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    if($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year' AND id = '$id'")->num_rows > 0){
+    if ($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year' AND id = '$id'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "School year already exists";
@@ -66,7 +66,7 @@ if (isset($_POST['reset_school_year'])) {
     $school_year = $dbCon->real_escape_string($_POST['school_year']);
 
     // check if school year exists only in ap_sections
-    if($dbCon->query("SELECT * FROM ap_sections WHERE school_year = '$school_year'")->num_rows == 0){
+    if ($dbCon->query("SELECT * FROM ap_sections WHERE school_year = '$school_year'")->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "School year <strong>$school_year</strong> cannot be reset because it is not being used.";
@@ -103,34 +103,38 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
 ?>
 
 
-<main class="overflow-hidden flex" >
+<main class="overflow-hidden flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
-              <!-- Table Header -->
-              <div class="flex justify-between items-center">
+            <!-- Table Header -->
+            <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
                     <h1 class="text-[24px] font-bold">School Year</h1>
                 </div>
-               <div class="flex gap-4">
+                <div class="flex gap-4">
                     <label for="reset-academic" class="btn btn-sm ">Reset School Year</label>
                     <a href="./create/academic-year.php" class="btn btn-sm ">Create</a>
-               </div>
+                </div>
             </div>
 
-            <?php if($hasError)  { ?>
+            <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
 
-            <?php if($hasSuccess)  { ?>
+            <?php if ($hasSuccess) { ?>
                 <div role="alert" class="alert alert-success mb-8">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                     <span><?= $message ?></span>
                 </div>
             <?php } ?>
@@ -139,46 +143,46 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
             <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-md table-pin-rows table-pin-cols ">
                     <thead>
-                    <tr>
-                        <td class="bg-slate-500 text-white">ID</td> 
-                        <td class="bg-slate-500 text-white">Academic Year</td> 
-                        <td class="bg-slate-500 text-white text-center">Action</td>
-                    </tr>
-                    </thead> 
+                        <tr>
+                            <td class="bg-slate-500 text-white">ID</td>
+                            <td class="bg-slate-500 text-white">Academic Year</td>
+                            <td class="bg-slate-500 text-white text-center">Action</td>
+                        </tr>
+                    </thead>
                     <tbody>
                         <?php $schoolYears = $dbCon->query($query); ?>
-                        <?php while($row = $schoolYears->fetch_assoc()) { ?>
-                        
+                        <?php while ($row = $schoolYears->fetch_assoc()) { ?>
+
                             <tr>
-                                <td><?= $row['id'] ?></td> 
+                                <td><?= $row['id'] ?></td>
                                 <td>
                                     <div class="badge p-4 bg-green-400 text-white font-semibold">
                                         <?= $row['school_year'] ?>
                                     </div>
-                                </td> 
+                                </td>
                                 <td>
                                     <div class="flex justify-center gap-2">
-                                        <label for="edit-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-gray-400">Edit</label>
-                                        <label for="delete-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-red-400">Delete</label>
+                                        <label for="edit-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-gray-400 text-white">Edit</label>
+                                        <label for="delete-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-red-400 text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>
 
                         <?php } ?>
-                    </tbody> 
+                    </tbody>
                 </table>
             </div>
-            
+
             <!-- Pagination -->
             <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if($page - 1 <= 0) { ?> disabled <?php } ?>> 
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
-                
+
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right' ></i>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                    <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
         </div>
@@ -186,8 +190,8 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
 
     <!-- Modals -->
     <?php $schoolYears = $dbCon->query($query); ?>
-    <?php while($row = $schoolYears->fetch_assoc()) { ?>
-    
+    <?php while ($row = $schoolYears->fetch_assoc()) { ?>
+
         <!-- Edit modal -->
         <input type="checkbox" id="edit-school-year-<?= $row['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
@@ -202,10 +206,10 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                         <select class="select select-bordered" name="school_year" required>
                             <option disabled selected>Select an option</option>
                             <?php
-                                $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year WHERE id != '$row[id]'");
-                                while($schoolYear = $existingSchoolYears->fetch_assoc()) {
-                                    echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
-                                }
+                            $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year WHERE id != '$row[id]'");
+                            while ($schoolYear = $existingSchoolYears->fetch_assoc()) {
+                                echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
+                            }
                             ?>
                         </select>
                     </label>
@@ -222,8 +226,8 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
         <!-- Delete modal -->
         <input type="checkbox" id="delete-school-year-<?= $row['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">Notice!</h3>
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Notice!</h3>
                 <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
@@ -235,24 +239,24 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
             </div>
             <label class="modal-backdrop" for="delete-school-year-<?= $row['id'] ?>">Close</label>
         </div>
-        
+
     <?php } ?>
 
     <!-- Reset modal -->
     <input type="checkbox" id="reset-academic" class="modal-toggle" />
     <div class="modal" role="dialog">
-        <div class="modal-box">
+        <div class="modal-box border border-error border-2">
             <form method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                 <!-- Name -->
                 <label class="flex flex-col gap-2">
-                    <span class="font-bold text-[18px]">Reset School Year</span>
+                    <span class="font-bold text-[18px] text-error">Reset School Year</span>
                     <select class="select select-bordered" name="school_year" required>
                         <option disabled="disabled" selected="selected">Select an option</option>
                         <?php
-                            $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year");
-                            while($schoolYear = $existingSchoolYears->fetch_assoc()) {
-                                echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
-                            }
+                        $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year");
+                        while ($schoolYear = $existingSchoolYears->fetch_assoc()) {
+                            echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
+                        }
                         ?>
                     </select>
                 </label>

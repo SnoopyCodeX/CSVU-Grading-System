@@ -6,7 +6,7 @@ require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../public/login");
     exit();
 }
 
@@ -148,11 +148,11 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white" >ID</td>
-                            <td class="bg-slate-500 text-white" >Name</td>
-                            <td class="bg-slate-500 text-white" >Email</td>
-                            <td class="bg-slate-500 text-white" >Gender</td>
-                            <td class="bg-slate-500 text-white" >Contact</td>
+                            <td class="bg-slate-500 text-white">ID</td>
+                            <td class="bg-slate-500 text-white">Name</td>
+                            <td class="bg-slate-500 text-white">Email</td>
+                            <td class="bg-slate-500 text-white">Gender</td>
+                            <td class="bg-slate-500 text-white">Contact</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
@@ -164,16 +164,16 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                                 <th class="font-normal"><?= $admin['firstName'] ?> <?= $admin['middleName'] ?> <?= $admin['lastName'] ?></th>
                                 <th class="font-normal"><?= $admin['email'] ?></th>
                                 <th class="font-normal">
-                                    <div class="badge p-3 bg-blue-200">
-                                    <?= ucfirst($admin['gender']) ?>
+                                    <div class="badge p-3 bg-blue-200 text-black">
+                                        <?= ucfirst($admin['gender']) ?>
                                     </div>
                                 </th>
                                 <th class="font-normal"><?= $admin['contact'] ?></th>
                                 <td>
                                     <div class="flex gap-2">
-                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm">View</label>
-                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm">Edit</label>
-                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm">Delete</label>
+                                        <label for="view-admin-<?= $admin['id'] ?>" class="bg-blue-400 btn btn-sm text-white">View</label>
+                                        <label for="edit-admin-<?= $admin['id'] ?>" class="bg-gray-400 btn btn-sm text-white">Edit</label>
+                                        <label for="delete-admin-<?= $admin['id'] ?>" class="bg-red-400 btn btn-sm text-white">Delete</label>
                                     </div>
                                 </td>
                             </tr>
@@ -268,7 +268,7 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
                     <input type="hidden" name="id" value="<?= $admin['id'] ?>" />
 
                     <!-- Name -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
                             <input class="input input-bordered" name="firstName" value="<?= $admin['firstName'] ?>" required />
@@ -329,8 +329,8 @@ $adminsQuery = "SELECT * FROM ap_userdetails WHERE roles = 'admin' LIMIT $start,
         <!-- Delete Students Modal -->
         <input type="checkbox" id="delete-admin-<?= $admin['id'] ?>" class="modal-toggle" />
         <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-bold">Notice!</h3>
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Notice!</h3>
                 <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
                 <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">

@@ -6,10 +6,10 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../public/login");
+    header("Location: ../../../public/login");
     exit();
 }
-    
+
 // pag meron session mag rerender yung dashboard//
 require_once("../../../components/header.php");
 
@@ -19,7 +19,7 @@ $hasSuccess = false;
 $message = "";
 
 // Create new subject
-if(isset($_POST['create_subject'])) {
+if (isset($_POST['create_subject'])) {
     $course = $dbCon->real_escape_string($_POST['course']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $subjectName = $dbCon->real_escape_string($_POST['subject_name']);
@@ -29,7 +29,7 @@ if(isset($_POST['create_subject'])) {
 
     $subjectNameExistQuery = $dbCon->query("SELECT * FROM ap_subjects WHERE name = '$subjectName'");
 
-    if($subjectNameExistQuery->num_rows > 0) {
+    if ($subjectNameExistQuery->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Subject name already exists!";
@@ -37,7 +37,7 @@ if(isset($_POST['create_subject'])) {
         $query = "INSERT INTO ap_subjects (course, year_level, name, units, credits_units, term) VALUES ('$course', '$yearLevel', '$subjectName', '$units', '$creditsUnits', '$term')";
         $result = mysqli_query($dbCon, $query);
 
-        if($result) {
+        if ($result) {
             $hasError = false;
             $hasSuccess = true;
             $message = "Subject created successfully!";
@@ -53,7 +53,7 @@ if(isset($_POST['create_subject'])) {
 $courses = $dbCon->query("SELECT * FROM ap_courses");
 ?>
 
-<main class="w-screen h-screen overflow-scroll overflow-x-hidden flex" >
+<main class="w-screen h-screen overflow-scroll overflow-x-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
@@ -63,25 +63,29 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                 <h2 class="text-[38px] font-bold mb-8">Create Subject</h2>
                 <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
-                    <?php if($hasError)  { ?>
+                    <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
 
-                    <?php if($hasSuccess)  { ?>
+                    <?php if ($hasSuccess) { ?>
                         <div role="alert" class="alert alert-success mb-8">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
                             <span><?= $message ?></span>
                         </div>
                     <?php } ?>
-                    
+
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Course</span>
                         <select class="select select-bordered" name="course" required>
                             <option value="" disabled selected>Select Course</option>
-                            <?php while($course = $courses->fetch_assoc()) { ?>
+                            <?php while ($course = $courses->fetch_assoc()) { ?>
                                 <option value="<?php echo $course['id'] ?>"><?php echo $course['course'] . " - #" . $course['course_code'] ?></option>
                             <?php } ?>
                         </select>
@@ -97,22 +101,22 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                             <option value="4th year">4th year</option>
                         </select>
                     </label>
-                
+
                     <!-- Name -->
                     <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Subject Name</span>
-                            <input class="input input-bordered" placeholder="Enter Subject Name" name="subject_name" required/>
+                            <input class="input input-bordered" placeholder="Enter Subject Name" name="subject_name" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Units</span>
-                            <input class="input input-bordered"  placeholder="Enter Subject Units" name="units" required />
+                            <input class="input input-bordered" placeholder="Enter Subject Units" name="units" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Credits Units</span>
-                            <input class="input input-bordered"  placeholder="Enter Subject Credits" name="credits_units" required />
+                            <input class="input input-bordered" placeholder="Enter Subject Credits" name="credits_units" required />
                         </label>
 
                         <label class="flex flex-col gap-2 col-span-3">
