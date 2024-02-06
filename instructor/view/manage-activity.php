@@ -141,8 +141,9 @@ $pages = ceil($total / $limit);
 $query = "SELECT 
     ap_activities.*,
     ap_subjects.name AS subject_name,
-    ap_courses.course AS course_name,
-    ap_sections.name AS section_name
+    ap_courses.course_code AS course_code,
+    ap_sections.name AS section_name,
+    ap_sections.id AS section_id
     FROM ap_activities 
     INNER JOIN ap_subjects ON ap_activities.subject = ap_subjects.id
     INNER JOIN ap_courses ON ap_activities.course = ap_courses.id
@@ -151,26 +152,27 @@ $query = "SELECT
     WHERE ap_activities.instructor = '" . AuthController::user()->id . "' LIMIT $start, $limit";
 
 $sectionsQuery = "SELECT
-    ap_subjects.*,
     ap_sections.id as sectionId,
     ap_sections.name as sectionName,
-    ap_courses.course as courseName
+    ap_courses.course_code as courseCode
     FROM ap_sections 
-    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id 
-    JOIN ap_section_students ON ap_sections.id = ap_section_students.section_id
-    JOIN ap_courses ON ap_subjects.course = ap_courses.id
-    WHERE ap_sections.instructor = " . AuthController::user()->id . " GROUP BY ap_sections.subject";
+    JOIN ap_courses ON ap_sections.course = ap_courses.id
+    WHERE ap_sections.instructor = " . AuthController::user()->id;
 
 $sectionsQueryResult = $dbCon->query($sectionsQuery);
 $sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
 
 // Count all students in each section that the instructor is handling
-$studentsCount = 0;
+$studentsCount = [];
 foreach ($sections as $key => $section) {
     $countStudentsQuery = "SELECT COUNT(*) as count FROM ap_section_students WHERE section_id = " . $section['sectionId'];
     $countStudentsQueryResult = $dbCon->query($countStudentsQuery);
     $countStudents = $countStudentsQueryResult->fetch_assoc();
-    $studentsCount += $countStudents['count'];
+
+    if(!isset($studentsCount["{$section['sectionId']}"]))
+        $studentsCount["{$section['sectionId']}"] = $countStudents['count'];
+    else
+        $studentsCount["{$section['sectionId']}"] += $countStudents['count'];
 }
 
 // fetch all subjects
@@ -243,9 +245,9 @@ $schoolYearsQuery = "SELECT * FROM ap_school_year";
                                 <td><?= $row['id'] ?></td>
                                 <td><?= $row['name'] ?></td>
                                 <td><?= $row['term'] ?></td>
-                                <td><?= $studentsCount ?></td>
+                                <td><?= $studentsCount["{$row['section_id']}"] ?></td>
                                 <td><?= $row['subject_name'] ?></td>
-                                <td><?= $row['course_name'] ?></td>
+                                <td><?= $row['course_code'] ?></td>
                                 <td><?= $row['section_name'] ?></td>
                                 <td><?= $row['passing_rate'] * 100 ?>%</td>
                                 <td><?= $row['max_score'] ?></td>

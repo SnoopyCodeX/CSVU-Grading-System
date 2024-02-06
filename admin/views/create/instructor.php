@@ -33,6 +33,14 @@ if (isset($_POST['create_instructor'])) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Invalid email address";
+    } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Please enter a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+    } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
     } else {
         // check if email already exists in ap_userdetails table
         $checkEmailQuery = "SELECT * FROM ap_userdetails WHERE email = '$email'";
@@ -72,15 +80,15 @@ if (isset($_POST['create_instructor'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex">
+<main class="w-screen h-screen overflow-scroll flex">
     <?php require_once("../../layout/sidebar.php")  ?>
-    <section class=" w-full px-4 lg:w-[700px] mx-auto">
+    <section class=" w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold mb-8">Create Instructor</h2>
-                <form class="flex flex-col gap-4  mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4 w-full  mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -142,15 +150,21 @@ if (isset($_POST['create_instructor'])) {
 
 
                     <!-- Account -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
                             <input class="input input-bordered" type="email"  placeholder='Email Password'  name="email" required />
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data="{show: true}">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input class="input input-bordered" placeholder='Enter Password'  name="password" required />
+                            <div class="relative">
+                                <input type="password" placeholder="Enter Password" class="input input-bordered w-full" name="password" x-bind:type="show ? 'password' : 'text'" required />
+                                <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
+                                    <i x-show="!show" class='bx bx-hide'></i>
+                                    <i x-show="show" class='bx bx-show'></i>
+                                </button>
+                            </div>
                         </label>
                     </div>
 

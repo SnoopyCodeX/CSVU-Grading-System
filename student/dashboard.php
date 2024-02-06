@@ -89,8 +89,8 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
                             <td>Subject</td>
                             <td>Instructor</td>
                             <td>Score</td>
+                            <td>Max Score</td>
                             <td>Status</td>
-                            <td>Actions</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -109,16 +109,11 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
                                             Passed
                                         </div>
                                     </td>
-                                    <td>
-                                        <div>
-                                            <button class="btn btn-sm">View</button>
-                                        </div>
-                                    </td>
                                 </tr>
                             <?php } ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="8" class="text-center">No activities found.</td>
+                                <td colspan="7" class="text-center">No activities found.</td>
                             </tr>
                         <?php endif ?>
                     </tbody>

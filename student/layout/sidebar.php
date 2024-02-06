@@ -1,15 +1,20 @@
  <?php
     $currentDir = dirname($_SERVER['PHP_SELF']);
     $FirstDir = explode('/', trim($currentDir, '/'));
+    $baseFolder = "//" . $_SERVER['SERVER_NAME'] . "/" . $FirstDir['0'];
     $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/student";
 ?>
 
-<aside class="w-[320px] border-r  p-4 flex flex-col gap-4 justify-between sticky top-0 bg-[#405D47] text-white">
+<aside class="w-[320px] hidden md:block border-r  p-4 flex flex-col gap-4 justify-between sticky top-0 bg-[#405D47] text-white">
     <div class="h-full">
-        <h1 class="text-[32px] font-bold p-4">CSVU</h1>
+        <div class="flex justify-center items-center flex-col">
+            <img src=<?php echo $baseFolder."/assets/images/logo.png"  ?> class='w-[120px] h-[120px]' />
+            <h1 class="text-[14px] text-center font-semibold p-4">Cavite State University - General Trias City, Campus (CvSU)</h1>
+        </div>
         <nav class="my-4 h-full ">
             <ul class="menu">
                 <li><a href="<?php echo $rootFolder;?>/dashboard">Dasboard</a></li>
+                <li><a href="<?php echo $rootFolder;?>/view/grades">My Grades</a></li>
             </ul>
         </nav>
     </div>

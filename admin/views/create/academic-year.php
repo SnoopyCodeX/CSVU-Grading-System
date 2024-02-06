@@ -48,10 +48,10 @@ if (isset($_POST['create_school_year'])) {
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center h-[70%] w-full">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold mb-8">Create School year</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4  px-[32px]  w-full" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">

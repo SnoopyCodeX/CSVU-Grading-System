@@ -33,6 +33,14 @@ if (isset($_POST['create-admin'])) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
+    } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Please enter a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+    } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
     } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
@@ -70,10 +78,10 @@ if (isset($_POST['create-admin'])) {
     <section class="w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
+            <div class="flex justify-center items-center flex-col w-full gap-4">
                 <h2 class="text-[38px] font-bold mb-8">Create Admin</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
+                <form class="flex flex-col gap-4  px-[32px]  w-full mb-auto" action="<?= $_SERVER['PHP_SELF'] ?>" method="post">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -94,7 +102,7 @@ if (isset($_POST['create-admin'])) {
                     <?php } ?>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
                             <input class="input input-bordered" name="firstName" placeholder="Enter First name" required />
@@ -111,7 +119,7 @@ if (isset($_POST['create-admin'])) {
                     </div>
 
                     <!-- Details -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Gender</span>
                             <select class="select select-bordered" name="gender" required>
@@ -135,25 +143,28 @@ if (isset($_POST['create-admin'])) {
 
 
                     <!-- Account -->
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Email</span>
-                            <input type="email" class="input input-bordered" type="email" name="email" placeholder="Enter Email name" required />
+                            <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" required />
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data="{show: true}">
                             <span class="font-bold text-[18px]">Password</span>
-                            <input type="password" class="input input-bordered" name="password" placeholder="Enter Password name" required />
+                            <div class="relative">
+                                <input type="password" placeholder="Enter Password" class="input input-bordered w-full" name="password" x-bind:type="show ? 'password' : 'text'" required />
+                                <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
+                                    <i x-show="!show" class='bx bx-hide'></i>
+                                    <i x-show="show" class='bx bx-show'></i>
+                                </button>
+                            </div>
                         </label>
                     </div>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div></div>
-                        <div class="flex flex-col gap-2">
-                            <button class="btn btn-success text-lg text-semibold text-white" name="create-admin">Create</button>
-                            <a href="../manage-admin.php" class="btn btn-error text-lg text-semibold text-white">Cancel</a>
-                        </div>
+                        <a href="../manage-admin.php" class="btn btn-error text-lg text-semibold text-white">Cancel</a>
+                        <button class="btn btn-success text-lg text-semibold text-white" name="create-admin">Create</button>
                     </div>
                 </form>
             </div>

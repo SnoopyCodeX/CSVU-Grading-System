@@ -16,7 +16,13 @@ require_once("../../components/header.php");
 // Error and success handlers
 $hasError = false;
 $hasSuccess = false;
+$hasSearch = false;
 $message = "";
+
+if (isset($_POST['search-course'])) {
+    $search = $dbCon->real_escape_string($_POST['search-course']);
+    $hasSearch = true;
+}
 
 // Edit course
 if (isset($_POST['edit_course'])) {
@@ -78,12 +84,21 @@ $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
 // count total pages
-$courseCount = $dbCon->query("SELECT COUNT(*) AS count FROM ap_courses")->fetch_assoc();
+if ($hasSearch) {
+    $searchQuery = "SELECT COUNT(*) AS count FROM ap_courses WHERE course LIKE '%$search%' OR course_code LIKE '%$search%'";
+    $courseCount = $dbCon->query($searchQuery)->fetch_assoc();
+} else {
+    $courseCount = $dbCon->query("SELECT COUNT(*) AS count FROM ap_courses")->fetch_assoc();
+}
 $total = $courseCount['count'];
 $pages = ceil($total / $limit);
 
 // prefetch all courses
-$courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
+if ($hasSearch) {
+    $courses = $dbCon->query("SELECT * FROM ap_courses WHERE course LIKE '%$search%' OR course_code LIKE '%$search%' LIMIT $start, $limit");
+} else {
+    $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
+}
 ?>
 
 <main class="overflow-hidden flex h-screen">
@@ -116,12 +131,33 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
                 <div class="flex justify-between items-center">
                     <h1 class="text-[28px] font-bold">Course</h1>
                 </div>
-                <a href="./create/course.php" class="btn">Create</a>
+                <div class="flex gap-4 px-4">
+                    <!-- Search bar -->
+                    <form class="w-[300px]" method="POST" action="<?= $_SERVER['PHP_SELF'] ?>" autocomplete="off">   
+                        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </div>
+                            <input type="search" name="search-course" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search course" value="<?= $hasSearch ? $search : '' ?>" required>
+                            <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Create button -->
+                    <a href="./create/course.php" class="btn">Create</a>
+                </div>
             </div>
 
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
+            <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
+                <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead class="">
                         <tr>
                             <th class="bg-slate-500 text-white">ID</th>
@@ -131,23 +167,29 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
                         </tr>
                     </thead>
                     <tbody>
-                        <?php while ($course = $courses->fetch_assoc()) { ?>
+                        <?php if ($courses->num_rows == 0) { ?>
                             <tr>
-                                <td><?= $course['id'] ?></td>
-                                <td class="capitalize text-[18px]"><?= $course['course'] ?></td>
-                                <td>
-                                    <span class="badge bg-yellow-200 font-bold p-4 text-black">
-                                        <?= $course['course_code'] ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="flex justify-center gap-2">
-                                        <label for="view-course-<?= $course['id'] ?>" class="btn btn-sm bg-blue-300 text-white">View</label>
-                                        <label for="edit-course-<?= $course['id'] ?>" class="btn btn-sm bg-gray-300 text-white">Edit</label>
-                                        <label for="delete-modal-<?= $course['id'] ?>" class="btn btn-sm bg-red-500 text-white">Delete</label>
-                                    </div>
-                                </td>
+                                <td colspan="4" class="text-center">No records found</td>
                             </tr>
+                        <?php } else { ?>
+                            <?php while ($course = $courses->fetch_assoc()) { ?>
+                                <tr>
+                                    <td><?= $course['id'] ?></td>
+                                    <td class="capitalize text-[18px]"><?= $course['course'] ?></td>
+                                    <td>
+                                        <span class="badge bg-yellow-200 font-bold p-4 text-black">
+                                            <?= $course['course_code'] ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="flex justify-center gap-2">
+                                            <label for="view-course-<?= $course['id'] ?>" class="btn btn-sm bg-blue-300 text-white">View</label>
+                                            <label for="edit-course-<?= $course['id'] ?>" class="btn btn-sm bg-gray-300 text-white">Edit</label>
+                                            <label for="delete-modal-<?= $course['id'] ?>" class="btn btn-sm bg-red-500 text-white">Delete</label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
                         <?php } ?>
                     </tbody>
                 </table>

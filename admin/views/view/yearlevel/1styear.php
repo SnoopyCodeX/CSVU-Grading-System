@@ -85,35 +85,38 @@ $courses = $dbCon->query("SELECT * FROM ap_courses LIMIT $start, $limit");
 <main class="h-screen overflow-hidden">
     <div class="h-screen grid md:grid md:grid-cols-[320px_auto] gap-4 border border-gray-400 w-full">
         <?php require_once("../../../layout/sidebar.php")  ?>
-       <div class="overflow-y-scroll">
-        <?php require_once("../../../layout/topbar.php") ?>
-        <div class='py-4 flex justify-end pr-4'>
-            <a class='btn' href="../../create/course.php">Create</a>
-        </div>
-       <div class=' overflow-hidden sm:pr-[48px] sm:grid sm:grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 p-4 mt-8'>
-           <a href="../students/1styear.php" class="">
-           <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
-                <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
-                <span>32 students</span>
-                <span>Mr John roy pogi123</span>
+        <div class="overflow-y-scroll">
+            <?php require_once("../../../layout/topbar.php") ?>
+            <div class='py-4 flex justify-end pr-4'>
+                <a class='btn' href="../../create/course.php">Create</a>
             </div>
-           </a>
-           <a href="../students/1styear.php" class="">
-           <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
-                <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
-                <span>32 students</span>
-                <span>Mr John roy pogi123</span>
+            
+            <div class=' overflow-hidden sm:pr-[48px] sm:grid sm:grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 p-4 mt-8'>
+                <a href="../students/1styear.php" class="">
+                        <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                            <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
+                            <span>32 students</span>
+                            <span>Mr John roy pogi123</span>
+                        </div>
+                </a>
+
+                <a href="../students/1styear.php" class="">
+                        <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                            <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
+                            <span>32 students</span>
+                            <span>Mr John roy pogi123</span>
+                        </div>
+                </a>
+                
+                <a href="../students/1styear.php" class="">
+                        <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                            <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
+                            <span>32 students</span>
+                            <span>Mr John roy pogi123</span>
+                        </div>
+                </a>
+                
             </div>
-           </a>
-           <a href="../students/1styear.php" class="">
-           <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
-                <h1 class='text-[32px] font-semibold text-center cursor-pointer'>DSA - 101</h1>
-                <span>32 students</span>
-                <span>Mr John roy pogi123</span>
-            </div>
-           </a>
-        
-        </div>
        </div>
     </div>
 

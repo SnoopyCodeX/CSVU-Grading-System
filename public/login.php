@@ -50,9 +50,15 @@ if (AuthController::isAuthenticated()) {
                     </label>
 
                     <!-- Password -->
-                    <label class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2" x-data="{show: true}">
                         <span>Password</span>
-                        <input type="password" name="password" class="input input-bordered input-md" placeholder="Enter your password" required />
+                        <div class="relative">
+                            <input type="password" name="password" class="input input-bordered input-md w-full" placeholder="Enter your Password" required x-bind:type="show ? 'password' : 'text'">
+                            <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
+                                <i x-show="!show" class='bx bx-hide'></i>
+                                <i x-show="show" class='bx bx-show'></i>
+                            </button>
+                        </div>
                     </label>
 
                     <!-- Break -->

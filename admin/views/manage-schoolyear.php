@@ -140,8 +140,8 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
             <?php } ?>
 
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
+            <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
+                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
                             <td class="bg-slate-500 text-white">ID</td>

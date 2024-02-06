@@ -16,12 +16,15 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         $selectedStudentIds = $data['selectedStudentIds'];
 
         if ($yearLevel === "All") {
-            $studentQuery = "SELECT * FROM ap_userdetails WHERE roles='student'";
+            $studentQuery = "SELECT * FROM ap_userdetails WHERE roles='student' AND id NOT IN (SELECT student_id FROM ap_section_students WHERE section_id='$id')";
         } else {
-            $studentQuery = "SELECT * FROM ap_userdetails WHERE year_level='$yearLevel' AND roles='student'";
+            $studentQuery = "SELECT * FROM ap_userdetails WHERE year_level='$yearLevel' AND roles='student' AND id NOT IN (SELECT student_id FROM ap_section_students WHERE section_id='$id')";
         }
 
-        $sectionStudentsQuery = "SELECT * FROM ap_section_students WHERE section_id='$id'";
+        if(count($selectedStudentIds) > 0)
+            $sectionStudentsQuery = "SELECT * FROM ap_section_students WHERE section_id='$id' AND student_id NOT IN (" . implode(",", $selectedStudentIds) . ")";
+        else
+            $sectionStudentsQuery = "SELECT * FROM ap_section_students WHERE section_id='$id'";
 
         $result = $dbCon->query($studentQuery);
 
@@ -70,18 +73,17 @@ $id = $dbCon->real_escape_string($_GET['id']) ? $dbCon->real_escape_string($_GET
 // update section
 if (isset($_POST['update_section'])) {
     $sectionName = $dbCon->real_escape_string($_POST['section_name']);
-    $subject = $dbCon->real_escape_string($_POST['subject']);
     $schoolYear = $dbCon->real_escape_string($_POST['school_year']);
     $term = $dbCon->real_escape_string($_POST['term']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $course = $dbCon->real_escape_string($_POST['course']);
     $instructor = $dbCon->real_escape_string($_POST['instructor']);
     $selectedStudents = json_decode($_POST['selected_students']);
+    $subjects = $_POST['subjects'];
 
     // Update section query
     $updateSectionQuery = "UPDATE ap_sections SET 
         name = '$sectionName',
-        subject = '$subject',
         school_year = '$schoolYear',
         term = '$term',
         year_level = '$yearLevel',
@@ -96,29 +98,55 @@ if (isset($_POST['update_section'])) {
     // Execute delete query
     $dbCon->query($deleteSectionStudentsQuery);
 
-    // check if there are selected students
-    if (count($selectedStudents) > 0) {
-        // Insert all selected students to ap_section_students table
-        $insertSectionStudentsQuery = "INSERT INTO ap_section_students (section_id, student_id) VALUES ";
+    // check if there are selected subjects
+    if (count($subjects) > 0) {
+        // delete all subjects assigned to the section
+        $deleteSectionSubjectsQuery = "DELETE FROM ap_section_subjects WHERE section_id = $id";
+        $dbCon->query($deleteSectionSubjectsQuery);
 
-        foreach ($selectedStudents as $studentId) {
-            $insertSectionStudentsQuery .= "($id, $studentId),";
+        // Update section subjects query
+        $updateSectionSubjectsQuery = "INSERT INTO ap_section_subjects(section_id, subject_id) VALUES";
+
+        // loop though all selected subjects
+        foreach ($subjects as $subjectId) {
+            $updateSectionSubjectsQuery .= "($id, $subjectId),";
         }
 
         // Remove last comma
-        $insertSectionStudentsQuery = substr($insertSectionStudentsQuery, 0, -1);
+        $updateSectionSubjectsQuery = substr($updateSectionSubjectsQuery, 0, -1);
 
         // Execute insert query
-        $dbCon->query($insertSectionStudentsQuery);
-    }
+        $dbCon->query($updateSectionSubjectsQuery);
 
-    // Update section
-    if ($dbCon->query($updateSectionQuery)) {
-        $hasSuccess = true;
-        $message = "Section updated successfully!";
+        // check if there are selected students
+        if (count($selectedStudents) > 0) {
+            // Insert all selected students to ap_section_students table
+            $insertSectionStudentsQuery = "INSERT INTO ap_section_students (section_id, student_id) VALUES ";
+
+            foreach ($selectedStudents as $studentId) {
+                $insertSectionStudentsQuery .= "($id, $studentId),";
+            }
+
+            // Remove last comma
+            $insertSectionStudentsQuery = substr($insertSectionStudentsQuery, 0, -1);
+
+            // Execute insert query
+            $dbCon->query($insertSectionStudentsQuery);
+        }
+
+        // Update section
+        if ($dbCon->query($updateSectionQuery)) {
+            $hasSuccess = true;
+            $message = "Section updated successfully!";
+        } else {
+            $hasError = true;
+            $message = "There was an error updating the section! {$dbCon->error}";
+        }
     } else {
+        // If no subjects are selected, return an error
         $hasError = true;
-        $message = "There was an error updating the section! {$dbCon->error}";
+        $message = "Please select at least one subject!";
+    
     }
 }
 
@@ -128,8 +156,6 @@ $sectionQuery = "SELECT
     ap_sections.name AS sectionName,
     ap_sections.term AS term,
     ap_sections.year_level AS yearLevel,
-    ap_subjects.id AS subjectId, 
-    ap_subjects.name AS subjectName, 
     ap_school_year.school_year AS schoolYear, 
     ap_school_year.id AS schoolYearId, 
     ap_courses.id AS courseId,
@@ -138,7 +164,6 @@ $sectionQuery = "SELECT
     ap_userdetails.id AS instructorId,
     CONCAT(ap_userdetails.firstName, ' ', ap_userdetails.middleName, ' ', ap_userdetails.lastName) AS instructorName
     FROM ap_sections 
-    INNER JOIN ap_subjects ON ap_sections.subject = ap_subjects.id 
     INNER JOIN ap_school_year ON ap_sections.school_year = ap_school_year.id 
     INNER JOIN ap_courses ON ap_sections.course = ap_courses.id
     INNER JOIN ap_userdetails ON ap_sections.instructor = ap_userdetails.id
@@ -148,12 +173,14 @@ $sectionQuery = "SELECT
 $studentsQuery = "SELECT
     ap_section_students.id,
     ap_section_students.student_id AS studentId,
-    CONCAT(ap_userdetails.firstName, ' ', ap_userdetails.middleName, ' ', ap_userdetails.lastName) AS studentName
+    CONCAT(ap_userdetails.firstName, ' ', ap_userdetails.middleName, ' ', ap_userdetails.lastName) AS studentName,
+    ap_userdetails.year_level as year_level
     FROM
     ap_section_students
     INNER JOIN ap_userdetails ON ap_section_students.student_id = ap_userdetails.id
     WHERE ap_section_students.section_id = $id
 ";
+
 
 // Prefetch section query
 $sectionResult = $dbCon->query($sectionQuery);
@@ -164,6 +191,23 @@ if ($sectionResult->num_rows === 0) {
     exit();
 }
 
+// Fetch all subjects assigned to the section
+$sectionSubjectsQuery = "SELECT 
+    ap_subjects.* 
+    FROM ap_section_subjects
+    JOIN ap_subjects ON ap_section_subjects.subject_id = ap_subjects.id
+    WHERE section_id = $id
+";
+
+// Prefetch section subjects
+$sectionSubjects = $dbCon->query($sectionSubjectsQuery);
+
+// store section subject ids in an array
+$sectionSubjectIds = [];
+while ($sectionSubject = $sectionSubjects->fetch_assoc()) {
+    array_push($sectionSubjectIds, $sectionSubject['id']);
+}
+
 // Prefetch section result
 $sectionResult = $sectionResult->fetch_assoc();
 
@@ -171,7 +215,10 @@ $sectionResult = $sectionResult->fetch_assoc();
 $studentsResult = $dbCon->query($studentsQuery);
 
 // Prefetch all subjects
-$subjectsQuery = "SELECT * FROM ap_subjects WHERE id != '{$sectionResult['subjectId']}'";
+if(count($sectionSubjectIds) > 0)
+    $subjectsQuery = "SELECT * FROM ap_subjects WHERE id NOT IN (" . implode(",", $sectionSubjectIds) . ")";
+else
+    $subjectsQuery = "SELECT * FROM ap_subjects";
 
 // Prefetch all school years
 $schoolYearsQuery = "SELECT * FROM ap_school_year WHERE school_year != '{$sectionResult['schoolYear']}'";
@@ -182,7 +229,20 @@ $coursesQuery = "SELECT * FROM ap_courses WHERE id != '{$sectionResult['courseId
 // Prefetch all instructors
 $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['instructorId']}' AND roles = 'instructor'";
 ?>
+<style>
+    .ts-wrapper .ts-control {
+        background-color: transparent;
+        border-color: var(--fallback-bc,oklch(var(--bc)/0.2));
+        height: 3rem;
+        padding-left: 1rem;
+        padding-right: 2.5rem;
+        line-height: 2;
+    }
 
+    .ts-wrapper .ts-control input {
+        color: white;
+    }
+</style>
 <main class="w-screen h-screen overflow-x-hidden flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="w-full px-4 h-full">
@@ -216,36 +276,43 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                         <input class="input input-bordered" value="<?= $sectionResult['sectionName'] ?>" name="section_name" required />
                     </label>
 
-                    <!-- Main Grid -->
-                    <div class="grid grid-cols-2 gap-4">
-
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Subject</span>
-                            <select class="select select-bordered" name="subject" required>
-                                <!--Display all the subjects here-->
+                    <!-- Subjects -->
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Subjects</span>
+                        <div class="relative flex w-full">
+                            <select class="block w-full rounded-sm cursor-pointer focus:outline-none w-full" name="subjects[]" id="subjects" multiple required>
                                 <option value="" disabled>Select Subject</option>
-                                <option value="<?= $sectionResult['subjectId'] ?>" selected><?= $sectionResult['subjectName'] ?></option>
+
+                                <?php $sectionSubjectsResult = $dbCon->query($sectionSubjectsQuery); ?>
+                                <?php while ($sectionSubject = $sectionSubjectsResult->fetch_assoc()) { ?>
+                                    <option value="<?= $sectionSubject['id'] ?>" selected><?= $sectionSubject['name'] ?></option>
+                                <?php } ?>
 
                                 <?php $subjects = $dbCon->query($subjectsQuery); ?>
                                 <?php while ($subject = $subjects->fetch_assoc()) { ?>
                                     <option value="<?= $subject['id'] ?>"><?= $subject['name'] ?></option>
                                 <?php } ?>
                             </select>
-                        </label>
+                        </div>
+                    </label>
 
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">School Year</span>
-                            <select class="select select-bordered" name="school_year" required>
-                                <!--Display all the subjects here-->
-                                <option value="" disabled>Select School Year</option>
-                                <option value="<?= $sectionResult['schoolYearId'] ?>" selected><?= $sectionResult['schoolYear'] ?></option>
+                    <!-- School Year -->
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">School Year</span>
+                        <select class="select select-bordered" name="school_year" required>
+                            <!--Display all the subjects here-->
+                            <option value="" disabled>Select School Year</option>
+                            <option value="<?= $sectionResult['schoolYearId'] ?>" selected><?= $sectionResult['schoolYear'] ?></option>
 
-                                <?php $schoolYears = $dbCon->query($schoolYearsQuery); ?>
-                                <?php while ($schoolYear = $schoolYears->fetch_assoc()) { ?>
-                                    <option value="<?= $schoolYear['id'] ?>"><?= $schoolYear['school_year'] ?></option>
-                                <?php } ?>
-                            </select>
-                        </label>
+                            <?php $schoolYears = $dbCon->query($schoolYearsQuery); ?>
+                            <?php while ($schoolYear = $schoolYears->fetch_assoc()) { ?>
+                                <option value="<?= $schoolYear['id'] ?>"><?= $schoolYear['school_year'] ?></option>
+                            <?php } ?>
+                        </select>
+                    </label>
+
+                    <!-- Main Grid -->
+                    <div class="grid grid-cols-2 gap-4">
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">School Term</span>
@@ -319,6 +386,7 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                                     <option value="2nd Year">2nd Year</option>
                                     <option value="3rd Year">3rd Year</option>
                                     <option value="4th Year">4th Year</option>
+                                    <option value="5th Year">5th Year</option>
                                 </select>
                             </label>
                         </div>
@@ -328,9 +396,14 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
                             <!-- Students -->
                             <?php while ($student = $studentsResult->fetch_assoc()) { ?>
-                                <div class="h-[48px] flex gap-4 justify-start px-4 items-center  gap-4 border border-gray-400 rounded-[5px]">
-                                    <input type="checkbox" class="checkbox checkbox-sm" checked />
-                                    <span data-studentId="<?= $student['studentId'] ?>"><?= $student['studentName'] ?></span>
+                                <div class="h-[56px] border border-gray-400 rounded-[5px]">
+                                    <div class="flex gap-4 justify-start px-4 items-center  gap-4">
+                                        <input type="checkbox" class="checkbox checkbox-sm" checked />
+                                        <div class="flex flex-col gap-1">
+                                            <span data-studentId="<?= $student['studentId'] ?>"><?= $student['studentName'] ?></span>
+                                            <span class="badge badge-info"><?= $student['year_level'] ?></span>
+                                        </div>
+                                    </div>
                                 </div>
                             <?php } ?>
 
@@ -351,8 +424,9 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 </main>
 
 <script>
-    // TODO: fix bug in student selection
     document.addEventListener("DOMContentLoaded", () => {
+        new TomSelect("#subjects", {});
+
         const yearLevelSelect = document.querySelector("#section-students-filter");
         const studentContainer = document.querySelector("#section-students-body");
 
@@ -361,6 +435,8 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
             // Get all students that has been checked
             const selectedStudents = Array.from(studentContainer.querySelectorAll("input[type='checkbox']:checked"));
             const selectedStudentIds = selectedStudents.map(student => student.parentElement.querySelector('span').dataset.studentid);
+
+            console.log("selected students: ", selectedStudentIds);
 
             const yearLevel = e.target.value;
             const data = {
@@ -383,14 +459,21 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
                     const unselectedStudents = Array.from(studentContainer.querySelectorAll("input[type='checkbox']:not(:checked)"));
 
                     // remove all unselected students from studentContainer
-                    unselectedStudents.forEach(student => student.parentElement.remove());
+                    unselectedStudents.forEach(student => student.parentElement.parentElement.remove());
+
+                    console.log("fetched students: " ,students);
 
                     students.forEach(student => {
                         const studentDiv = document.createElement("div");
-                        studentDiv.classList.add("h-[48px]", "flex", "gap-4", "justify-start", "px-4", "items-center", "gap-4", "border", "border-gray-400", "rounded-[5px]");
+                        studentDiv.classList.add("h-[56px]", "border", "border-gray-400", "rounded-[5px]");
                         studentDiv.innerHTML = `
-                            <input type="checkbox" class="checkbox checkbox-sm" />
-                            <span data-studentId="${student.id}">${student.firstName} ${student.middleName} ${student.lastName}</span>
+                            <div class="flex gap-4 justify-start px-4 items-center  gap-4">
+                                <input type="checkbox" class="checkbox checkbox-sm" />
+                                <div class="flex flex-col gap-1">
+                                    <span data-studentId="${student.id}">${student.firstName} ${student.middleName} ${student.lastName}</span>
+                                    <span class="badge badge-info">${student.year_level}</span>
+                                </div>
+                            </div>
                         `;
 
                         studentContainer.appendChild(studentDiv);
@@ -400,9 +483,13 @@ $instructorsQuery = "SELECT * FROM ap_userdetails WHERE id != '{$sectionResult['
 
         // Form submission
         document.querySelector("#update-section-form").addEventListener("submit", (e) => {
+            // e.preventDefault();
             // Get all the selected students
             const students = Array.from(document.querySelectorAll("#section-students-body input[type='checkbox']:checked"));
-            const studentIds = students.map(student => student.nextElementSibling.dataset.studentid);
+            const studentIds = students.map(student => student.nextElementSibling.firstElementChild.dataset.studentid);
+
+
+            console.log(studentIds);
 
             // Set the value of the hidden input
             document.querySelector("#selected-students").value = JSON.stringify(studentIds);

@@ -10,7 +10,7 @@
      <div class="h-full">
        <div class="flex justify-center items-center flex-col">
         <img src=<?php echo $baseFolder."/assets/images/logo.png"  ?> class='w-[120px] h-[120px]' />
-       <h1 class="text-[14px] text-center font-semibold p-4">Cavite State University - General Trias City, Campus (CvSU)</h1>
+        <h1 class="text-[14px] text-center font-semibold p-4">Cavite State University - General Trias City, Campus (CvSU)</h1>
        </div>
          <nav class="my-4 h-full ">
              <ul class="menu">
@@ -33,7 +33,7 @@
                      </details>
                  </li>
 
-                 <li>
+                 <!-- <li>
                      <details>
                          <summary>
                              <i class='bx bxs-buildings text-[24px]'></i>
@@ -47,7 +47,7 @@
                              <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/5thyear.php">5th Year</a></li>
                          </ul>
                      </details>
-                 </li>
+                 </li> -->
                  <li>
                      <details>
                          <summary>
@@ -56,18 +56,18 @@
                          </summary>
                          <ul>
                              <li><a href="<?php echo $rootFolder; ?>/manage-student">Manage Students</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/manage-promote-student">Promote Students</a></li>
+                             <!-- <li><a href="<?php echo $rootFolder; ?>/manage-promote-student">Promote Students</a></li> -->
                              <li><a href="<?php echo $rootFolder; ?>/manage-instructor">Manage Instructor</a></li>
                              <li><a href="<?php echo $rootFolder; ?>/manage-admin">Manage Admin</a></li>
                          </ul>
                      </details>
                  </li>
-                 <!-- <li>
+                 <li>
                      <a href="<?php echo $rootFolder; ?>/grade-request">
                          <i class='bx bxs-notepad text-[24px]'></i>
-                         <span class="text-[18px]">Request</span>
+                         <span class="text-[18px]">Grade Requests</span>
                      </a>
-                 </li> -->
+                 </li>
              </ul>
          </nav>
      </div>

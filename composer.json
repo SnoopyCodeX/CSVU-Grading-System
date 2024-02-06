@@ -1,0 +1,7 @@
+{
+    "name": "hopiesoberanya/cvsu-grading-sys",
+    "type": "project",
+    "require": {
+        "phpoffice/phpspreadsheet": "^2.0"
+    }
+}

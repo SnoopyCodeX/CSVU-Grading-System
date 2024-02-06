@@ -69,9 +69,15 @@ $query = "SELECT id, firstName, middleName, lastName, email, gender, contact, si
                         <input class="input input-bordered" />
                     </label>
 
-                    <label class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2" x-data="{show: true}">
                         <span class="font-bold text-[18px]">Password</span>
-                        <input class="input input-bordered" />
+                        <div class="relative">
+                            <input class="input input-bordered" type="password" x-bind:type="show ? 'password' : 'text'" />
+                            <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
+                                <i x-show="!show" class='bx bx-hide'></i>
+                                <i x-show="show" class='bx bx-show'></i>
+                            </button>
+                        </div>
                     </label>
                 </div>
 

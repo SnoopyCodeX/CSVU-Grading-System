@@ -7,7 +7,7 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
 
 <div class="navbar bg-base-100">
 
-  <div class="flex-none">
+  <div class="flex-none block md:hidden">
       <button class="btn btn-ghost" onclick="my_modal_2.showModal()">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
     </button>
@@ -15,7 +15,7 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
 
 
   <div class="flex-1">
-    <a class="btn btn-ghost text-xl">CSVU</a>
+    <a class="btn btn-ghost text-xl">CVSU</a>
   </div>
   <div class="flex-none gap-2">
     <div class="dropdown dropdown-end">
@@ -25,12 +25,25 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
         </div>
       </div>
       <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-[5px] w-52">
-        <li><a href="<?= $rootFolder ?>/logout">Logout</a></li>
+        <li><a onclick="logout_modal.showModal()">Logout</a></li>
       </ul>
     </div>
   </div>
 </div>
 
+<dialog id="logout_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Logout</h3>
+    <p>Are you sure you want to logout?</p>
+    <div class="modal-action">
+      <a class="btn btn-error" href="<?= $rootFolder ?>/logout">Yes</a>
+      <button class="btn" onclick="logout_modal.close()">No</button>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 
 <dialog id="my_modal_2" class="modal">
   <div class="modal-box">
@@ -56,7 +69,7 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
                      </details>
                  </li>
 
-                 <li>
+                 <!-- <li>
                      <details>
                          <summary>
                              <i class='bx bxs-buildings text-[24px]'></i>
@@ -70,7 +83,7 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
                              <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/5thyear.php">5th Year</a></li>
                          </ul>
                      </details>
-                 </li>
+                 </li> -->
                  <li>
                      <details>
                          <summary>
@@ -79,18 +92,18 @@ $rootFolder = "//".$_SERVER['SERVER_NAME'] . "/".$FirstDir['0']."/admin/views";
                          </summary>
                          <ul>
                              <li><a href="<?php echo $rootFolder; ?>/manage-student">Manage Students</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/manage-promote-student">Promote Students</a></li>
+                             <!-- <li><a href="<?php echo $rootFolder; ?>/manage-promote-student">Promote Students</a></li> -->
                              <li><a href="<?php echo $rootFolder; ?>/manage-instructor">Manage Instructor</a></li>
                              <li><a href="<?php echo $rootFolder; ?>/manage-admin">Manage Admin</a></li>
                          </ul>
                      </details>
                  </li>
-                 <!-- <li>
+                 <li>
                      <a href="<?php echo $rootFolder; ?>/grade-request">
                          <i class='bx bxs-notepad text-[24px]'></i>
-                         <span class="text-[18px]">Request</span>
+                         <span class="text-[18px]">Grade Requests</span>
                      </a>
-                 </li> -->
+                 </li>
              </ul>
          </nav>
   </div>

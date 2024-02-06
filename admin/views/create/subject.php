@@ -53,15 +53,15 @@ if (isset($_POST['create_subject'])) {
 $courses = $dbCon->query("SELECT * FROM ap_courses");
 ?>
 
-<main class="w-screen h-screen overflow-scroll overflow-x-hidden flex">
+<main class="w-screen h-screen overflow-scroll overflow-scroll flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center">
-            <div class="flex justify-center items-center flex-col gap-4 p-4">
+        <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold mb-8">Create Subject</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4 w-full" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -103,7 +103,7 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                     </label>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Subject Name</span>
                             <input class="input input-bordered" placeholder="Enter Subject Name" name="subject_name" required />
@@ -118,26 +118,23 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                             <span class="font-bold text-[18px]">Credits Units</span>
                             <input class="input input-bordered" placeholder="Enter Subject Credits" name="credits_units" required />
                         </label>
-
-                        <label class="flex flex-col gap-2 col-span-3">
-                            <span class="font-bold text-[18px]">Term</span>
-                            <select class="select select-bordered" name="term">
-                                <option value="" selected disabled>Select Term</option>
-                                <option value="1st Sem">1st Sem</option>
-                                <option value="2nd Sem">2nd Sem</option>
-                                <option value="3rd Sem">3rd Sem</option>
-                            </select>
-                        </label>
                     </div>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Term</span>
+                        <select class="select select-bordered" name="term">
+                            <option value="" selected disabled>Select Term</option>
+                            <option value="1st Sem">1st Sem</option>
+                            <option value="2nd Sem">2nd Sem</option>
+                            <option value="3rd Sem">3rd Sem</option>
+                        </select>
+                    </label>
 
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div></div>
-                        <div class="flex flex-col gap-2">
-                            <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
-                            <button class="btn btn-success" name="create_subject">Create</button>
-                        </div>
+                        <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
+                        <button class="btn btn-success" name="create_subject">Create</button>
                     </div>
                 </form>
             </div>

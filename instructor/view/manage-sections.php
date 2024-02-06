@@ -29,11 +29,11 @@ $sectionQuery = "SELECT
     ap_userdetails.firstName,
     ap_userdetails.lastName,
     ap_userdetails.middleName,
-    ap_subjects.name as subjectName
+    ap_courses.course_code AS course_code
     FROM ap_sections 
     JOIN ap_userdetails ON ap_sections.instructor = ap_userdetails.id 
-    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id
-    WHERE ap_sections.instructor = " . AuthController::user()->id;
+    JOIN ap_courses ON ap_sections.course = ap_courses.id
+    WHERE ap_sections.instructor = " . AuthController::user()->id . " LIMIT $start, $limit";
 
 require_once("../../components/header.php");
 ?>
@@ -62,7 +62,7 @@ require_once("../../components/header.php");
                             <td class="bg-slate-500 text-white">Name</td>
                             <td class="bg-slate-500 text-white">Term</td>
                             <td class="bg-slate-500 text-white">Students</td>
-                            <td class="bg-slate-500 text-white">Subject</td>
+                            <td class="bg-slate-500 text-white">Course</td>
                             <td class="bg-slate-500 text-white">Instructor</td>
                             <td class="bg-slate-500 text-white">Status</td>
                         </tr>
@@ -79,7 +79,7 @@ require_once("../../components/header.php");
                                 <!-- Student Count -->
                                 <td><?= $dbCon->query("SELECT COUNT(*) as count FROM ap_section_students JOIN ap_sections ON ap_section_students.section_id = ap_sections.id WHERE ap_section_students.section_id={$row['id']}")->fetch_assoc()['count'] ?></td>
                                 <!-- Subject Name -->
-                                <td><?= $row['subjectName'] ?></td>
+                                <td><?= $row['course_code'] ?></td>
                                 <!-- Instructor Name -->
                                 <td>
                                     <?= $row['lastName'] ?>,

@@ -13,14 +13,11 @@ if (!AuthController::isAuthenticated()) {
 require_once("../components/header.php");
 
 $sectionsQuery = "SELECT
-    ap_subjects.*,
-    ap_sections.id as sectionId,
+    ap_sections.*,
     ap_courses.course as courseName
-    FROM ap_sections 
-    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id 
-    JOIN ap_section_students ON ap_sections.id = ap_section_students.section_id
-    JOIN ap_courses ON ap_subjects.course = ap_courses.id
-    WHERE ap_sections.instructor = " . AuthController::user()->id . " GROUP BY ap_sections.subject";
+    FROM ap_sections
+    JOIN ap_courses ON ap_sections.course = ap_courses.id
+    WHERE ap_sections.instructor = " . AuthController::user()->id . " GROUP BY ap_sections.id";
 
 $sectionsQueryResult = $dbCon->query($sectionsQuery);
 $sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
@@ -28,10 +25,19 @@ $sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
 // Count all students in each section that the instructor is handling
 $studentsCount = 0;
 foreach ($sections as $key => $section) {
-    $countStudentsQuery = "SELECT COUNT(*) as count FROM ap_section_students WHERE section_id = " . $section['sectionId'];
+    $countStudentsQuery = "SELECT COUNT(*) as count FROM ap_section_students WHERE section_id = " . $section['id'];
     $countStudentsQueryResult = $dbCon->query($countStudentsQuery);
     $countStudents = $countStudentsQueryResult->fetch_assoc();
     $studentsCount += $countStudents['count'];
+}
+
+// Count all subjects that the instructor is handling
+$subjectsCount = 0;
+foreach ($sections as $key => $section) {
+    $countSubjectsQuery = "SELECT COUNT(*) as count FROM ap_section_subjects WHERE section_id = " . $section['id'];
+    $countSubjectsQueryResult = $dbCon->query($countSubjectsQuery);
+    $countSubjects = $countSubjectsQueryResult->fetch_assoc();
+    $subjectsCount += $countSubjects['count'];
 }
 
 // Count all sections that the instructor is handling
@@ -61,7 +67,7 @@ $sectionsCount = count($sections);
                     </svg>
                 </div>
                 <div class="stat-title">My Subjects</div>
-                <div class="stat-value"><?= count($sections) ?></div>
+                <div class="stat-value"><?= $subjectsCount ?></div>
             </div>
 
             <div class="stat">
@@ -101,18 +107,35 @@ $sectionsCount = count($sections);
                     </thead>
                     <tbody>
                         <?php
-                        foreach ($sections as $key => $section) {
+                        foreach($sections as $key => $section) :
+                            $subjectsQuery = "SELECT 
+                                ap_section_subjects.*, 
+                                ap_subjects.id as subjectId,
+                                ap_subjects.name as subjectName, 
+                                ap_subjects.units as subjectUnits,
+                                ap_subjects.credits_units as subjectCreditsUnits,
+                                ap_subjects.term as subjectTerm,
+                                ap_subjects.year_level as subjectYearLevel,
+                                ap_courses.course as subjectCourse
+                                FROM ap_section_subjects 
+                                JOIN ap_subjects ON ap_section_subjects.subject_id = ap_subjects.id
+                                JOIN ap_courses ON ap_subjects.course = ap_courses.id
+                                WHERE section_id = " . $section['id'];
+
+                            $subjectsResult = $dbCon->query($subjectsQuery);
                         ?>
-                            <tr>
-                                <th><?= $section['id'] ?></th>
-                                <td><?= $section['name'] ?></td>
-                                <td><?= $section['courseName'] ?></td>
-                                <td><?= $section['year_level'] ?></td>
-                                <td><?= $section['units'] ?></td>
-                                <td><?= $section['credits_units'] ?></td>
-                                <td><?= $section['term'] ?></td>
-                            </tr>
-                        <?php } ?>
+                            <?php while ($row = $subjectsResult->fetch_assoc()) : ?>
+                                <tr>
+                                    <th><?= $row['subjectId'] ?></th>
+                                    <td><?= $row['subjectName'] ?></td>
+                                    <td><?= $row['subjectCourse'] ?></td>
+                                    <td><?= $row['subjectYearLevel'] ?></td>
+                                    <td><?= $row['subjectUnits'] ?></td>
+                                    <td><?= $row['subjectCreditsUnits'] ?></td>
+                                    <td><?= $row['subjectTerm'] ?></td>
+                                </tr>
+                            <?php endwhile; ?>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>

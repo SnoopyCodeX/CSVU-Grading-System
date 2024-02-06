@@ -50,11 +50,11 @@ if (isset($_POST['create_course'])) {
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
-            <div class="flex justify-center items-center flex-col gap-4">
-                <h2 class="text-[38px] font-bold mb-8">Create Course</h2>
+        <div class="flex flex-col gap-4 justify-center items-center w-full h-[70%]">
+            <div class="w-full flex justify-center items-center flex-col gap-4">
+                <h2 class="text-[28px] md:text-[38px] font-bold mb-8">Create Course</h2>
 
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4  px-auto md:px-[32px] w-full mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
                             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
@@ -81,16 +81,13 @@ if (isset($_POST['create_course'])) {
 
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Course Code</span>
-                        <input type="text" class="border border-gray-400 input input-bordered" placeholder="Course Name" name="course_code">
+                        <input type="text" class="border border-gray-400 input input-bordered" placeholder="Course Code" name="course_code">
                     </label>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div></div>
-                        <div class="flex flex-col gap-2">
-                            <button class="btn btn-success text-base" name="create_course">Create</button>
-                            <a class="btn btn-error text-base" href="../manage-course.php">Cancel</a>
-                        </div>
+                        <a class="btn btn-error text-base" href="../manage-course.php">Cancel</a>
+                        <button class="btn btn-success text-base" name="create_course">Create</button>
                     </div>
                 </form>
             </div>

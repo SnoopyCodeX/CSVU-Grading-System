@@ -41,12 +41,26 @@ $subjectCount = $subjectQuery->num_rows;
 $sectionQuery = $dbCon->query("SELECT * FROM ap_sections");
 $sectionCount = $sectionQuery->num_rows;
 
+$firstYears = $dbCon->query("SELECT * FROM ap_userdetails WHERE roles = 'student' AND year_level = '1st Year'");
+$firstYearCount = $firstYears->num_rows;
+
+$secondYears = $dbCon->query("SELECT * FROM ap_userdetails WHERE roles = 'student' AND year_level = '2nd Year'");
+$secondYearCount = $secondYears->num_rows;
+
+$thirdYears = $dbCon->query("SELECT * FROM ap_userdetails WHERE roles = 'student' AND year_level = '3rd Year'");
+$thirdYearCount = $thirdYears->num_rows;
+
+$fourthYears = $dbCon->query("SELECT * FROM ap_userdetails WHERE roles = 'student' AND year_level = '4th Year'");
+$fourthYearCount = $fourthYears->num_rows;
+
+$fifthYears = $dbCon->query("SELECT * FROM ap_userdetails WHERE roles = 'student' AND year_level = '5th Year'");
+$fifthYearCount = $fifthYears->num_rows;
 ?>
 
 
-<main class="h-screen flex overflow-hidden xm:bg-red-500 sm:bg-black md:bg-blue-400">
+<main class="h-screen flex overflow-auto">
     <?php require_once("./layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class="border w-full h-full px-4">
         <?php require_once("./layout/topbar.php") ?>
 
         <div class="stats shadow w-full mb-8">
@@ -56,7 +70,7 @@ $sectionCount = $sectionQuery->num_rows;
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
-                <div class="stat-title">Students</div>
+                <div class="stat-title">Total Students</div>
                 <div class="stat-value"><?php echo $studentCount ?></div>
             </div>
 
@@ -66,7 +80,7 @@ $sectionCount = $sectionQuery->num_rows;
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                     </svg>
                 </div>
-                <div class="stat-title">Subjects</div>
+                <div class="stat-title">Total Subjects</div>
                 <div class="stat-value"><?php echo $subjectCount ?></div>
             </div>
 
@@ -76,10 +90,30 @@ $sectionCount = $sectionQuery->num_rows;
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                     </svg>
                 </div>
-                <div class="stat-title">Sections</div>
-                <div class="stat-value">
-                    <div class="stat-value"><?php echo $sectionCount ?></div>
+                <div class="stat-title">Total Sections</div>
+                <div class="stat-value"> <?php echo $sectionCount ?> </div>
+            </div>
+        </div>
+
+        <div class="stats shadow w-full mb-8">
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
                 </div>
+                <div class="stat-title">Total 1st Years</div>
+                <div class="stat-value"><?php echo $firstYearCount ?></div>
+            </div>
+
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                    </svg>
+                </div>
+                <div class="stat-title">Total 2nd Years</div>
+                <div class="stat-value"><?php echo $secondYearCount ?></div>
             </div>
 
             <div class="stat">
@@ -88,13 +122,30 @@ $sectionCount = $sectionQuery->num_rows;
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
                     </svg>
                 </div>
-                <div class="stat-title">Sections</div>
-                <div class="stat-value">
-                    <div class="stat-value"><?php echo $sectionCount ?></div>
-                </div>
+                <div class="stat-title">Total 3rd Years</div>
+                <div class="stat-value"> <?php echo $thirdYearCount ?> </div>
             </div>
 
-        </div>
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                    </svg>
+                </div>
+                <div class="stat-title">Total 4th Years</div>
+                <div class="stat-value"> <?php echo $fourthYearCount ?> </div>
+            </div>
+
+
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path>
+                    </svg>
+                </div>
+                <div class="stat-title">Total 5th Years</div>
+                <div class="stat-value"> <?php echo $fifthYearCount ?> </div>
+            </div>
         </div>
 
         <div class="px-4 flex justify-between flex-col gap-4">
@@ -108,8 +159,8 @@ $sectionCount = $sectionQuery->num_rows;
 
             <!-- Table Content -->
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 330px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
+            <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 330px)">
+                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
                             <th class="bg-slate-500 text-white">ID</th>
@@ -164,7 +215,6 @@ $sectionCount = $sectionQuery->num_rows;
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
-        </div>
         </div>
     </section>
 

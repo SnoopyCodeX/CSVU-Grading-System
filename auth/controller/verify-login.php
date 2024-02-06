@@ -54,7 +54,18 @@ if (isset($_POST['login'])) {
     require "../configuration/config.php";
     $email = $dbCon->real_escape_string($_POST['email']);
     $password = $dbCon->real_escape_string($_POST['password']);
-    $loginHandler = new LoginHandler($dbCon);
-    $loginHandler->authenticateUser($email, $password);
+
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $hasError = true;
+        $message = "Invalid email format!";
+        return;
+    } else if (!str_ends_with($email, "@cvsu.edu.ph")) {
+        $hasError = true;
+        $message = "Invalid email address! Email address must end with <strong>@cvsu.edu.ph</strong>!";
+        return;
+    } else {
+        $loginHandler = new LoginHandler($dbCon);
+        $loginHandler->authenticateUser($email, $password);
+    }
 }
 ?>

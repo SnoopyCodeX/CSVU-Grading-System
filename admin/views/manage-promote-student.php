@@ -188,7 +188,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
             <!-- Table Content -->
             <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
+                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
                             <th class="bg-slate-500 text-white">ID</th>
