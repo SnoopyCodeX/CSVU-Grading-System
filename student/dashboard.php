@@ -113,7 +113,7 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
                             <?php } ?>
                         <?php else : ?>
                             <tr>
-                                <td colspan="7" class="text-center">No activities found.</td>
+                                <td colspan="8" class="text-center">No activities found.</td>
                             </tr>
                         <?php endif ?>
                     </tbody>

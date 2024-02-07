@@ -235,8 +235,27 @@ if (isset($_POST['delete-student'])) {
         $message = "Student does not exist!";
     } else {
         $query = "DELETE FROM ap_userdetails WHERE id='$id'";
-
         $delete = $dbCon->query($query);
+
+        // check if student id is also in ap_section_students. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM ap_section_students WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM ap_section_students WHERE student_id='$id'");
+        }
+
+        // check if student id is also in ap_student_grades. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM ap_student_grades WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM ap_student_grades WHERE student_id='$id'");
+        }
+
+        // check if student id is also in ap_student_final_grades. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM ap_student_final_grades WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM ap_student_final_grades WHERE student_id='$id'");
+        }
+
+        // check if student id is also in ap_grade_requests. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM ap_grade_requests WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM ap_grade_requests WHERE student_id='$id'");
+        }
 
         if ($delete) {
             $hasError = false;

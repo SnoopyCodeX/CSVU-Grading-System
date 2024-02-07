@@ -4,7 +4,7 @@
     $baseFolder = "//" . $_SERVER['SERVER_NAME'] . "/" . $FirstDir['0'];
     $rootFolder = "//" . $_SERVER['SERVER_NAME'] . "/" . $FirstDir['0'] . "/admin/views";
     $dasboard = "//" . $_SERVER['SERVER_NAME'] . "/" . $FirstDir['0'] . "/admin/dashboard";
-    ?>
+?>
 
  <aside class="hidden md:block  w-[320px] h-screen border-r  p-4 flex flex-col gap-4 justify-between sticky top-0 bg-[#405D47] text-white">
      <div class="h-full">
@@ -32,22 +32,6 @@
                          </ul>
                      </details>
                  </li>
-
-                 <!-- <li>
-                     <details>
-                         <summary>
-                             <i class='bx bxs-buildings text-[24px]'></i>
-                             <span class="text-[18px]">Year Level</span>
-                         </summary>
-                         <ul>
-                             <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/1styear.php">1st Year</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/2ndyear.php">2nd Year</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/3rdyear.php">3rd Year</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/4thyear.php">4th Year</a></li>
-                             <li><a href="<?php echo $rootFolder; ?>/view/yearlevel/5thyear.php">5th Year</a></li>
-                         </ul>
-                     </details>
-                 </li> -->
                  <li>
                      <details>
                          <summary>
@@ -56,7 +40,6 @@
                          </summary>
                          <ul>
                              <li><a href="<?php echo $rootFolder; ?>/manage-student">Manage Students</a></li>
-                             <!-- <li><a href="<?php echo $rootFolder; ?>/manage-promote-student">Promote Students</a></li> -->
                              <li><a href="<?php echo $rootFolder; ?>/manage-instructor">Manage Instructor</a></li>
                              <li><a href="<?php echo $rootFolder; ?>/manage-admin">Manage Admin</a></li>
                          </ul>

@@ -21,8 +21,6 @@ if (AuthController::isAuthenticated()) {
 
 ?>
 <main class="h-screen ">
-
-
     <div class="w-full h-full grid grid-cols-2 gap-4">
         <div class="px-[120px] flex justify-center  gap-4 flex-col">
             <!-- Header -->
@@ -63,8 +61,6 @@ if (AuthController::isAuthenticated()) {
 
                     <!-- Break -->
                     <span class="border border-black my-2"></span>
-                    <!-- <p><a href="./forgot-password.php">Forgot Password</a></p> -->
-                    <!-- Button -->
                     <button type="submit" name="login" class="btn bg-[#1b651b] text-base text-white ">Login</button>
                 </div>
             </form>

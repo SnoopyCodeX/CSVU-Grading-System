@@ -200,7 +200,7 @@ $gradeRequest = $gradeRequestsResults->fetch_assoc();
                     </thead>
                     <tbody id="grades-body">
                         <?php
-                        if ($gradesResults->num_rows > 0 && $gradeRequest['status'] == 'approved') {
+                        if ($gradeRequest != null && $gradesResults->num_rows > 0 && $gradeRequest['status'] == 'approved') {
                             while ($row = $gradesResults->fetch_assoc()) {
                         ?>
                                 <tr>
