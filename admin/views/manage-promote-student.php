@@ -14,9 +14,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         $yearLevel = $dbCon->real_escape_string($data['year_level']);
 
         if ($yearLevel == 'All')
-            $query = "SELECT * FROM ap_userdetails WHERE roles='student'";
+            $query = "SELECT * FROM userdetails WHERE roles='student'";
         else
-            $query = "SELECT * FROM ap_userdetails WHERE roles='student' AND year_level='$yearLevel'";
+            $query = "SELECT * FROM userdetails WHERE roles='student' AND year_level='$yearLevel'";
 
         $result = $dbCon->query($query);
 
@@ -49,7 +49,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 }
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
     exit();
 }
 
@@ -65,7 +65,7 @@ $message = "";
 if (isset($_POST['promote-student'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
     $year_level = $dbCon->real_escape_string($_POST['year_level']);
-    $query = "UPDATE ap_userdetails SET year_level='$year_level' WHERE id='$id'";
+    $query = "UPDATE userdetails SET year_level='$year_level' WHERE id='$id'";
 
     if ($dbCon->query($query)) {
         $hasSuccess = true;
@@ -85,7 +85,7 @@ if (isset($_POST['batch-promote'])) {
         $message = "No students selected";
     } else {
         // get all students
-        $query = "SELECT * FROM ap_userdetails WHERE roles='student'";
+        $query = "SELECT * FROM userdetails WHERE roles='student'";
         $result = $dbCon->query($query);
 
         if ($result->num_rows > 0) {
@@ -114,7 +114,7 @@ if (isset($_POST['batch-promote'])) {
 
                 // update year level
                 $yearLevel = $yearLevelMap[strtolower($student['year_level'])];
-                $query = "UPDATE ap_userdetails SET year_level='$yearLevel' WHERE id='{$student['id']}'";
+                $query = "UPDATE userdetails SET year_level='$yearLevel' WHERE id='{$student['id']}'";
 
                 if (!$dbCon->query($query)) {
                     $hasError = true;
@@ -140,13 +140,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
 // total pages
-$result1 = $dbCon->query("SELECT count(id) AS id FROM ap_userdetails WHERE roles='student'");
+$result1 = $dbCon->query("SELECT count(id) AS id FROM userdetails WHERE roles='student'");
 $students = $result1->fetch_all(MYSQLI_ASSOC);
 $total = $students[0]['id'];
 $pages = ceil($total / $limit);
 
 // Prefetch all students query
-$query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limit";
+$query = "SELECT * FROM userdetails WHERE roles='student' LIMIT $start, $limit";
 ?>
 
 <main class="w-screen h-[95%] overflow-x-hidden flex">
@@ -248,7 +248,7 @@ $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limi
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>

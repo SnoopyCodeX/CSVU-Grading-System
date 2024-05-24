@@ -6,7 +6,7 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -23,18 +23,27 @@ if (isset($_POST['create_subject'])) {
     $course = $dbCon->real_escape_string($_POST['course']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $subjectName = $dbCon->real_escape_string($_POST['subject_name']);
+    $subjectCode = $dbCon->real_escape_string($_POST['subject_code']);
     $units = $dbCon->real_escape_string($_POST['units']);
     $creditsUnits = $dbCon->real_escape_string($_POST['credits_units']);
     $term = $dbCon->real_escape_string($_POST['term']);
 
-    $subjectNameExistQuery = $dbCon->query("SELECT * FROM ap_subjects WHERE name = '$subjectName'");
+    $subjectCodeExistQuery = $dbCon->query("SELECT * FROM subjects WHERE code = '$subjectCode' AND course='$course'");
 
-    if ($subjectNameExistQuery->num_rows > 0) {
+    if ($subjectCodeExistQuery->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Subject name already exists!";
+        $message = "Subject code already exists!";
+    } else if (!is_numeric($units) || intval($units) <= 0) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Subject units must be a numeric value and must be a positive integer greater than 0!";
+    } else if (!is_numeric($creditsUnits) || intval($creditsUnits) <= 0) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Subject credit units must be a numeric value and must be a positive integer greater than 0!";
     } else {
-        $query = "INSERT INTO ap_subjects (course, year_level, name, units, credits_units, term) VALUES ('$course', '$yearLevel', '$subjectName', '$units', '$creditsUnits', '$term')";
+        $query = "INSERT INTO subjects (course, year_level, name, code, units, credits_units, term) VALUES ('$course', '$yearLevel', '$subjectName', '$subjectCode', '$units', '$creditsUnits', '$term')";
         $result = mysqli_query($dbCon, $query);
 
         if ($result) {
@@ -50,7 +59,10 @@ if (isset($_POST['create_subject'])) {
 }
 
 // Prefetch all courses
-$courses = $dbCon->query("SELECT * FROM ap_courses");
+$courses = $dbCon->query("SELECT * FROM courses");
+
+// Prefetch all instructors
+$instructors = $dbCon->query("SELECT * FROM userdetails WHERE roles='instructor'");
 ?>
 
 <main class="w-screen h-screen overflow-scroll overflow-scroll flex">
@@ -120,16 +132,22 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                         </label>
                     </div>
 
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Term</span>
-                        <select class="select select-bordered" name="term">
-                            <option value="" selected disabled>Select Term</option>
-                            <option value="1st Sem">1st Sem</option>
-                            <option value="2nd Sem">2nd Sem</option>
-                            <option value="3rd Sem">3rd Sem</option>
-                        </select>
-                    </label>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Subject Code</span>
+                            <input class="input input-bordered" placeholder="Enter Subject Code" name="subject_code" required />
+                        </label>
 
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Term</span>
+                            <select class="select select-bordered" name="term" required>
+                                <option value="" selected disabled>Select Term</option>
+                                <option value="1st Sem">1st Sem</option>
+                                <option value="2nd Sem">2nd Sem</option>
+                                <option value="Midyear">Midyear</option>
+                            </select>
+                        </label>
+                    </div>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">

@@ -6,7 +6,7 @@ require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
     exit();
 }
 
@@ -32,11 +32,9 @@ if (isset($_POST['update_instructor'])) {
     $middleName = $dbCon->real_escape_string($_POST['middle_name']);
     $lastName = $dbCon->real_escape_string($_POST['lastname_name']);
     $gender = $dbCon->real_escape_string($_POST['gender']);
-    $contact = $dbCon->real_escape_string($_POST['contact']);
+    $contact = str_replace("-", "", $dbCon->real_escape_string($_POST['contact']));
     $birthday = $dbCon->real_escape_string($_POST['birthday']);
     $email = filter_var($dbCon->real_escape_string($_POST['email']), FILTER_VALIDATE_EMAIL);
-    $newPassword = $dbCon->real_escape_string($_POST['new-password']);
-    $confirmPassword = $dbCon->real_escape_string($_POST['confirm-password']);
 
     if (!$email) {
         $hasError = true;
@@ -51,8 +49,8 @@ if (isset($_POST['update_instructor'])) {
         $hasSuccess = false;
         $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
     } else {
-        // check if id exists in ap_userdetails and has a role of 'instructor' query
-        $checkIdQuery = "SELECT * FROM ap_userdetails WHERE id = '$id' AND roles = 'instructor'";
+        // check if id exists in userdetails and has a role of 'instructor' query
+        $checkIdQuery = "SELECT * FROM userdetails WHERE id = '$id' AND roles = 'instructor'";
         $checkIdResult = $dbCon->query($checkIdQuery);
 
         if ($checkIdResult->num_rows <= 0) {
@@ -60,7 +58,7 @@ if (isset($_POST['update_instructor'])) {
             $hasSuccess = false;
             $message = "Instructor does not exist";
         } else {
-            $updateQuery = "UPDATE ap_userdetails SET 
+            $updateQuery = "UPDATE userdetails SET 
                 firstName = '$firstName',
                 middleName = '$middleName',
                 lastName = '$lastName',
@@ -70,7 +68,7 @@ if (isset($_POST['update_instructor'])) {
                 email = '$email'
             ";
 
-            if ($newPassword) {
+            /* if ($newPassword) {
                 // check if new password matches with the confirm password
                 $newPasswordHashed = crypt($newPassword, '$6$Crypt$');
                 $confirmPasswordHashed = crypt($confirmPassword, '$6$Crypt$');
@@ -82,7 +80,7 @@ if (isset($_POST['update_instructor'])) {
                 } else {
                     $updateQuery .= ", password='" . $newPasswordHashed . "'";
                 }
-            }
+            } */
 
             if(!$hasError) {
                 $updateQuery .= "WHERE id = '$id'";
@@ -106,8 +104,8 @@ if (isset($_POST['update_instructor'])) {
 if (isset($_POST['delete_instructor'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    // check if id exists in ap_userdetails and has a role of 'instructor' query
-    $checkIdQuery = "SELECT * FROM ap_userdetails WHERE id = '$id' AND roles = 'instructor'";
+    // check if id exists in userdetails and has a role of 'instructor' query
+    $checkIdQuery = "SELECT * FROM userdetails WHERE id = '$id' AND roles = 'instructor'";
     $checkIdResult = $dbCon->query($checkIdQuery);
 
     if ($checkIdResult->num_rows <= 0) {
@@ -115,10 +113,41 @@ if (isset($_POST['delete_instructor'])) {
         $hasSuccess = false;
         $message = "Instructor does not exist";
     } else {
-        $deleteQuery = "DELETE FROM ap_userdetails WHERE id = '$id'";
+        $deleteQuery = "DELETE FROM userdetails WHERE id = '$id'";
         $result = $dbCon->query($deleteQuery);
 
         if ($result) {
+            // Get all activities for the current instructor
+            $activitiesQuery = $dbCon->query("SELECT * FROM activities WHERE instructor = $id");
+
+            if ($activitiesQuery->num_rows > 0) {
+                $activities = $activitiesQuery->fetch_all(MYSQLI_ASSOC);
+
+                // Loop through each activities
+                foreach ($activities as $activity) {
+                    // Delete all activity scores for the current activity
+                    $dbCon->query("DELETE FROM activity_scores WHERE activity_id = {$activity['id']}");
+                }
+
+                // Delete all activities under the current instructor
+                $dbCon->query("DELETE FROM activities WHERE instructor = $id");
+            }
+
+            // Delete all activities for the current instructor
+            $dbCon->query("DELETE FROM activities WHERE instructor = $id");
+
+            // Delete all grade release request for the current instructor
+            $dbCon->query("DELETE FROM instructor_grade_release_requests WHERE instructor_id = $id");
+
+            // Delete all grading criterias for the current instructor
+            $dbCon->query("DELETE FROM grading_criterias WHERE instructor = $id");
+
+            // Delete all assigned subjects for the current instructor
+            $dbCon->query("DELETE FROM subject_instructors WHERE instructor_id = $id");
+
+            // Delete all assigned sections for the current instructor
+            $dbCon->query("DELETE FROM subject_instructor_sections WHERE instructor_id = $id");
+
             $hasError = false;
             $hasSuccess = true;
             $message = "Instructor deleted successfully";
@@ -137,9 +166,9 @@ $start = ($page - 1) * $limit;
 
 // get total records
 if ($hasSearch) {
-    $queryCount = "SELECT count(*) as total FROM ap_userdetails WHERE roles = 'instructor' AND (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%')";
+    $queryCount = "SELECT count(*) as total FROM userdetails WHERE roles = 'instructor' AND (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%')";
 } else {
-    $queryCount = "SELECT count(*) as total FROM ap_userdetails WHERE roles = 'instructor'";
+    $queryCount = "SELECT count(*) as total FROM userdetails WHERE roles = 'instructor'";
 }
 $resultCount = $dbCon->query($queryCount);
 $rowCount = $resultCount->fetch_assoc();
@@ -148,9 +177,9 @@ $pages = ceil($total / $limit);
 
 // get all instructors
 if ($hasSearch) {
-    $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' AND (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%') LIMIT $start, $limit";
+    $query = "SELECT * FROM userdetails WHERE roles = 'instructor' AND (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%') LIMIT $start, $limit";
 } else {
-    $query = "SELECT * FROM ap_userdetails WHERE roles = 'instructor' LIMIT $start, $limit";
+    $query = "SELECT * FROM userdetails WHERE roles = 'instructor' LIMIT $start, $limit";
 }
 ?>
 
@@ -165,9 +194,9 @@ if ($hasSearch) {
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">Instructor</h1>
+                    <h1 class="text-[24px] font-semibold">Manage Instructors</h1>
                 </div>
-                <div class="flex gap-4 px-4">
+                <div class="flex items-center gap-4 px-4">
                     <!-- Search bar -->
                     <form class="w-[300px]" method="POST" action="<?= $_SERVER['PHP_SELF'] ?>" autocomplete="off">   
                         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
@@ -187,7 +216,7 @@ if ($hasSearch) {
                     </form>
 
                     <!-- Create button -->
-                    <a href="./create/instructor.php" class="btn">Create</a>
+                    <a href="./create/instructor.php" class="btn btn-success"><i class="bx bx-plus-circle"></i> Create</a>
                 </div>
             </div>
 
@@ -213,15 +242,15 @@ if ($hasSearch) {
 
             <!-- Table Content -->
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
+                <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white">ID</td>
-                            <td class="bg-slate-500 text-white">Name</td>
-                            <td class="bg-slate-500 text-white">Gender</td>
-                            <td class="bg-slate-500 text-white">Contact</td>
-                            <td class="bg-slate-500 text-white">Email</td>
-                            <td class="bg-slate-500 text-white">Birthday</td>
+                            <!-- <td class="bg-slate-500 text-white">ID</td> -->
+                            <td class="bg-slate-500 text-white text-center">Name</td>
+                            <td class="bg-slate-500 text-white text-center">Sex</td>
+                            <td class="bg-slate-500 text-white text-center">Contact</td>
+                            <td class="bg-slate-500 text-white text-center">Email</td>
+                            <td class="bg-slate-500 text-white text-center">Birthday</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
@@ -229,19 +258,19 @@ if ($hasSearch) {
                         <?php $instructors = $dbCon->query($query); ?>
                         <?php if ($instructors->num_rows == 0) { ?>
                             <tr>
-                                <td colspan="7" class="text-center">No records found</td>
+                                <td colspan="6" class="text-center">No records found</td>
                             </tr>
                         <?php } else { ?>
                             <?php while ($instructor = $instructors->fetch_assoc()) { ?>
                                 <tr>
-                                    <td><?= $instructor['id'] ?></td>
-                                    <td><?= $instructor['firstName'] ?> <?= $instructor['middleName'] ?> <?= $instructor['lastName'] ?></td>
-                                    <td><?= ucfirst($instructor['gender']) ?></td>
-                                    <td><?= $instructor['contact'] ?></td>
-                                    <td><?= $instructor['email'] ?></td>
-                                    <td><?= $instructor['birthday'] ?></td>
+                                    <!-- <td><?= $instructor['id'] ?></td> -->
+                                    <td class="text-center"><?= $instructor['firstName'] ?> <?= $instructor['middleName'] ?> <?= $instructor['lastName'] ?></td>
+                                    <td class="text-center"><?= ucfirst($instructor['gender']) ?></td>
+                                    <td class="text-center"><?= $instructor['contact'] ?></td>
+                                    <td class="text-center"><?= $instructor['email'] ?></td>
+                                    <td class="text-center"><?= $instructor['birthday'] ?></td>
                                     <td>
-                                        <div class="flex gap-2">
+                                        <div class="flex gap-2 justify-center items-center">
                                             <label for="view-instructor-<?= $instructor['id'] ?>" class="bg-blue-400 btn btn-sm text-white">View</label>
                                             <label for="edit-instructor-<?= $instructor['id'] ?>" class="bg-gray-400 btn btn-sm text-white">Edit</label>
                                             <label for="delete-instructor-<?= $instructor['id'] ?>" class="bg-red-400 btn btn-sm text-white">Delete</label>
@@ -262,7 +291,7 @@ if ($hasSearch) {
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -299,21 +328,21 @@ if ($hasSearch) {
                     <!-- Details -->
                     <div class="grid grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Gender</span>
+                            <span class="font-bold text-[18px]">Sex</span>
                             <select class="select select-bordered" name="gender" disabled required>
                                 <option value="male" <?php if ($row['gender'] == 'male') { ?> disabled <?php } ?>>Male</option>
                                 <option value="female" <?php if ($row['gender'] == 'female') { ?> disabled <?php } ?>>Female</option>
                             </select>
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data>
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" disabled required />
+                            <input x-mask="9999-999-9999" type="tel" class="input input-bordered" name="contact" placeholder="0912-345-6789" class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" disabled required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" disabled required />
+                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "2001-01-01" ?>" name="birthday" disabled required />
                         </label>
                     </div>
 
@@ -355,9 +384,9 @@ if ($hasSearch) {
                     </div>
 
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Gender</span>
+                        <span class="font-bold text-[18px]">Sex</span>
                         <select class="select select-bordered" name="gender" required>
-                            <option value="" selected disabled>Select Gender</option>
+                            <option value="" selected disabled>Select Sex</option>
                             <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
                             <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                         </select>
@@ -365,14 +394,14 @@ if ($hasSearch) {
 
                     <!-- Details -->
                     <div class="grid grid-cols-2 gap-4">
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data>
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" required />
+                            <input x-mask="9999-999-9999" @input="enforcePrefix" type="tel" class="input input-bordered" name="contact" placeholder="0912-345-6789" class="input input-bordered" value="<?= $row['contact'] ?>" name="contact" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "1900-01-01" ?>" name="birthday" required />
+                            <input class="input input-bordered" type="date" value="<?= $row['birthday'] ?? "2000-01-01" ?>" name="birthday" required />
                         </label>
                     </div>
 
@@ -384,7 +413,7 @@ if ($hasSearch) {
                         <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required />
                     </label>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <!-- <div class="grid grid-cols-2 gap-4">
                         <label class="flex flex-col gap-2" x-data="{show: true}">
                             <span class="font-semibold text-base">New Password</span>
                             <div class="relative">
@@ -406,7 +435,7 @@ if ($hasSearch) {
                                 </button>
                             </div>
                         </label>
-                    </div>
+                    </div> -->
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
@@ -436,3 +465,15 @@ if ($hasSearch) {
         </div>
     <?php } ?>
 </main>
+
+<script>
+    function enforcePrefix(e) {
+        let currentValue = e.target.value;
+
+        if (!currentValue.startsWith("09")) {
+            e.target.value = "09" + currentValue.substring(2);
+        }
+
+        console.log("HELO")
+    }
+</script>

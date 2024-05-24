@@ -1,16 +1,55 @@
 <?php
+session_start();
+
 require('../../vendor/autoload.php');
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-session_start();
 // kung walang session mag reredirect sa login //
 
 require("../../configuration/config.php");
 require('../../auth/controller/auth.controller.php');
 
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    if(isset($_GET['courseId']) && isset($_GET['yearLevel'])) {
+        $yearLevel = $dbCon->real_escape_string($_GET['yearLevel']);
+        $courseId = $dbCon->real_escape_string($_GET['courseId']);
+
+        $courseQuery = $dbCon->query("SELECT * FROM courses WHERE id='$courseId'");
+        $course = $courseQuery->fetch_assoc();
+
+        $sectionsQuery = $dbCon->query("SELECT * FROM sections WHERE course='$courseId' AND year_level='$yearLevel'");
+        $sections = $sectionsQuery->fetch_all(MYSQLI_ASSOC);
+
+        header('Content-type: application/json');
+        echo json_encode($sections, JSON_PRETTY_PRINT);
+    }
+
+    exit;
+}
+
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
+    exit();
+}
+
+// Error and success handlers
+$hasError = false;
+$hasSuccess = false;
+$hasSearch = false;
+$hasWarning = false;
+$warning = "";
+$message = "";
+
+// Download template student excel data
+if (isset($_POST['download-template-excel'])) {
+    $template = "../../utils/templates/import-students-template.xlsx";
+    $fragments = explode("/", $template);
+
+    header('Content-Type: ' . mime_content_type($template));
+    header('Content-Disposition: attachment;filename=' . end($fragments));
+    header('Cache-Control: max-age=0');
+    readfile($template);
     exit();
 }
 
@@ -19,40 +58,60 @@ if (isset($_POST['export-excel'])) {
     $spreadsheet = new Spreadsheet();
     $sheet = $spreadsheet->getActiveSheet();
 
-    $sheet->setCellValue('A1', 'id');
-    $sheet->setCellValue('B1', 'firstName');
-    $sheet->setCellValue('C1', 'middleName');
-    $sheet->setCellValue('D1', 'lastName');
-    $sheet->setCellValue('E1', 'email');
-    $sheet->setCellValue('F1', 'gender');
-    $sheet->setCellValue('G1', 'birthday');
-    $sheet->setCellValue('H1', 'contact');
-    $sheet->setCellValue('I1', 'sid');
-    $sheet->setCellValue('J1', 'year_level');
-    $sheet->setCellValue('K1', 'password');
+    $sheet->setCellValue('A1', 'First Name');
+    $sheet->setCellValue('B1', 'Middle Name');
+    $sheet->setCellValue('C1', 'Last Name');
+    $sheet->setCellValue('D1', 'Email Address');
+    $sheet->setCellValue('E1', 'Gender');
+    $sheet->setCellValue('F1', 'Birthday');
+    $sheet->setCellValue('G1', 'Contact Number');
+    $sheet->setCellValue('H1', 'Student ID');
+    $sheet->setCellValue('I1', 'Course Code');
+    $sheet->setCellValue('J1', 'Year Level');
+    $sheet->setCellValue('K1', 'Section Name');
 
 
-    $query = "SELECT * FROM ap_userdetails WHERE roles='student'";
+    $query = "SELECT * FROM userdetails WHERE roles='student'";
     $result = $dbCon->query($query);
 
     if ($result->num_rows > 0) {
+        $skippedStudentExport = 0;
         $i = 2;
+
         while ($row = $result->fetch_assoc()) {
-            $sheet->setCellValue('A' . $i, $row['id']);
-            $sheet->setCellValue('B' . $i, $row['firstName']);
-            $sheet->setCellValue('C' . $i, $row['middleName']);
-            $sheet->setCellValue('D' . $i, $row['lastName']);
-            $sheet->setCellValue('E' . $i, $row['email']);
-            $sheet->setCellValue('F' . $i, $row['gender']);
-            $sheet->setCellValue('G' . $i, $row['birthday']);
-            $sheet->setCellValue('H' . $i, '="' . $row['contact'] . '"');
-            $sheet->setCellValue('I' . $i, '="' . $row['sid'] . '"');
+            $sectionQuery = $dbCon->query("SELECT
+                sections.*,
+                courses.course_code as course_code
+                FROM section_students
+                LEFT JOIN sections ON section_students.section_id = sections.id
+                LEFT JOIN courses ON sections.course = courses.id
+                WHERE section_students.student_id = '$row[id]' AND section_students.is_irregular='0'
+            ");
+
+            if ($sectionQuery->num_rows == 0) {
+                $skippedStudentExport += 1;
+                $hasWarning = true;
+                $warning = "Skipped $skippedStudentExport student data" . (($skippedStudentExport > 1) ? 's' : '') . " during the export process because" . (($skippedStudentExport > 1) ? 'they' : 'he/she') . " does not have a course and section!";
+                continue;
+            }
+
+            $section = $sectionQuery->fetch_assoc();
+
+            $sheet->setCellValue('A' . $i, $row['firstName']);
+            $sheet->setCellValue('B' . $i, $row['middleName']);
+            $sheet->setCellValue('C' . $i, $row['lastName']);
+            $sheet->setCellValue('D' . $i, $row['email']);
+            $sheet->setCellValue('E' . $i, $row['gender']);
+            $sheet->setCellValue('F' . $i, $row['birthday']);
+            $sheet->setCellValue('G' . $i, '="' . $row['contact'] . '"');
+            $sheet->setCellValue('H' . $i, '="' . $row['sid'] . '"');
+            $sheet->setCellValue('I' . $i, $section['course_code']);
             $sheet->setCellValue('J' . $i, $row['year_level']);
-            $sheet->setCellValue('K' . $i, '="' . $row['password'] . '"');
+            $sheet->setCellValue('K' . $i, $section['name']);
             $i++;
         }
 
-        $filename = "students-" . date('Y-m-d') . ".xlsx";
+        $filename = "exported-students-" . date('Y-m-d') . ".xlsx";
         $writer = new Xlsx($spreadsheet);
         $writer->save($filename);
 
@@ -70,17 +129,48 @@ if (isset($_POST['export-excel'])) {
 
 // export as csv
 if (isset($_POST['export-csv'])) {
-    $filename = "students-" . date('Y-m-d') . ".csv";
-    $query = "SELECT * FROM ap_userdetails WHERE roles='student'";
+    $filename = "exported-students-" . date('Y-m-d') . ".csv";
+    $query = "SELECT * FROM userdetails WHERE roles='student'";
     $result = $dbCon->query($query);
 
     if ($result->num_rows > 0) {
+        $skippedStudentExport = 0;
+
         $fp = fopen($filename, 'w');
-        fputcsv($fp, array('id', 'firstName', 'middleName', 'lastName', 'gender', 'birthday', 'contact', 'email', 'sid', 'year_level', 'password'));
+        fputcsv($fp, array(
+            'First Name', 
+            'Middle Name', 
+            'Last Name', 
+            'Gender', 
+            'Birthday', 
+            'Contact Number', 
+            'Email Address', 
+            'Student ID', 
+            'Course Code',
+            'Year Level',
+            'Section Name'
+        ));
 
         while ($row = $result->fetch_assoc()) {
+            $sectionQuery = $dbCon->query("SELECT
+                sections.*,
+                courses.course_code as course_code
+                FROM section_students
+                LEFT JOIN sections ON section_students.section_id = sections.id
+                LEFT JOIN courses ON sections.course = courses.id
+                WHERE section_students.student_id = '$row[id]' AND section_students.is_irregular='0'
+            ");
+
+            if ($sectionQuery->num_rows == 0) {
+                $skippedStudentExport += 1;
+                $hasWarning = true;
+                $warning = "Skipped $skippedStudentExport student data" . (($skippedStudentExport > 1) ? 's' : '') . " during the export process because" . (($skippedStudentExport > 1) ? 'they' : 'he/she') . " does not have a course and section!";
+                continue;
+            }
+
+            $section = $sectionQuery->fetch_assoc();
+
             fputcsv($fp, array(
-                $row['id'], 
                 $row['firstName'], 
                 $row['middleName'], 
                 $row['lastName'], 
@@ -89,8 +179,9 @@ if (isset($_POST['export-csv'])) {
                 '="' . $row['contact'] . '"', 
                 $row['email'], 
                 '="' . $row['sid'] . '"', 
-                $row['year_level'], 
-                '="' . $row['password'] . '"'
+                $section['course_code'],
+                $row['year_level'],
+                $section['name']
             ));
         }
 
@@ -99,6 +190,10 @@ if (isset($_POST['export-csv'])) {
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename=' . $filename);
         readfile($filename);
+
+        // Delete csv file after exporting
+        @unlink($filename);
+
         exit();
     }
 
@@ -107,12 +202,6 @@ if (isset($_POST['export-csv'])) {
 
 // pag meron session mag rerender yung dashboard//
 require_once("../../components/header.php");
-
-// Error and success handlers
-$hasError = false;
-$hasSuccess = false;
-$hasSearch = false;
-$message = "";
 
 // search student
 if (isset($_POST['search-student'])) {
@@ -127,14 +216,331 @@ $start = ($page - 1) * $limit;
 
 // total pages
 if($hasSearch) {
-    $result1 = $dbCon->query("SELECT count(id) AS id FROM ap_userdetails WHERE (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%' OR sid LIKE '%$search%') AND roles='student'");
+    $result1 = $dbCon->query("SELECT count(*) AS count FROM userdetails WHERE (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%' OR sid LIKE '%$search%') AND roles='student'");
 } else {
-    $result1 = $dbCon->query("SELECT count(id) AS id FROM ap_userdetails WHERE roles='student'");
+    $result1 = $dbCon->query("SELECT count(*) AS count FROM userdetails WHERE roles='student'");
 }
 
-$students = $result1->fetch_all(MYSQLI_ASSOC);
-$total = $students[0]['id'];
+$students = $result1->fetch_assoc();
+$total = $students['count'];
 $pages = ceil($total / $limit);
+
+// Import students
+if (isset($_POST['import_student'])) {
+    $file = $_FILES['file'];
+    $fileName = $file['name'];
+    $fileTmpName = $file['tmp_name'];
+    $fileSize = $file['size'];
+    $fileError = $file['error'];
+    $fileType = $file['type'];
+
+    $fileExt = explode('.', $fileName);
+    $fileActualExt = strtolower(end($fileExt));
+
+    $allowed = array('xlsx', 'csv');
+
+    // Check if file type is allowed and check if the mime type is allowed
+    if (in_array($fileActualExt, $allowed) && ($fileType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || $fileType === "text/csv")) {
+        if ($fileError === 0) {
+            // Check if file size is less than 100MB
+            if ($fileSize < (1000000) * 1024 * 1024) {
+                $fileNameNew = uniqid('', true) . "." . $fileActualExt;
+                $fileDestination = 'uploads/' . $fileNameNew;
+
+                // auto create destination if it does not exist
+                if (!file_exists('uploads')) {
+                    @mkdir('uploads', 0777, true);
+                }
+
+                // move the file to the destination
+                @move_uploaded_file($fileTmpName, $fileDestination);
+
+                // check if the file is an excel or csv file, if it is an excel file, use PhpSpreadsheet to read the file, if it is a csv file, use fgetcsv to read the file
+                if ($fileActualExt === "xlsx") {
+                    $reader = new PhpOffice\PhpSpreadsheet\Reader\Xlsx();
+                    $spreadsheet = $reader->load($fileDestination);
+                    $sheetData = $spreadsheet->getActiveSheet()->toArray();
+                } else if ($fileActualExt === "csv") {
+                    $file = fopen($fileDestination, "r");
+                    $sheetData = array();
+
+                    while (!feof($file)) {
+                        $line = fgetcsv($file);
+
+                        if(!is_array($line)) {
+                            continue;
+                        }
+
+                        $sheetData[] = $line;
+                    }
+
+                    fclose($file);
+                }
+
+                // remove the header from the read data
+                $header = array_map(fn ($head) => trim($head), array_shift($sheetData));
+                $data = array();
+
+                $diff = array_diff([
+                    'Student ID',
+                    'First Name',
+                    'Middle Name',
+                    'Last Name',
+                    'Gender',
+                    'Contact Number',
+                    'Birthday',
+                    'Email Address',
+                    'Course Code',
+                    'Year Level',
+                    'Section Name',
+                ], $header);
+
+                // Check if all columns are present in the imported file
+                if (count($diff) > 0) {
+                    $hasError = true;
+                    $hasSuccess = false;
+                    $message = "Missing columns: <strong>" . implode(", ", $diff) . "</strong> in the imported file!";
+                } else {
+                    // combine the header and the data
+                    foreach ($sheetData as $row) {
+                        $data[] = array_combine($header, $row);
+                    }
+
+                    $oldDatCount = count($data);
+
+                    // Filter out empty cells
+                    $data = array_filter($data, function($student) {
+                        if (!empty(trim($student['Student ID'] ?? '')) && 
+                            !empty(trim($student['First Name'] ?? '')) &&
+                            !empty(trim($student['Last Name'] ?? '')) &&
+                            !empty(trim($student['Gender'] ?? '')) && 
+                            !empty(trim($student['Contact Number'] ?? '')) &&
+                            !empty(trim($student['Birthday'] ?? '')) && 
+                            !empty(trim($student['Email Address'] ?? '')) &&
+                            !empty(trim($student['Course Code'] ?? '')) &&
+                            !empty(trim($student['Year Level'] ?? '')) &&
+                            !empty(trim($student['Section Name'] ?? '')))
+                            return $student;
+                    });
+
+                    $newDataCount = count($data);
+                    $skippedDataCount = $oldDatCount - $newDataCount;
+                    $skippedStudentData = 0;
+                    $successfulCount = 0;
+
+                    if ($skippedDataCount > 0) {
+                        $skippedStudentData += $skippedDataCount;
+                        $hasWarning = true;
+                        $warning = "Skipped $skippedStudentData student data" . (($skippedStudentData > 1) ? 's' : '') . " because the" . (($skippedStudentData > 1) ? 'ir' : '') . " student ID or email address already exists OR some of the" . (($skippedStudentData > 1) ? 'ir' : '') . " data are empty!";
+                    }
+
+                    // check if there is data in the file
+                    if (count($data) > 0) {
+                        // insert query
+                        $insertStudentQuery = "INSERT INTO userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, year_level, roles, sid) VALUES";
+                        $insertStudentEmailQuery = "INSERT INTO pending_account_mails(email, raw_password) VALUES";
+                        $emails = [];
+                        $sids = [];
+                        $sections = [];
+
+                        // loop through the data and validate
+                        foreach ($data as $student) {
+                            $studentId = trim($dbCon->real_escape_string($student['Student ID']));
+                            $firstName = trim($dbCon->real_escape_string($student['First Name']));
+                            $middleName = trim($dbCon->real_escape_string($student['Middle Name'] ?? ''));
+                            $lastName = trim($dbCon->real_escape_string($student['Last Name']));
+                            $gender = strtolower(trim($dbCon->real_escape_string($student['Gender'])));
+                            $contact = $dbCon->real_escape_string($student['Contact Number']);
+                            $birthday = trim($dbCon->real_escape_string($student['Birthday']));
+                            $email = filter_var(trim($dbCon->real_escape_string($student['Email Address'])), FILTER_VALIDATE_EMAIL);
+                            $yearLevel = trim($dbCon->real_escape_string($student['Year Level']));
+                            $course = trim($dbCon->real_escape_string($student['Course Code']));
+                            $section = trim($dbCon->real_escape_string($student['Section Name']));
+
+                            if (str_contains($birthday, "/")) {
+                                $birthday = str_replace("/", "-", $birthday);
+                                $birthday = date("Y-m-d", strtotime($birthday));
+                            }
+
+                            if($fileActualExt === 'csv') {
+                                // remove \=" and \" from contact, sid and password
+                                $contact = substr($contact, 3, -2);
+                                $studentId = substr($studentId, 3, -2);
+                            }
+                            
+                            if (!$email) {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "Please enter a valid email address";
+                                break;
+                            } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "One of the imported student data does not have a valid email address. It should use his/her <strong>@cvsu.edu.ph</strong> email address.";
+                                break;
+                            } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
+                                break;
+                            } else if (!in_array(strtolower($yearLevel), ['1st year', '2nd year', '3rd year', '4th year', '5th year'])) {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "One of the students have an invalid year level, please enter a valid year level!";
+                                break;
+                            } else if ($dbCon->query("SELECT * FROM courses WHERE course_code = '$course'")->num_rows == 0) {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "One of the students have an invalid course code, please enter a valid course code!";
+                                break;
+                            } else {
+                                // Get course
+                                $courseQuery = $dbCon->query("SELECT * FROM courses WHERE course_code = '$course'");
+                                $course = $courseQuery->fetch_assoc();
+
+                                // Check if section name is valid
+                                $sectionQuery = $dbCon->query("SELECT * FROM sections WHERE name = '$section' AND course = '$course[id]' AND year_level = '" . ucwords(strtolower($yearLevel)) . "'");
+                                
+                                if ($sectionQuery->num_rows == 0) {
+                                    $hasError = true;
+                                    $hasSuccess = false;
+                                    $message = "One of the students have an invalid section name, please enter a valid section name!";
+                                    break;
+                                }
+
+                                $sectionData = $sectionQuery->fetch_assoc();
+
+                                // skip if email or student id is already in the database
+                                if ($dbCon->query("SELECT * FROM userdetails WHERE email = '$email' OR sid = '$studentId'")->num_rows > 0) {
+                                    $skippedStudentData++;
+
+                                    $hasWarning = true;
+                                    $warning = "Skipped $skippedStudentData student data" . (($skippedStudentData > 1) ? 's' : '') . " because the" . (($skippedStudentData > 1) ? 'ir' : '') . " student ID or email address already exists OR some of the" . (($skippedStudentData > 1) ? 'ir' : '') . " data are empty!";
+
+                                    continue;
+                                }
+
+                                // Check if email has already been queued to be added
+                                if (in_array($email, $emails)) {
+                                    $skippedStudentData++;
+
+                                    $hasWarning = true;
+                                    $warning = "Skipped $skippedStudentData student data" . (($skippedStudentData > 1) ? 's' : '') . " because the" . (($skippedStudentData > 1) ? 'ir' : '') . " student ID or email address already exists OR some of the" . (($skippedStudentData > 1) ? 'ir' : '') . " data are empty!";
+
+                                    continue;
+                                } else
+                                    $emails[] = $email;
+
+                                // Check if student id has already been queued to be added
+                                if (in_array($studentId, $sids)) {
+                                    $skippedStudentData++;
+
+                                    $hasWarning = true;
+                                    $warning = "Skipped $skippedStudentData student data" . (($skippedStudentData > 1) ? 's' : '') . " because the" . (($skippedStudentData > 1) ? 'ir' : '') . " student ID or email address already exists OR some of the" . (($skippedStudentData > 1) ? 'ir' : '') . " data are empty!";
+
+                                    continue;
+                                } else
+                                    $sids[] = $studentId;
+
+                                $password = constant("USER_DEFAULT_PASSWORD");
+                                $sections[$studentId] = $sectionData['id'];
+                                $successfulCount += 1;
+
+                                $insertStudentQuery .= "(
+                                    '$firstName',
+                                    '$middleName',
+                                    '$lastName',
+                                    '$gender',
+                                    '$contact',
+                                    '$birthday',
+                                    '$email',
+                                    '" . crypt($password, '$6$Crypt$') . "',
+                                    '$yearLevel',
+                                    'student',
+                                    '$studentId'
+                                ),";
+                                
+                                $insertStudentEmailQuery .= "(
+                                    '$email',
+                                    '$password'
+                                ),";
+                            }
+                        }
+
+                        // execute the query if there are no errors
+                        if(!str_ends_with($insertStudentQuery, "VALUES") && !$hasError) {
+                            $insertStudentQuery = substr($insertStudentQuery, 0, -1);
+                            $insertStudentEmailQuery = substr($insertStudentEmailQuery, 0, -1);
+                            $result1 = $dbCon->query($insertStudentQuery);
+                            $result2 = $dbCon->query($insertStudentEmailQuery);
+
+                            if ($result1) {
+                                foreach ($sids as $sid) {
+                                    $studentDataQuery = $dbCon->query("SELECT * FROM userdetails WHERE sid = '$sid' AND roles = 'student'");
+
+                                    if ($studentDataQuery->num_rows > 0) {
+                                        $studentData = $studentDataQuery->fetch_assoc();
+                                        $assignedSection = $sections[$sid];
+
+                                        $dbCon->query("INSERT INTO section_students (section_id, student_id) VALUES(
+                                            '$assignedSection',
+                                            '$studentData[id]'
+                                        )");
+                                    }
+                                }
+
+                                $hasError = false;
+                                $hasSuccess = true;
+                                $message = "Successfully imported <strong>$successfulCount student" . ($successfulCount > 1 ? 's' : '') . "!</strong>";
+                            } else {
+                                $hasError = true;
+                                $hasSuccess = false;
+                                $message = "Failed to import students!";
+                            }
+                        }
+
+                        // unset entered values
+                        unset($studentId);
+                        unset($firstName);
+                        unset($middleName);
+                        unset($lastName);   
+                        unset($gender);
+                        unset($contact);
+                        unset($birthday);
+                        unset($email);
+                        unset($course);
+                        unset($yearLevel);
+                        unset($section);
+                    } else {
+                        $hasError = true;
+                        $hasSuccess = false;
+                        $message = "No data found in the file!";
+                    }
+                }
+
+                // delete the file after importing
+                @unlink($fileDestination);
+
+                // delete the folder if it exists, this is to prevent the users from accessing the upload folder
+                if (is_dir('uploads')) {
+                    @rmdir('uploads');
+                }
+            } else {
+                $hasError = true;
+                $hasSuccess = false;
+                $message = "Your file exceeeded the maximum file sie of 100MB!";
+            }
+        } else {
+            $hasError = true;
+            $hasSuccess = false;
+            $message = "An error occurred while uploading the file. Please try again.";
+        }
+    } else {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Invalid file type. Only <strong>EXCEL</strong> and <strong>CSV</strong> files are allowed!";
+    }
+}
 
 // update student
 if (isset($_POST['update_student'])) {
@@ -144,32 +550,37 @@ if (isset($_POST['update_student'])) {
     $middleName = $dbCon->real_escape_string($_POST['middle_name']);
     $lastName = $dbCon->real_escape_string($_POST['last_name']);
     $gender = $dbCon->real_escape_string($_POST['gender']);
-    $contact = $dbCon->real_escape_string($_POST['contact']);
+    $contact = str_replace("-", "", $dbCon->real_escape_string($_POST['contact']));
     $birthday = $dbCon->real_escape_string($_POST['birthday']);
     $email = filter_var($dbCon->real_escape_string($_POST['email']), FILTER_VALIDATE_EMAIL);
-    $newPassword = $dbCon->real_escape_string($_POST['new-password']);
-    $confirmPassword = $dbCon->real_escape_string($_POST['confirm-password']);
+    $section = $dbCon->real_escape_string($_POST['section'] ?? '');
+    // $newPassword = $dbCon->real_escape_string($_POST['new-password']);
+    // $confirmPassword = $dbCon->real_escape_string($_POST['confirm-password']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
 
     if (!$email) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
-     }else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+    } else if (empty($section)) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Please enter a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+        $message = "Please enter section of the student!";
+    } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Please use the student's <strong>@cvsu.edu.ph</strong> email address.";
     } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
-    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
+    } else if ($dbCon->query("SELECT * FROM userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Student does not exist!";
     } else {
         // get student details that matches the given id
-        $result = $dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'");
+        $result = $dbCon->query("SELECT * FROM userdetails WHERE id='$id' AND roles = 'student'");
 
         if ($result->num_rows == 0) {
             $hasError = true;
@@ -179,7 +590,7 @@ if (isset($_POST['update_student'])) {
             $student = $result->fetch_assoc();
 
             // update student query 
-            $query = "UPDATE ap_userdetails SET 
+            $query = "UPDATE userdetails SET 
                 sid='$studentId',
                 firstName='$firstName',
                 middleName='$middleName',
@@ -191,7 +602,7 @@ if (isset($_POST['update_student'])) {
                 year_level='$yearLevel'
             ";
 
-            if ($newPassword) {
+            /* if ($newPassword) {
                 // check if new password matches with the confirm password
                 $newPasswordHashed = crypt($newPassword, '$6$Crypt$');
                 $confirmPasswordHashed = crypt($confirmPassword, '$6$Crypt$');
@@ -203,7 +614,7 @@ if (isset($_POST['update_student'])) {
                 } else {
                     $query .= ", password='" . $newPasswordHashed . "'";
                 }
-            }
+            } */
 
             if(!$hasError) {
                 $query .= " WHERE id='$id'";
@@ -211,6 +622,9 @@ if (isset($_POST['update_student'])) {
                 $update = $dbCon->query($query);
 
                 if ($update) {
+                    $deleteStudentFromSection = $dbCon->query("DELETE FROM section_students WHERE student_id='$id' AND is_irregular='0'");
+                    $insertAgain = $dbCon->query("INSERT INTO section_students(section_id, student_id) VALUES('$section', '$id')");
+
                     $hasError = false;
                     $hasSuccess = true;
                     $message = "Successfully updated student!";
@@ -229,32 +643,37 @@ if (isset($_POST['update_student'])) {
 if (isset($_POST['delete-student'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    if ($dbCon->query("SELECT * FROM ap_userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
+    if ($dbCon->query("SELECT * FROM userdetails WHERE id='$id' AND roles = 'student'")->num_rows == 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Student does not exist!";
     } else {
-        $query = "DELETE FROM ap_userdetails WHERE id='$id'";
+        $query = "DELETE FROM userdetails WHERE id='$id'";
         $delete = $dbCon->query($query);
 
-        // check if student id is also in ap_section_students. If so, delete it as well
-        if ($dbCon->query("SELECT * FROM ap_section_students WHERE student_id='$id'")->num_rows > 0) {
-            $dbCon->query("DELETE FROM ap_section_students WHERE student_id='$id'");
+        // check if student id is also in section_students. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM section_students WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM section_students WHERE student_id='$id'");
         }
 
-        // check if student id is also in ap_student_grades. If so, delete it as well
-        if ($dbCon->query("SELECT * FROM ap_student_grades WHERE student_id='$id'")->num_rows > 0) {
-            $dbCon->query("DELETE FROM ap_student_grades WHERE student_id='$id'");
+        // check if student id is also in activity_scires. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM activity_scores WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM activity_scores WHERE student_id='$id'");
         }
 
-        // check if student id is also in ap_student_final_grades. If so, delete it as well
-        if ($dbCon->query("SELECT * FROM ap_student_final_grades WHERE student_id='$id'")->num_rows > 0) {
-            $dbCon->query("DELETE FROM ap_student_final_grades WHERE student_id='$id'");
+        // check if student id is also in student_final_grades. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM student_final_grades WHERE student='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM student_final_grades WHERE student='$id'");
         }
 
-        // check if student id is also in ap_grade_requests. If so, delete it as well
-        if ($dbCon->query("SELECT * FROM ap_grade_requests WHERE student_id='$id'")->num_rows > 0) {
-            $dbCon->query("DELETE FROM ap_grade_requests WHERE student_id='$id'");
+        // check if student id is also in student_final_grades. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM student_enrolled_subjects WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM student_enrolled_subjects WHERE student_id='$id'");
+        }
+
+        // check if student id is also in grade_requests. If so, delete it as well
+        if ($dbCon->query("SELECT * FROM grade_requests WHERE student_id='$id'")->num_rows > 0) {
+            $dbCon->query("DELETE FROM grade_requests WHERE student_id='$id'");
         }
 
         if ($delete) {
@@ -271,13 +690,42 @@ if (isset($_POST['delete-student'])) {
 
 // Prefetch all students query
 if($hasSearch) {
-    $query = "SELECT * FROM ap_userdetails WHERE (CONCAT(firstName, ' ', middleName, ' ', lastName) LIKE '%$search%' OR email LIKE '%$search%' OR sid LIKE '%$search%') AND roles='student' LIMIT $start, $limit";
+    $query = "SELECT 
+        userdetails.* ,
+        courses.course_code AS course,
+        sections.name AS section,
+        sections.id AS sectionId,
+        section_students.is_irregular
+        FROM userdetails 
+        LEFT JOIN section_students ON section_students.student_id = userdetails.id
+        LEFT JOIN sections ON section_students.section_id = sections.id
+        LEFT JOIN courses ON sections.course = courses.id
+        WHERE (CONCAT(userdetails.firstName, ' ', userdetails.middleName, ' ', userdetails.lastName) LIKE '%$search%' 
+        OR userdetails.email LIKE '%$search%' OR userdetails.sid LIKE '%$search%') 
+        AND userdetails.roles='student'
+        LIMIT $start, $limit
+    ";
 } else {
-    $query = "SELECT * FROM ap_userdetails WHERE roles='student' LIMIT $start, $limit";
+    $query = "SELECT 
+        userdetails.* ,
+        courses.course_code AS course,
+        sections.name AS section,
+        sections.id AS sectionId,
+        section_students.is_irregular
+        FROM userdetails 
+        LEFT JOIN section_students ON section_students.student_id = userdetails.id
+        LEFT JOIN sections ON section_students.section_id = sections.id
+        LEFT JOIN courses ON sections.course = courses.id
+        WHERE userdetails.roles='student' 
+        LIMIT $start, $limit
+    ";
 }
+
+$coursesQuery = $dbCon->query("SELECT * FROM courses");
+$courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<main class="w-screen overflow-x-hidden flex">
+<main class="w-screen overflow-x-auto flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="h-screen w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -285,14 +733,14 @@ if($hasSearch) {
 
         <div class="px-4 flex justify-between flex-col gap-4">
             <!-- Table Header -->
-            <div class="flex justify-between items-center">
+            <div class="flex  flex-col md:flex-row justify-between md:items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[24px] font-semibold">Student</h1>
+                    <h1 class="text-[24px] font-semibold">Manage Students</h1>
                 </div>
-                <div class="flex gap-4 px-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 md:items-center gap-4 px-0 md:px-4">
                     <!-- Search bar -->
-                    <form class="w-[300px]" method="POST" action="<?= $_SERVER['PHP_SELF'] ?>" autocomplete="off">   
+                    <form class="w-auto md:w-full" method="POST" autocomplete="off">   
                         <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
                         <div class="relative">
                             <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
@@ -300,7 +748,7 @@ if($hasSearch) {
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                                 </svg>
                             </div>
-                            <input type="search" name="search-student" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search name" value="<?= $hasSearch ? $search : '' ?>" required>
+                            <input type="search" name="search-student" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search name, email or I.D." value="<?= $hasSearch ? $search : '' ?>" required>
                             <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                                 <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
@@ -309,19 +757,31 @@ if($hasSearch) {
                         </div>
                     </form>
 
-                    <!-- Create button -->
-                    <a href="./create/student.php" class="btn">Create</a>
+                    <div class="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <!-- Import -->
+                        <button class="btn btn-info" onclick="import_file_modal.showModal()"><i class="bx bx-import"></i> Import</button>
 
-                    <!-- Export Button -->
-                    <div class="dropdown dropdown-end">
-                        <div tabindex="0" role="button" class="btn m-1"><i class="bx bxs-file-export"></i> Export As</div>
-                        <ul tabindex="0" class="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><label for="export_excel_modal">Excel</label></li>
-                            <li><label for="export_csv_modal">CSV</label></li>
-                        </ul>
+                        <!-- Export Button -->
+                        <div class="dropdown dropdown-end">
+                            <button tabindex="0" role="button" class="btn btn-info !w-full md:!w-auto"><i class="bx bx-export"></i> Export</button>
+                            <ul tabindex="0" class="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                <li><label for="export_excel_modal" onclick="export_excel_modal.showModal()"><i class="fa fa-file-excel"></i> Excel</label></li>
+                                <li><label for="export_csv_modal" onclick="export_csv_modal.showModal()"><i class="fa fa-file-csv"></i> CSV</label></li>
+                            </ul>
+                        </div>
+
+                        <!-- Create button -->
+                        <a href="./create/student.php" class="btn btn-success"><i class="bx bx-plus-circle"></i> Create</a>
                     </div>
                 </div>
             </div>
+
+            <?php if ($hasWarning) { ?>
+                <div role="alert" class="alert alert-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <span><?= $warning ?></span>
+                </div>
+            <?php } ?>
 
             <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
@@ -343,38 +803,43 @@ if($hasSearch) {
 
             <!-- Table Content -->
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
+                <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th class="bg-slate-500 text-white">ID</th>
+                            <!-- <th class="bg-slate-500 text-white">ID</th> -->
+                            <td class="bg-slate-500 text-white text-center">Student ID</td>
                             <td class="bg-slate-500 text-white">Name</td>
                             <td class="bg-slate-500 text-white">Email</td>
-                            <td class="bg-slate-500 text-white">Gender</td>
-                            <td class="bg-slate-500 text-white">Contact</td>
-                            <td class="bg-slate-500 text-white">Student ID</td>
-                            <td class="bg-slate-500 text-white">Year Level</td>
+                            <td class="bg-slate-500 text-white text-center">Sex</td>
+                            <td class="bg-slate-500 text-white text-center">Course</td>
+                            <td class="bg-slate-500 text-white text-center">Year Level/Section</td>
                             <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
                         <?php
                         $result = $dbCon->query($query);
-
+                        
                         if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
+                            $students = $result->fetch_all(MYSQLI_ASSOC);
+
+                            foreach ($students as $row) {
+                                if ($row['is_irregular'] == '1')
+                                    continue;
+
                                 echo "
                                     <tr>
-                                        <td>{$row['id']}</td>
+                                        <td class='text-center'>{$row['sid']}</td>
                                         <td>{$row['firstName']} {$row['middleName']} {$row['lastName']}</th>
                                         <td>{$row['email']}</td>
-                                        <td>" . ucfirst($row['gender']) . "</td>
-                                        <td>{$row['contact']}</td>
-                                        <td>{$row['sid']}</td>
-                                        <td>{$row['year_level']}</td>
+                                        <td class='text-center'>" . ucfirst($row['gender']) . "</td>
+                                        <td class='text-center'>" . (isset($row['course']) ? ($row['course']) : 'No course') . "</td>
+                                        <td class='text-center'>" . (isset($row['section']) ? (str_split($row['year_level'])[0] . '-' . $row['section']) : 'No section') . "</td>
                                         <td>
                                             <div class='flex gap-2 justify-center items-center'>
+                                                <a href='./view/student_enrolled_subjects.php?student={$row['id']}" . ($page != 1 ? '&prev_page=' . $page : '') . "' class='btn btn-info btn-sm text-white " . (!isset($row['course']) ? 'btn-disabled' : '') . "'>Enrolled Subjects</a>
                                                 <label for='view-student-{$row['id']}' class='btn btn-sm bg-blue-400 text-white'>View</label>
-                                                <label for='edit-student-{$row['id']}' class='btn btn-sm bg-gray-400 text-white'>Edit</label>
+                                                <label for='edit-student-{$row['id']}' onclick='updateSectionOptions({$row['id']}, {$row['sectionId']})' class='btn btn-sm bg-gray-400 text-white'>Edit</label>
                                                 <label for='delete-student-{$row['id']}' class='btn btn-sm bg-red-400 text-white'>Delete</label>
                                             </div>
                                         </td>
@@ -404,7 +869,7 @@ if($hasSearch) {
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -415,6 +880,8 @@ if($hasSearch) {
     <?php $result = $dbCon->query($query); ?>
     <?php if ($result->num_rows > 0) { ?>
         <?php while ($row = $result->fetch_assoc()) { ?>
+
+            <?php if ($row['is_irregular'] == '1') continue; ?>
 
             <!-- View modal -->
             <input type="checkbox" id="view-student-<?= $row['id'] ?>" class="modal-toggle" />
@@ -446,9 +913,9 @@ if($hasSearch) {
                         </div>
 
                         <!-- Details -->
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-semibold text-base">Gender</span>
+                                <span class="font-semibold text-base">Sex</span>
                                 <select class="select select-bordered" name="gender" required disabled>
                                     <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
                                     <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
@@ -459,10 +926,27 @@ if($hasSearch) {
                                 <span class="font-semibold text-base">Contact</span>
                                 <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required disabled />
                             </label>
+                        </div>
 
+                        <label class="flex flex-col gap-2">
+                            <span class="font-semibold text-base">Birthdate</span>
+                            <input class="input input-bordered" type="text" name="birthday" value="<?= date("F j, Y", strtotime($row['birthday'] ?? "2001-01-01")) ?>" required disabled />
+                        </label>
+
+                        <div class="grid grid-cols-3 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-semibold text-base">Birthdate</span>
-                                <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>" required disabled />
+                                <span class="font-semibold text-base">Course</span>
+                                <input class="input input-bordered" type="text" name="course" value="<?= $row['course'] ?? 'No course' ?>" required disabled />
+                            </label>
+                            
+                            <label class="flex flex-col gap-2">
+                                <span class="font-semibold text-base">Year Level</span>
+                                <input class="input input-bordered" type="text" name="year_level" value="<?= $row['year_level'] ?? 'No year level' ?>" required disabled />
+                            </label>
+                            
+                            <label class="flex flex-col gap-2">
+                                <span class="font-semibold text-base">Section</span>
+                                <input class="input input-bordered" type="text" name="section" value="<?= $row['section'] ?? 'No section' ?>" required disabled />
                             </label>
                         </div>
 
@@ -470,17 +954,6 @@ if($hasSearch) {
                         <label class="flex flex-col gap-2">
                             <span class="font-semibold text-base">Email</span>
                             <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required disabled />
-                        </label>
-
-                        <label class="flex flex-col gap-2">
-                            <span class="font-semibold text-base">Year level</span>
-                            <select class="select select-bordered" name="year_level" required disabled>
-                                <option value="1st year" <?php if (strtolower($row['year_level']) == '1st year') { ?> selected <?php } ?>>1st year</option>
-                                <option value="2nd year" <?php if (strtolower($row['year_level']) == '2nd year') { ?> selected <?php } ?>>2nd year</option>
-                                <option value="3rd year" <?php if (strtolower($row['year_level']) == '3rd year') { ?> selected <?php } ?>>3rd year</option>
-                                <option value="4th year" <?php if (strtolower($row['year_level']) == '4th year') { ?> selected <?php } ?>>4th year</option>
-                                <option value="5th year" <?php if (strtolower($row['year_level']) == '5th year') { ?> selected <?php } ?>>5th year</option>
-                            </select>
                         </label>
                     </div>
                 </div>
@@ -491,7 +964,7 @@ if($hasSearch) {
             <input type="checkbox" id="edit-student-<?= $row['id'] ?>" class="modal-toggle" />
             <div class="modal" role="dialog">
                 <div class="modal-box">
-                    <form class="flex flex-col gap-4  px-[32px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                    <form class="flex flex-col gap-4  px-[32px] mb-auto" method="post">
                         <input type="hidden" name="id" value="<?= $row['id'] ?>" />
 
                         <!-- Student ID -->
@@ -518,28 +991,60 @@ if($hasSearch) {
                         </div>
 
                         <!-- Details -->
-                        <div class="grid grid-cols-3 gap-4">
+                        <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2">
-                                <span class="font-semibold text-base">Gender</span>
+                                <span class="font-semibold text-base">Sex</span>
                                 <select class="select select-bordered" name="gender" required>
-                                    <option value="" selected disabled>Select Gender</option>
+                                    <option value="" selected disabled>Select Sex</option>
                                     <option value="male" <?php if ($row['gender'] == 'male') { ?> selected <?php } ?>>Male</option>
                                     <option value="female" <?php if ($row['gender'] == 'female') { ?> selected <?php } ?>>Female</option>
                                 </select>
                             </label>
 
-                            <label class="flex flex-col gap-2">
+                            <label class="flex flex-col gap-2" x-data>
                                 <span class="font-semibold text-base">Contact</span>
-                                <input class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required />
-                            </label>
-
-                            <label class="flex flex-col gap-2">
-                                <span class="font-semibold text-base">Birthdate</span>
-                                <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "1900-01-01" ?>" required />
+                                <input x-mask="9999-999-9999" @input="enforcePrefix" type="tel" class="input input-bordered" name="contact" placeholder="0912-345-6789" class="input input-bordered" name="contact" value="<?= $row['contact'] ?>" required />
                             </label>
                         </div>
 
+                        <label class="flex flex-col gap-2">
+                            <span class="font-semibold text-base">Birthdate</span>
+                            <input class="input input-bordered" type="date" name="birthday" value="<?= $row['birthday'] ?? "2001-01-01" ?>" required />
+                        </label>
 
+                        <label class="flex flex-col gap-2">
+                            <span class="font-semibold text-base">Course</span>
+
+                            <select class="select select-bordered" name="course" id="edit-course-<?= $row['id'] ?>" onchange="onCourseChanged(event)" required>
+                                <option value="" selected disabled>Select course</option>
+
+                                <?php foreach($courses as $course): ?>
+                                    <option value="<?= $course['id'] ?>" <?php if($course['course_code'] == $row['course']): ?> selected <?php endif; ?>><?= $course['course'] ?> (<?= $course['course_code'] ?>)</option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="flex flex-col gap-2">
+                                <span class="font-semibold text-base">Year Level</span>
+
+                                <select class="select select-bordered" name="year_level" id="edit-yearlevel-<?= $row['id'] ?>" onchange="onYearLevelChanged(event)" required <?php if(!isset($row['course'])): ?> disabled <?php endif; ?>>
+                                    <option value="" selected disabled>Select year level</option>
+                                    <option value="1st year" <?php if(isset($row['year_level']) && strtolower($row['year_level']) == '1st year') { ?> selected <?php } ?>>1st year</option>
+                                    <option value="2nd year" <?php if(isset($row['year_level']) && strtolower($row['year_level']) == '2nd year') { ?> selected <?php } ?>>2nd year</option>
+                                    <option value="3rd year" <?php if(isset($row['year_level']) && strtolower($row['year_level']) == '3rd year') { ?> selected <?php } ?>>3rd year</option>
+                                    <option value="4th year" <?php if(isset($row['year_level']) && strtolower($row['year_level']) == '4th year') { ?> selected <?php } ?>>4th year</option>
+                                    <option value="5th year" <?php if(isset($row['year_level']) && strtolower($row['year_level']) == '5th year') { ?> selected <?php } ?>>5th year</option>
+                                </select>
+                            </label>
+
+                            <label class="flex flex-col gap-2">
+                                <span class="font-bold text-[18px]">Section</span>
+                                <select class="select select-bordered" name="section" id="edit-section-<?= $row['id'] ?>" required <?php if(!isset($row['course']) || !isset($row['year_level'])): ?> disabled <?php endif; ?>>
+                                    <option value="" selected disabled>Select section</option>
+                                </select>
+                            </label>
+                        </div>
 
                         <!-- Account -->
                         <label class="flex flex-col gap-2">
@@ -547,7 +1052,7 @@ if($hasSearch) {
                             <input class="input input-bordered" type="email" name="email" value="<?= $row['email'] ?>" required />
                         </label>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <!-- <div class="grid grid-cols-2 gap-4">
                             <label class="flex flex-col gap-2" x-data="{show: true}">
                                 <span class="font-semibold text-base">New Password</span>
                                 <div class="relative">
@@ -569,19 +1074,7 @@ if($hasSearch) {
                                     </button>
                                 </div>
                             </label>
-                        </div>
-
-                        <label class="flex flex-col gap-2">
-                            <span class="font-semibold text-base">Year level</span>
-                            <select class="select select-bordered" name="year_level" required>
-                                <option value="" selected disabled>Select year level</option>
-                                <option value="1st year" <?php if (strtolower($row['year_level']) == '1st year') { ?> selected <?php } ?>>1st year</option>
-                                <option value="2nd year" <?php if (strtolower($row['year_level']) == '2nd year') { ?> selected <?php } ?>>2nd year</option>
-                                <option value="3rd year" <?php if (strtolower($row['year_level']) == '3rd year') { ?> selected <?php } ?>>3rd year</option>
-                                <option value="4th year" <?php if (strtolower($row['year_level']) == '4th year') { ?> selected <?php } ?>>4th year</option>
-                                <option value="5th year" <?php if (strtolower($row['year_level']) == '5th year') { ?> selected <?php } ?>>5th year</option>
-                            </select>
-                        </label>
+                        </div> -->
 
                         <!-- Actions -->
                         <div class="grid grid-cols-2 gap-4">
@@ -600,7 +1093,7 @@ if($hasSearch) {
                     <h3 class="text-lg font-bold text-error">Notice!</h3>
                     <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
 
-                    <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                    <form class="flex justify-end gap-4 items-center" method="post">
                         <input type="hidden" name="id" value="<?= $row['id'] ?>" />
 
                         <label class="btn" for="delete-student-<?= $row['id'] ?>">Cancel</label>
@@ -614,35 +1107,154 @@ if($hasSearch) {
         <?php mysqli_free_result($result); ?>
     <?php } ?>
 
+    <!-- Import file modal -->
+    <dialog class="modal" id="import_file_modal">
+        <div class="modal-box min-w-[474px]">
+            <form class="hidden" id="downloadTemplateForm" method="post">
+                <input type="hidden" name="download-template-excel">
+            </form>
+            <form class="flex flex-col gap-4" method="post" enctype="multipart/form-data">
+                <h2 class="text-center text-[28px] font-bold">Import Students</h2>
+                <p class="text-center text-[16px]">You can import students by uploading a <strong>CSV</strong> or <strong>EXCEL</strong> file.</p>
+                <label class="flex flex-col gap-2 mb-4">
+                    <span class="font-bold text-[18px]">Upload file</span>
+                    <input type="file" name="file" class="file-input file-input-sm md:file-input-md file-input-bordered w-full" accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv" required />
+                    <div class="label">
+                        <span class="label-text-alt text-error">Only <kbd class="p-1">*.xlsx</kbd> and <kbd class="p-1">*.csv</kbd> files are allowed</span>
+                    </div>
+                </label>
+
+                <div class="modal-action">
+                    <button class="btn btn-sm md:btn-md btn-warning text-base" type="button" onclick="downloadTemplate()"><i class="fa fa-download"></i> Download template</button>
+                    <button class="btn btn-sm md:btn-md btn-error text-base" type="button" onclick="import_file_modal.close()">Cancel</button>
+                    <button class="btn btn-sm md:btn-md btn-success text-base" name="import_student">Import</button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
     <!-- Export as excel modal -->
-    <input type="checkbox" class="modal-toggle" id="export_excel_modal">
-    <div class="modal" role="modal">
+    <dialog class="modal" id="export_excel_modal">
         <div class="modal-box">
             <h3 class="font-bold text-lg">Export as Excel</h3>
-            <p class="py-4">Do you really want to export all this data to excel file?</p>
+            <p class="py-4">Do you really want to export all this data to excel file? Students without courses and sections will be excluded.</p>
 
             <!-- Actions -->
-            <form class="modal-action" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <label class="btn btn-error text-base" for="export_excel_modal">Cancel</label>
-                <button class="btn btn-success text-base" name="export-excel">Export</button>
+            <form class="modal-action" method="post">
+                <button class="btn btn-error text-base" type="button" onclick="export_excel_modal.close()">Cancel</button>
+                <button class="btn btn-success text-base" name="export-excel" onclick="export_excel_modal.close()">Export</button>
             </form>
         </div>
-        <label class="modal-backdrop" for="export_excel_modal">close</label>
-    </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 
     <!-- Export as csv modal -->
-    <input type="checkbox" id="export_csv_modal" class="modal-toggle">
-    <div class="modal" role="dialog">
+    <dialog class="modal" id="export_csv_modal">
         <div class="modal-box">
             <h3 class="font-bold text-lg">Export as CSV</h3>
-            <p class="py-4">Do you really want to export all this data to csv file?</p>
+            <p class="py-4">Do you really want to export all this data to csv file? Students without courses and sections will be excluded.</p>
 
             <!-- Actions -->
-            <form class="modal-action" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <label class="btn btn-error text-base" for="export_csv_modal">Cancel</label>
-                <button class="btn btn-success text-base" name="export-csv">Export</button>
+            <form class="modal-action" method="post">
+                <button class="btn btn-error text-base" type="button" onclick="export_csv_modal.close()">Cancel</button>
+                <button class="btn btn-success text-base" name="export-csv" onclick="export_csv_modal.close()">Export</button>
             </form>
         </div>
-        <label class="modal-backdrop" for="export_csv_modal">close</label>
-    </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
 </main>
+
+<script>
+    const titleCase = (string) => string.split(' ').map((str) => (str.substr(0, 1).toUpperCase() + str.substring(1))).join(' ');
+
+    const updateSectionOptions = async (id, defaultSelected = null) => {
+        const yearLevel = titleCase(document.querySelector(`#edit-yearlevel-${id}`).value);
+        const courseId = document.querySelector(`#edit-course-${id}`).value;
+        const section = document.querySelector(`#edit-section-${id}`);
+
+        if(!yearLevel || !courseId)
+            return;
+
+        // Remove all options
+        section.innerHTML = "<option value='' selected disabled>Loading sections...</option>";
+
+        // Disable section
+        section.setAttribute('disabled', '');
+
+        // Fetch all available section from selected course and year level
+        const sections = await fetch(`<?= $_SERVER['PHP_SELF'] ?>?courseId=${courseId}&yearLevel=${yearLevel}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "content-type": "application/json"
+            }})
+            .then(res => res.json());
+
+        // If there are sections found, display them all
+        if(sections.length > 0) {
+            section.removeAttribute('disabled');
+            section.innerHTML = "<option value='' selected disabled>Select sections</option>";
+
+            sections.forEach(sec => {
+                const option = document.createElement('option');
+                option.setAttribute('value', sec.id);
+
+                if(defaultSelected != null && sec.id == defaultSelected) {
+                    option.setAttribute('selected', '');
+                }
+
+                const textNode = document.createTextNode(sec.name);
+                option.appendChild(textNode);
+                section.appendChild(option);
+            });
+        } else {
+            section.setAttribute('disabled', '');
+
+            const option = document.createElement('option');
+            option.setAttribute('value', '');
+            option.setAttribute('selected', '');
+            option.setAttribute('disabled', '');
+
+            const textNode = document.createTextNode('No available sections')
+            option.appendChild(textNode);
+            section.appendChild(option);
+        }
+    }
+
+    const onCourseChanged = (e) => {
+        const yearLevel = document.querySelector(`#edit-yearlevel-${e.target.id.split('-').pop()}:disabled`);
+
+        if(yearLevel) {
+            if (!!yearLevel.value) {
+                updateSectionOptions(e.target.id.split('-').pop());
+            }
+
+            yearLevel.removeAttribute('disabled');
+        } else {
+            updateSectionOptions(e.target.id.split('-').pop());
+        }
+    };
+
+    const onYearLevelChanged = (e) => {
+        updateSectionOptions(e.target.id.split('-').pop());
+    };
+
+    function enforcePrefix(e) {
+        let currentValue = e.target.value;
+
+        if (!currentValue.startsWith("09")) {
+            e.target.value = "09" + currentValue.substring(2);
+        }
+    }
+
+    function downloadTemplate(e) {
+        document.querySelector("#downloadTemplateForm").submit();
+        import_file_modal.close();
+    }
+</script>

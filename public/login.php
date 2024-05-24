@@ -8,7 +8,6 @@ $message = "";
 require "../configuration/config.php";
 require("../auth/controller/verify-login.php");
 require("../auth/controller/auth.controller.php");
-require_once("../components/header.php");
 
 $currentDir = dirname($_SERVER['PHP_SELF']);
 $FirstDir = explode('/', trim($currentDir, '/'));
@@ -19,14 +18,26 @@ if (AuthController::isAuthenticated()) {
     exit();
 }
 
+require_once("../components/header.php");
 ?>
-<main class="h-screen ">
-    <div class="w-full h-full grid grid-cols-2 gap-4">
-        <div class="px-[120px] flex justify-center  gap-4 flex-col">
+
+<main class="w-full h-[100vh] grid grid-cols-1 lg:grid-cols-2">
+    <div class="relative hidden lg:block">
+        <div class="absolute top-0 p-4 gap-2 items-center z-20">
+            <img src="../assets/images/logo.png" alt="" class="w-[100px]">
+        </div>
+
+        <div class="absolute top-0 w-full h-full bg-[#00000055] z-10"></div>
+        <img src="../assets/images/background.png" alt="" class="h-full w-full object-cover">
+    </div>
+
+    <div class="flex justify-center items-center px-[64px]">
+        <!-- Form -->
+        <form class="flex flex-col gap-4 max-w-[600px]" action="" method="POST">
             <!-- Header -->
-            <div class="flex flex-col justify-center items-center gap-4 mb-4 ">
-                <h1 class="text-[48px] font-bold">Login</h1>
-                <span class="text-base text-center">Welcome to the LogIn portal! Navigate your academic journey with the web-based grading system of Cavite State University - General Triasl City, Campus, Lets get started</span>
+            <div class="flex flex-col justify-center gap-2 mb-4 w-full">
+                <span class="italic">Welcome to</span>
+                <h1 class="text-[38px] font-bold">Web-based Grading System</h1>
             </div>
 
             <?php if ($hasError) { ?>
@@ -38,37 +49,33 @@ if (AuthController::isAuthenticated()) {
                 </div>
             <?php } ?>
 
-            <!-- Form -->
-            <form class="" action="" method="POST">
-                <div class="flex flex-col gap-4 w-full">
-                    <!-- Email -->
-                    <label class="flex flex-col gap-2">
-                        <span>Email</span>
-                        <input type="email" name="email" class="input input-bordered input-md" placeholder="Enter your Email" required />
-                    </label>
+            <!-- Email -->
+            <label class="flex flex-col gap-2">
+                <span>Email</span>
+                <input type="email" name="email" class="input input-bordered input-md" placeholder="Enter your Email" required />
+            </label>
 
-                    <!-- Password -->
-                    <label class="flex flex-col gap-2" x-data="{show: true}">
-                        <span>Password</span>
-                        <div class="relative">
-                            <input type="password" name="password" class="input input-bordered input-md w-full" placeholder="Enter your Password" required x-bind:type="show ? 'password' : 'text'">
-                            <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
-                                <i x-show="!show" class='bx bx-hide'></i>
-                                <i x-show="show" class='bx bx-show'></i>
-                            </button>
-                        </div>
-                    </label>
-
-                    <!-- Break -->
-                    <span class="border border-black my-2"></span>
-                    <button type="submit" name="login" class="btn bg-[#1b651b] text-base text-white ">Login</button>
+            <!-- Password -->
+            <label class="flex flex-col gap-2" x-data="{show: true}">
+                <span>Password</span>
+                <div class="relative">
+                    <input type="password" name="password" class="input input-bordered input-md w-full" placeholder="Enter your Password" required x-bind:type="show ? 'password' : 'text'">
+                    <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
+                        <i x-show="!show" class='bx bx-hide'></i>
+                        <i x-show="show" class='bx bx-show'></i>
+                    </button>
                 </div>
-            </form>
-        </div>
+            </label>
 
-        <div  style='background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../assets/images/background.jpg); background-size: cover;'></div>
+            <!-- Break -->
+            <span class="border border-black my-2"></span>
+            <p class="w-full flex flex-col md:flex-row md:justify-between">
+                <span>Have you forgotten your password?</span>
+                <a class="link text-sky-500" href="./forgot-password.php">Reset Password</a>
+            </p>
+            <button type="submit" name="login" class="btn bg-[#1b651b] text-base text-white ">Login</button>
+        </form>
     </div>
-
 </main>
 
 

@@ -4,9 +4,10 @@ session_start();
 
 require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
+require('../../../utils/mailer.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -24,29 +25,41 @@ if (isset($_POST['create-admin'])) {
     $middleName = $dbCon->real_escape_string($_POST['middleName']);
     $lastName = $dbCon->real_escape_string($_POST['lastName']);
     $gender = $dbCon->real_escape_string($_POST['gender']);
-    $contact = $dbCon->real_escape_string($_POST['contact']);
+    $contact = str_replace("-", "", $dbCon->real_escape_string($_POST['contact']));
     $birthday = $dbCon->real_escape_string($_POST['birthday']);
     $email = filter_var($dbCon->real_escape_string($_POST['email']), FILTER_VALIDATE_EMAIL);
-    $password = $dbCon->real_escape_string($_POST['password']);
 
     if (!$email) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid email address";
-    } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
+    } else if (!str_ends_with($email, "@cvsu.edu.ph")) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Please enter a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+        $message = "Please use your <strong>@cvsu.edu.ph</strong> email address.";
     } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
-    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'")->num_rows > 0) {
+    } else if ($dbCon->query("SELECT * FROM userdetails WHERE email = '$email'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "A user with that email address already exists!";
     } else {
-        $insertAdminQuery = "INSERT INTO ap_userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, roles) VALUES(
+        // Auto generate password using uuid to prevent collision and with at least 8 characters    
+        // $password = substr(md5(uniqid()), 0, 8);
+
+        // randomly insert at least 1-3 special character to the password
+        // $specialChars = ['!', '@', '#', '$', '&', '_', '?'];
+        // $specialCharCount = rand(1, 3);
+        // for ($i = 0; $i < $specialCharCount; $i++) {
+        //     $password = substr_replace($password, $specialChars[rand(0, count($specialChars) - 1)], rand(0, strlen($password) - 1), 0);
+        // }
+
+        // Default password
+        $password = constant("USER_DEFAULT_PASSWORD");
+
+        $insertAdminQuery = "INSERT INTO userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, roles) VALUES(
             '$firstName',
             '$middleName',
             '$lastName',
@@ -61,9 +74,33 @@ if (isset($_POST['create-admin'])) {
         $insertAdminResult = $dbCon->query($insertAdminQuery);
 
         if ($insertAdminResult) {
+            // get the email template
+            $template = getNewAccountMailTemplate(
+                $email,
+                "$firstName $middleName $lastName",
+                $password,
+                "Welcome to CvSU Grading System",
+                constant('APP_URL'),
+                "We've sent you this email to notify you that we have created your account and you may login using this email address and this generated password. Under no circumstances are you to share this password to anyone. You may change your password once you've logged in.",
+                date('Y')
+            );
+
+            // send the email
+            sendMail($email, 'CvSU Grading System', $template);
+
             $hasError = false;
             $hasSuccess = true;
-            $message = "Admin successfully created!";
+            $message = "Admin successfully created! The password has been sent to its email address.";
+
+            // unset entered values
+            unset($firstName);
+            unset($middleName);
+            unset($lastName);
+            unset($gender);
+            unset($contact);
+            unset($birthday);
+            unset($email);
+            unset($password);
         } else {
             $hasError = true;
             $hasSuccess = false;
@@ -105,61 +142,48 @@ if (isset($_POST['create-admin'])) {
                     <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
-                            <input class="input input-bordered" name="firstName" placeholder="Enter First name" required />
+                            <input class="input input-bordered" name="firstName" placeholder="Enter First name" value="<?= $firstName ?? "" ?>" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middleName" placeholder="Enter Middle name" />
+                            <input class="input input-bordered" name="middleName" placeholder="Enter Middle name" value="<?= $middleName ?? "" ?>" />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered" name="lastName" required placeholder="Enter Last name" />
+                            <input class="input input-bordered" name="lastName" required placeholder="Enter Last name" value="<?= $lastName ?? "" ?>" required />
                         </label>
                     </div>
 
                     <!-- Details -->
                     <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Gender</span>
+                            <span class="font-bold text-[18px]">Sex</span>
                             <select class="select select-bordered" name="gender" required>
-                                <option value="" selected disabled>Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <option value="" selected disabled>Select Sex</option>
+                                <option value="male" <?php if (isset($gender) && strtolower($gender) == 'male') { ?> selected <?php } ?>>Male</option>
+                                <option value="female" <?php if (isset($gender) && strtolower($gender) == 'female') { ?> selected <?php } ?>>Female</option>
                             </select>
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data>
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input typ="tel" class="input input-bordered" name="contact" placeholder="Enter Contact name" required />
+                            <input x-mask="9999-999-9999" @input="enforcePrefix" type="tel" class="input input-bordered" name="contact" placeholder="0912-345-6789" value="<?= $contact ?? "" ?>" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" name="birthday" value="1900-01-01" required />
+                            <input class="input input-bordered" type="date" name="birthday" value="2000-01-01" required />
                         </label>
                     </div>
 
 
 
                     <!-- Account -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Email</span>
-                            <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" required />
-                        </label>
-
-                        <label class="flex flex-col gap-2" x-data="{show: true}">
-                            <span class="font-bold text-[18px]">Password</span>
-                            <div class="relative">
-                                <input type="password" placeholder="Enter Password" class="input input-bordered w-full" name="password" x-bind:type="show ? 'password' : 'text'" required />
-                                <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
-                                    <i x-show="!show" class='bx bx-hide'></i>
-                                    <i x-show="show" class='bx bx-show'></i>
-                                </button>
-                            </div>
-                        </label>
-                    </div>
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Email</span>
+                        <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" value="<?= $email ?? "" ?>" required />
+                    </label>
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
@@ -170,4 +194,17 @@ if (isset($_POST['create-admin'])) {
             </div>
         </div>
     </section>
+
 </main>
+
+<script>
+    function enforcePrefix(e) {
+        let currentValue = e.target.value;
+
+        if (!currentValue.startsWith("09")) {
+            e.target.value = "09" + currentValue.substring(2);
+        }
+
+        console.log("HELO")
+    }
+</script>

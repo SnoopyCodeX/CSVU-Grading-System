@@ -6,16 +6,16 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 // check if request is an ajax request
-if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+/* if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
     // fetch students
     if (isset($_GET['year_level'])) {
         $yearLevel = $dbCon->real_escape_string($_GET['year_level']);
 
 
         if ($yearLevel === "All") {
-            $query = "SELECT * FROM ap_userdetails WHERE roles='student' AND id NOT IN (SELECT student_id FROM ap_section_students)";
+            $query = "SELECT * FROM userdetails WHERE roles='student' AND id NOT IN (SELECT student_id FROM section_students)";
         } else {
-            $query = "SELECT * FROM ap_userdetails WHERE year_level='$yearLevel' AND roles='student' AND id NOT IN (SELECT student_id FROM ap_section_students)";
+            $query = "SELECT * FROM userdetails WHERE year_level='$yearLevel' AND roles='student' AND id NOT IN (SELECT student_id FROM section_students)";
         }
 
         $result = $dbCon->query($query);
@@ -29,10 +29,10 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     }
 
     exit();
-}
+} */
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -51,12 +51,15 @@ if (isset($_POST['create_section'])) {
     $term = $dbCon->real_escape_string($_POST['term']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $course = $dbCon->real_escape_string($_POST['course']);
-    $instructor = $dbCon->real_escape_string($_POST['instructor']);
-    $students = json_decode($_POST['students']);
+    // $students = json_decode($_POST['students']);
     $subjects = $_POST['subjects'];
 
+    // Get instructor from course
+    $courseQuery = $dbCon->query("SELECT * FROM courses WHERE id='$course'");
+    $courseInstructor = $courseQuery->fetch_assoc()['adviser'];
+
     // Check if section name already exists
-    $checkQuery = "SELECT * FROM ap_sections WHERE name='$sectionName'";
+    $checkQuery = "SELECT * FROM sections WHERE name='$sectionName' AND year_level='$yearLevel' AND course='$course'";
     $checkResult = $dbCon->query($checkQuery);
 
     if ($checkResult->num_rows > 0) {
@@ -67,21 +70,21 @@ if (isset($_POST['create_section'])) {
         $message = "Please select at least one subject!";
     } else {
         // Create section
-        $query = "INSERT INTO ap_sections (name, school_year, term, year_level, course, instructor) VALUES ('$sectionName', '$schoolYear', '$term', '$yearLevel', '$course', '$instructor')";
+        $query = "INSERT INTO sections (name, school_year, term, year_level, course, instructor) VALUES ('$sectionName', '$schoolYear', '$term', '$yearLevel', '$course', '$courseInstructor')";
         $result = $dbCon->query($query);
 
         if ($result) {
             $sectionId = $dbCon->insert_id;
 
             // Create section students
-            foreach ($students as $student) {
-                $query = "INSERT INTO ap_section_students (section_id, student_id) VALUES ('$sectionId', '$student')";
-                $result = $dbCon->query($query);
-            }
+            // foreach ($students as $student) {
+            //     $query = "INSERT INTO section_students (section_id, student_id) VALUES ('$sectionId', '$student')";
+            //     $result = $dbCon->query($query);
+            // }
 
             // Create section subjects
             foreach ($subjects as $subject) {
-                $query = "INSERT INTO ap_section_subjects (section_id, subject_id) VALUES ('$sectionId', '$subject')";
+                $query = "INSERT INTO section_subjects (section_id, subject_id) VALUES ('$sectionId', '$subject')";
                 $result = $dbCon->query($query);
             }
 
@@ -95,19 +98,19 @@ if (isset($_POST['create_section'])) {
 }
 
 // Prefetch all students query that are not in any section
-$studentsQuery = "SELECT * FROM ap_userdetails WHERE roles='student' AND id NOT IN (SELECT student_id FROM ap_section_students)";
+// $studentsQuery = "SELECT * FROM userdetails WHERE roles='student' AND id NOT IN (SELECT student_id FROM section_students)";
 
 // Prefetch all instructors query
-$instructorsQuery = "SELECT * FROM ap_userdetails WHERE roles='instructor'";
+$instructorsQuery = "SELECT * FROM userdetails WHERE roles='instructor'";
 
 // Prefetch all subjects query
-$subjectsQuery = "SELECT * FROM ap_subjects";
+$subjectsQuery = "SELECT * FROM subjects";
 
 // Prefetch all school year query
-$schoolYearQuery = "SELECT * FROM ap_school_year";
+$schoolYearQuery = "SELECT * FROM school_year";
 
 // Prefetch all course query
-$courseQuery = "SELECT * FROM ap_courses";
+$courseQuery = "SELECT * FROM courses";
 ?>
 <style>
     .ts-wrapper .ts-control {
@@ -196,9 +199,9 @@ $courseQuery = "SELECT * FROM ap_courses";
                                 <!--Display all the Semister here-->
                                 <option value="" selected disabled>Select Semester</option>
 
-                                <option value="1st Sem">First Semester</option>
-                                <option value="2nd Sem">Second Semester</option>
-                                <option value="3rd Sem">Third Semester</option>
+                                <option value="1st Sem">1st Sem</option>
+                                <option value="2nd Sem">2nd Sem</option>
+                                <option value="Midyear">Midyear</option>
                             </select>
                         </label>
 
@@ -231,28 +234,14 @@ $courseQuery = "SELECT * FROM ap_courses";
 
 
                     <!-- Student Selections -->
-                    <div class="divider">People</div>
+                    <!-- <div class="divider">People</div> -->
 
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Instructor</span>
-                        <select class="select select-bordered" name="instructor" required>
-                            <!--Display all the subjects here-->
-                            <option value="" selected disabled>Select instructor</option>
-
-                            <?php $instructors = $dbCon->query($instructorsQuery); ?>
-                            <?php while ($instructor = $instructors->fetch_assoc()) { ?>
-                                <option value="<?php echo $instructor['id'] ?>"><?php echo "{$instructor['firstName']} {$instructor['middleName']} {$instructor['lastName']}" ?></option>
-                            <?php } ?>
-                        </select>
-                    </label>
-
-                    <label class="flex flex-col gap-2">
+                    <!-- <label class="flex flex-col gap-2">
                         <div class="flex justify-between items-center">
                             <span class="font-bold text-[18px]">Students</span>
 
                             <label class="flex flex-col gap-2">
                                 <select class="select select-bordered select-sm" id="section-students-filter">
-                                    <!--Display all the Year here-->
                                     <option value="" selected disabled>Select year level</option>
 
                                     <option value="All" selected>All</option>
@@ -265,23 +254,23 @@ $courseQuery = "SELECT * FROM ap_courses";
                             </label>
                         </div>
 
-                        <div class="border border-black rounded-[5px] w-full h-[300px] grid md:grid-cols-3 gap-4 p-4 overflow-y-scroll" id="section-students-body">
-                            <?php $students = $dbCon->query($studentsQuery); ?>
-                            <?php while ($student = $students->fetch_assoc()) { ?>
-                                <div class="h-[56px] border border-gray-400 rounded-[5px]">
+                        <div class="border border-black rounded-[5px] w-full h-[300px] gap-4 p-4 overflow-y-scroll" id="section-students-body">
+                            <?php // $students = $dbCon->query($studentsQuery); ?>
+                            <?php // while ($student = $students->fetch_assoc()) { ?>
+                                <div class="h-[56px] border border-gray-400 rounded-[5px] mb-4">
                                     <div class="flex gap-4 justify-start px-4 items-center  gap-4">
                                         <input type="checkbox" class="checkbox checkbox-sm" />
                                         <div class="flex flex-col gap-1">
-                                            <span data-studentId="<?= $student['id'] ?>"><?= $student['firstName'] ?> <?= $student['middleName'] ?> <?= $student['lastName'] ?></span>
-                                            <span class="badge badge-info"><?= $student['year_level'] ?></span>
+                                            <span data-studentId="<?= "" // $student['id'] ?>"><?= "" // $student['firstName'] ?> <?= "" // $student['middleName'] ?> <?= "" // $student['lastName'] ?></span>
+                                            <span class="badge badge-info"><?= "" // $student['year_level'] ?></span>
                                         </div>
                                     </div>
                                 </div>
-                            <?php } ?>
+                            <?php // } ?>
                         </div>
                     </label>
 
-                    <input type="hidden" name="students" id="selected-students" />
+                    <input type="hidden" name="students" id="selected-students" /> -->
 
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
@@ -298,14 +287,14 @@ $courseQuery = "SELECT * FROM ap_courses";
     document.addEventListener("DOMContentLoaded", () => {
         new TomSelect("#subjects", {});
 
-        const yearLevelSelect = document.querySelector("#section-students-filter");
+        /* const yearLevelSelect = document.querySelector("#section-students-filter");
         const studentContainer = document.querySelector("#section-students-body");
 
         // Year level filter for student selection
         yearLevelSelect.addEventListener("change", (e) => {
             const yearLevel = e.target.value;
 
-            fetch(`<?= $_SERVER['PHP_SELF'] ?>?year_level=${yearLevel}`, {
+            fetch(`<?= "" //$_SERVER['PHP_SELF'] ?>?year_level=${yearLevel}`, {
                     method: "GET",
                     headers: {
                         "X-Requested-With": "XMLHttpRequest",
@@ -318,7 +307,7 @@ $courseQuery = "SELECT * FROM ap_courses";
 
                     students.forEach(student => {
                         const studentDiv = document.createElement("div");
-                        studentDiv.classList.add("h-[56px]", "border", "border-gray-400", "rounded-[5px]");
+                        studentDiv.classList.add("h-[56px]", "border", "border-gray-400", "rounded-[5px]", "mb-4");
                         studentDiv.innerHTML = `
                             <div class="flex gap-4 justify-start px-4 items-center  gap-4">
                                 <input type="checkbox" class="checkbox checkbox-sm" />
@@ -342,6 +331,6 @@ $courseQuery = "SELECT * FROM ap_courses";
 
             // Set the value of the hidden input
             document.querySelector("#selected-students").value = JSON.stringify(studentIds);
-        });
+        }); */
     });
 </script>

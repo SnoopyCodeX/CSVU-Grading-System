@@ -6,7 +6,7 @@ require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
     exit();
 }
 
@@ -21,24 +21,42 @@ $message = "";
 // update school year
 if (isset($_POST['update_school_year'])) {
     $school_year = $dbCon->real_escape_string($_POST['school_year']);
+    $semester = strtolower($dbCon->real_escape_string($_POST['semester']));
+    $status = $dbCon->real_escape_string($_POST['status']);
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    if ($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year' AND id = '$id'")->num_rows > 0) {
+    if ($dbCon->query("SELECT * FROM school_year WHERE school_year = '$school_year' AND semester='$semester' AND id = '$id' AND status='$status'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "School year already exists";
+        $message = "School year <strong>$school_year</strong>@<strong>$semester</strong> wasn't updated because nothing was changed.";
     } else {
-        $sql = "UPDATE ap_school_year SET school_year = '$school_year' WHERE id = '$id'";
-        $result = mysqli_query($dbCon, $sql);
+        $hasActive = false;
 
-        if ($result) {
-            $hasError = false;
-            $hasSuccess = true;
-            $message = "School year <strong>$school_year</strong> updated successfully";
-        } else {
-            $hasError = true;
-            $hasSuccess = false;
-            $message = "Error updating school year <strong>$school_year</strong>";
+        if ($status == 'active') {
+            // check if there are other school_years that are active
+            $checkActiveSchoolYear = $dbCon->query("SELECT * FROM school_year WHERE id <> $id AND status='active'");
+    
+            if ($checkActiveSchoolYear->num_rows > 0) {
+                $hasError = true;
+                $hasSuccess = false;
+                $hasActive = true;
+                $message = "Please disable other active school years before setting another school year as active";
+            }
+        }
+        
+        if (!$hasActive) {
+            $sql = "UPDATE school_year SET school_year = '$school_year', status='$status' WHERE id = '$id'";
+            $result = mysqli_query($dbCon, $sql);
+    
+            if ($result) {
+                $hasError = false;
+                $hasSuccess = true;
+                $message = "School year <strong>$school_year</strong>@<strong>$semester</strong> updated successfully";
+            } else {
+                $hasError = true;
+                $hasSuccess = false;
+                $message = "Error updating school year <strong>$school_year</strong>@<strong>$semester</strong>";
+            }
         }
     }
 }
@@ -47,45 +65,103 @@ if (isset($_POST['update_school_year'])) {
 if (isset($_POST['delete_school_year'])) {
     $id = $dbCon->real_escape_string($_POST['id']);
 
-    $sql = "DELETE FROM ap_school_year WHERE id = '$id'";
-    $result = mysqli_query($dbCon, $sql);
+    $schoolYearQuery = $dbCon->query("SELECT * FROM school_year WHERE id = '$id'");
 
-    if ($result) {
-        $hasError = false;
-        $hasSuccess = true;
-        $message = "School year <strong>$school_year</strong> deleted successfully";
+    if ($schoolYearQuery->num_rows > 0) {
+        $schoolYear = $schoolYearQuery->fetch_assoc();
+
+        if ($schoolYear['status'] == 'inactive') {
+            $sql = "DELETE FROM school_year WHERE id = '$id'";
+            $result = $dbCon->query($sql);
+
+            if ($result) {
+                $hasError = false;
+                $hasSuccess = true;
+                $message = "School year <strong>$schoolYear[school_year]</strong>@<strong>$schoolYear[semester]</strong> has been deleted successfully!";
+            } else {
+                $hasError = true;
+                $hasSuccess = false;
+                $message = "Error deleting school year <strong>$schoolYear[school_year]</strong>@<strong>$schoolYear[semester]</strong>";
+            }
+        } else {
+            $hasError = true;
+            $hasSuccess = false;
+            $message = "Cannot delete <strong>$schoolYear[school_year]</strong>@<strong>$schoolYear[semester]</strong> because it is currently active";
+        }
     } else {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Error deleting school year <strong>$school_year</strong>";
+        $message = "School year does not exist!";
     }
 }
 
 // reset school year
-if (isset($_POST['reset_school_year'])) {
-    $school_year = $dbCon->real_escape_string($_POST['school_year']);
+/* if (isset($_POST['reset_school_year'])) {
+    $school_yearId = $dbCon->real_escape_string($_POST['school_year']);
 
-    // check if school year exists only in ap_sections
-    if ($dbCon->query("SELECT * FROM ap_sections WHERE school_year = '$school_year'")->num_rows == 0) {
-        $hasError = true;
-        $hasSuccess = false;
-        $message = "School year <strong>$school_year</strong> cannot be reset because it is not being used.";
-    } else {
-        // delete records from ap_sections table with the school_year=$school_year
-        $sql = "DELETE FROM ap_sections WHERE school_year = '$school_year'";
-        $result = mysqli_query($dbCon, $sql);
+    $schoolYearQuery = $dbCon->query("SELECT * FROM school_year WHERE id = $school_yearId");
+    $schoolYear = $schoolYearQuery->fetch_assoc();
 
-        if ($result) {
-            $hasError = false;
-            $hasSuccess = true;
-            $message = "School year <strong>$school_year</strong> has been reset successfully";
-        } else {
+    $multiCheckQuery = "SELECT * FROM activities WHERE school_year = '$school_yearId';";
+    $multiCheckQuery .= "SELECT * FROM sections WHERE school_year = '$school_yearId'";
+
+    // check if school year exists only in sections
+    if ($dbCon->multi_query($multiCheckQuery)) {
+        $allUsed = 0;
+
+        do {
+            if ($result = $dbCon->store_result()) {
+                if ($result->num_rows > 0) {
+                    $allUsed += 1;
+                }
+            }
+        } while ($dbCon->more_results() && $dbCon->next_result());
+
+        if ($allUsed == 0) {
             $hasError = true;
             $hasSuccess = false;
-            $message = "Error resetting school year <strong>$school_year</strong>";
-        }
+            $message = "School year <strong>$schoolYear[school_year] @ $schoolYear[semester]</strong> has no data to be reset";
+        } else {
+            // First, delete all records in activities
+            $deleteActivitiesQuery = "DELETE FROM activities WHERE school_year = '$school_yearId'";
+            $deleteActivitiesResult = mysqli_query($dbCon, $deleteActivitiesQuery);
+
+            // Get all section ids in the school year
+            $getSectionIdsQuery = "SELECT id FROM sections WHERE school_year = '$school_yearId'";
+            $sectionIds = $dbCon->query($getSectionIdsQuery);
+
+            // store all section ids in an array
+            $sectionIdsArray = [];
+            while ($sectionId = $sectionIds->fetch_assoc()) {
+                array_push($sectionIdsArray, $sectionId['id']);
+            }
+
+            // Loop through the section ids array and delete all data in student_final_grades, activity_scores using the section ids
+            foreach ($sectionIdsArray as $sectionId) {
+                $deleteStudentActivityScoresQuery = "DELETE FROM activity_scores WHERE section_id = '$sectionId'";
+                $deleteStudentFinalGradesQuery = "DELETE FROM student_final_grades WHERE section = '$sectionId'";
+
+                $deleteStudentFinalGradesResult = $dbCon->query($deleteStudentFinalGradesQuery);
+                $deleteStudentActivityScoresResult = $dbCon->query($deleteStudentActivityScoresQuery);
+            }
+
+            // check if all queries are successful
+            if ($deleteStudentFinalGradesResult && $deleteStudentActivityScoresResult) {
+                $hasError = false;
+                $hasSuccess = true;
+                $message = "School year <strong>$schoolYear[school_year] @ $schoolYear[semester]</strong> has been reset successfully";
+            } else {
+                $hasError = true;
+                $hasSuccess = false;
+                $message = "Error resetting school year <strong>$schoolYear[school_year] @ $schoolYear[semester]</strong>";
+            }
+        } 
+    } else {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Error resetting school year <strong>$schoolYear[school_year] @ $schoolYear[semester]</strong>";
     }
-}
+} */
 
 // pagination 
 $limit = 10;
@@ -93,17 +169,17 @@ $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
 // total pages
-$result1 = $dbCon->query("SELECT count(id) AS id FROM ap_school_year");
+$result1 = $dbCon->query("SELECT count(id) AS id FROM school_year");
 $schoolYearCount = $result1->fetch_all(MYSQLI_ASSOC);
 $total = $schoolYearCount[0]['id'];
 $pages = ceil($total / $limit);
 
 // get school year
-$query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
+$query = "SELECT * FROM school_year LIMIT $start, $limit";
 ?>
 
 
-<main class="overflow-hidden h-screen flex">
+<main class="overflow-x-auto h-screen flex">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -113,11 +189,11 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[24px] font-bold">School Year</h1>
+                    <h1 class="text-[24px] font-semibold">Manage School Years</h1>
                 </div>
                 <div class="flex gap-4 flex-col md:flex-row">
-                    <label for="reset-academic" class="btn btn-sm ">Reset School Year</label>
-                    <a href="./create/academic-year.php" class="btn btn-sm ">Create</a>
+                    <!-- <label for="reset-academic" class="btn btn-error"><i class="bx bx-reset"></i> Reset School Year</label> -->
+                    <a href="./create/academic-year.php" class="btn btn-success"><i class="bx bx-plus-circle"></i> Create</a>
                 </div>
             </div>
 
@@ -141,12 +217,14 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
 
             <!-- Table Content -->
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
+                <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white">ID</td>
-                            <td class="bg-slate-500 text-white">Academic Year</td>
-                            <td class="bg-slate-500 text-white text-center">Action</td>
+                            <!-- <td class="bg-slate-500 text-white">ID</td> -->
+                            <td class="bg-slate-500 text-white text-center">Academic Year</td>
+                            <td class="bg-slate-500 text-white text-center">Semester</td>
+                            <td class="bg-slate-500 text-white text-center">Status</td>
+                            <td class="bg-slate-500 text-white text-center text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
@@ -154,13 +232,15 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                         <?php while ($row = $schoolYears->fetch_assoc()) { ?>
 
                             <tr>
-                                <td><?= $row['id'] ?></td>
-                                <td>
-                                    <div class="badge p-4 bg-green-400 text-white font-semibold">
-                                        <?= $row['school_year'] ?>
+                                <!-- <td><?= $row['id'] ?></td> -->
+                                <td class="text-center"><?= $row['school_year'] ?></td>
+                                <td class="text-center"><?= ucfirst($row['semester']) ?></td>
+                                <td class="text-center">
+                                    <div class="badge p-4 <?= strtolower($row['status']) == 'active' ? 'bg-green-400' : 'bg-red-400' ?> text-white font-semibold">
+                                        <?= ucfirst($row['status']) ?>
                                     </div>
                                 </td>
-                                <td>
+                                <td class="text-center">
                                     <div class="flex justify-center gap-2">
                                         <label for="edit-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-gray-400 text-white">Edit</label>
                                         <label for="delete-school-year-<?= $row['id'] ?>" class="btn btn-sm bg-red-400 text-white">Delete</label>
@@ -181,7 +261,7 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -201,16 +281,27 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
                     <!-- Name -->
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Edit School Year</span>
-                        <select class="select select-bordered" name="school_year" required>
+                    <label class="flex flex-col gap-2 mb-2" x-data>
+                        <span class="font-bold text-[18px]">School Year</span>
+                        <input x-mask="9999 - 9999" placeholder="<?= date('Y') ?> - <?= date('Y', strtotime('+ 1 year')) ?>" name="school_year" class="input input-bordered" value="<?= $row['school_year'] ?>" required>
+                    </label>
+
+                    <label class="flex flex-col gap-2 mb-2">
+                        <span class="font-bold text-[18px]">Semester</span>
+                        <select class="select select-bordered" name="semester" required>
                             <option disabled selected>Select an option</option>
-                            <?php
-                            $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year WHERE id != '$row[id]'");
-                            while ($schoolYear = $existingSchoolYears->fetch_assoc()) {
-                                echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
-                            }
-                            ?>
+                            <option value="1st Sem" <?php if(strtolower($row['semester']) == '1st sem'): ?> selected <?php endif; ?>>1st Semester</option>
+                            <option value="2nd Sem" <?php if(strtolower($row['semester']) == '2nd sem'): ?> selected <?php endif; ?>>2nd Semester</option>
+                            <option value="Midyear" <?php if(strtolower($row['semester']) == 'midyear'): ?> selected <?php endif; ?>>Midyear</option>
+                        </select>
+                    </label>
+
+                    <label class="flex flex-col gap-2 mb-2">
+                        <span class="font-bold text-[18px]">Edit Status</span>
+                        <select class="select select-bordered" name="status" required>
+                            <option disabled selected>Select an option</option>
+                            <option value="active" <?php if(strtolower($row['status']) == 'active'): ?> selected  <?php endif; ?>>Active</option>
+                            <option value="inactive" <?php if(strtolower($row['status']) == 'inactive'): ?> selected  <?php endif; ?>>Inactive</option>
                         </select>
                     </label>
 
@@ -234,7 +325,7 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
                     <input type="hidden" name="id" value="<?= $row['id'] ?>">
 
                     <label class="btn" for="delete-school-year-<?= $row['id'] ?>">Close</label>
-                    <button class="btn btn-error" name="delete_school-year">Delete</button>
+                    <button class="btn btn-error" name="delete_school_year">Delete</button>
                 </form>
             </div>
             <label class="modal-backdrop" for="delete-school-year-<?= $row['id'] ?>">Close</label>
@@ -243,20 +334,25 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
     <?php } ?>
 
     <!-- Reset modal -->
-    <input type="checkbox" id="reset-academic" class="modal-toggle" />
+    <!-- <input type="checkbox" id="reset-academic" class="modal-toggle" />
     <div class="modal" role="dialog">
         <div class="modal-box border border-error border-2">
-            <form method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <!-- Name -->
+            <form method="post" action="<?= "" //$_SERVER['PHP_SELF'] ?>">
                 <label class="flex flex-col gap-2">
                     <span class="font-bold text-[18px] text-error">Reset School Year</span>
+
+                    <div role="alert" class="alert alert-warning mb-2 text-[14px]">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span>Resetting a school year means <strong>deleting all the data related to a specific school year.</strong> Examples of which are the <strong>activities, scores and computed grades</strong> that are made during the school year will be <strong>gone and will not be retrieved again</strong>. <br><br> Do you still wish to proceed?</span>
+                    </div>
+
                     <select class="select select-bordered" name="school_year" required>
-                        <option disabled="disabled" selected="selected">Select an option</option>
+                        <option disabled="disabled" selected="selected">Select school year</option>
                         <?php
-                        $existingSchoolYears = $dbCon->query("SELECT * FROM ap_school_year");
+                        /*$existingSchoolYears = $dbCon->query("SELECT * FROM school_year ORDER BY school_year");
                         while ($schoolYear = $existingSchoolYears->fetch_assoc()) {
-                            echo "<option value='$schoolYear[school_year]'>$schoolYear[school_year]</option>";
-                        }
+                            echo "<option value='$schoolYear[id]'>$schoolYear[school_year] @ $schoolYear[semester]</option>";
+                        }*/
                         ?>
                     </select>
                 </label>
@@ -268,6 +364,6 @@ $query = "SELECT * FROM ap_school_year LIMIT $start, $limit";
             </form>
         </div>
         <label class="modal-backdrop" for="reset-academic">Close</label>
-    </div>
+    </div> -->
 
 </main>

@@ -32,7 +32,7 @@ class LoginHandler
     private function loginValidator($email, $password)
     {
         $pwd = crypt($password, '$6$Crypt$');
-        $sql = "SELECT * FROM ap_userdetails WHERE email='".$email."' AND password='" . $pwd. "'";
+        $sql = "SELECT * FROM userdetails WHERE email='".$email."' AND password='" . $pwd. "'";
         $result = $this->dbCon->query($sql);
         $fetch = mysqli_fetch_assoc($result);
 
@@ -41,7 +41,7 @@ class LoginHandler
         }
 
         return $fetch['roles'];
-    } //potek di na naman ako makalogin
+    }
 
     private function saveSession($userRole, $email)
     {

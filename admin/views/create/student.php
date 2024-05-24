@@ -4,9 +4,25 @@ session_start();
 
 require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
+require('../../../utils/mailer.php');
+
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+    if(isset($_GET['courseId']) && isset($_GET['yearLevel'])) {
+        $yearLevel = $dbCon->real_escape_string($_GET['yearLevel']);
+        $courseId = $dbCon->real_escape_string($_GET['courseId']);
+
+        $sectionsQuery = $dbCon->query("SELECT * FROM sections WHERE course='$courseId' AND year_level='$yearLevel'");
+        $sections = $sectionsQuery->fetch_all(MYSQLI_ASSOC);
+
+        header('Content-type: application/json');
+        echo json_encode($sections, JSON_PRETTY_PRINT);
+    }
+
+    exit;
+}
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -16,12 +32,12 @@ require_once("../../../components/header.php");
 // Error and success handlers
 $hasError = false;
 $hasSuccess = false;
-$hasWarning = false;
-$warning = "";
+// $hasWarning = false;
+// $warning = "";
 $message = "";
 
 // Import students
-if (isset($_POST['import_student'])) {
+/* if (isset($_POST['import_student'])) {
     $file = $_FILES['file'];
     $fileName = $file['name'];
     $fileTmpName = $file['tmp_name'];
@@ -37,6 +53,7 @@ if (isset($_POST['import_student'])) {
     // Check if file type is allowed and check if the mime type is allowed
     if (in_array($fileActualExt, $allowed) && ($fileType === "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" || $fileType === "text/csv")) {
         if ($fileError === 0) {
+            // Check if file size is less than 100MB
             if ($fileSize < (1000000) * 1024 * 1024) {
                 $fileNameNew = uniqid('', true) . "." . $fileActualExt;
                 $fileDestination = 'uploads/' . $fileNameNew;
@@ -46,8 +63,10 @@ if (isset($_POST['import_student'])) {
                     @mkdir('uploads', 0777, true);
                 }
 
+                // move the file to the destination
                 @move_uploaded_file($fileTmpName, $fileDestination);
 
+                // check if the file is an excel or csv file, if it is an excel file, use PhpSpreadsheet to read the file, if it is a csv file, use fgetcsv to read the file
                 if ($fileActualExt === "xlsx") {
                     require_once("../../../vendor/autoload.php");
                     $reader = new PhpOffice\PhpSpreadsheet\Reader\Xlsx();
@@ -70,35 +89,42 @@ if (isset($_POST['import_student'])) {
                     fclose($file);
                 }
 
+                // remove the header from the read data
                 $header = array_shift($sheetData);
                 $data = array();
+
+                // combine the header and the data
                 foreach ($sheetData as $row) {
                     $data[] = array_combine($header, $row);
                 }
 
+                // check if there is data in the file
                 if (count($data) > 0) {
                     // insert query
-                    $query = "INSERT INTO ap_userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, year_level, roles, sid) VALUES";
+                    $query = "INSERT INTO userdetails(firstName, middleName, lastName, gender, contact,  birthday, email, password, year_level, roles, sid) VALUES";
                     $skippedStudentData = 0;
 
                     // loop through the data and validate
                     foreach ($data as $student) {
-                        $studentId = $dbCon->real_escape_string($student['sid']);
-                        $firstName = $dbCon->real_escape_string($student['firstName']);
-                        $middleName = $dbCon->real_escape_string($student['middleName']);
-                        $lastName = $dbCon->real_escape_string($student['lastName']);
-                        $gender = $dbCon->real_escape_string($student['gender']);
-                        $contact = $dbCon->real_escape_string($student['contact']);
-                        $birthday = $dbCon->real_escape_string($student['birthday']);
-                        $email = filter_var($dbCon->real_escape_string($student['email']), FILTER_VALIDATE_EMAIL);
-                        $password = $dbCon->real_escape_string($student['password'] ?? 'cvsu@123');
-                        $yearLevel = $dbCon->real_escape_string($student['year_level']);
+                        $studentId = $dbCon->real_escape_string($student['Student ID'] ?? '');
+                        $firstName = $dbCon->real_escape_string($student['First Name']);
+                        $middleName = $dbCon->real_escape_string($student['Middle Name']);
+                        $lastName = $dbCon->real_escape_string($student['Last Name']);
+                        $gender = $dbCon->real_escape_string($student['Gender']);
+                        $contact = $dbCon->real_escape_string($student['Contact Number']);
+                        $birthday = $dbCon->real_escape_string($student['Birthday']);
+                        $email = filter_var($dbCon->real_escape_string($student['Email Address']), FILTER_VALIDATE_EMAIL);
+                        $yearLevel = $dbCon->real_escape_string($student['Year Level']);
+
+                        if (str_contains($birthday, "/")) {
+                            $birthday = str_replace("/", "-", $birthday);
+                            $birthday = date("Y-m-d", strtotime($birthday));
+                        }
 
                         if($fileActualExt === 'csv') {
                             // remove \=" and \" from contact, sid and password
                             $contact = substr($contact, 3, -2);
                             $studentId = substr($studentId, 3, -2);
-                            $password = substr($password, 3, -2);
                         }
                         
                         if (!$email) {
@@ -109,7 +135,7 @@ if (isset($_POST['import_student'])) {
                         } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
                             $hasError = true;
                             $hasSuccess = false;
-                            $message = "One of the imported student data does not have a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+                            $message = "One of the imported student data does not have a valid email address. It should use his/her <strong>@cvsu.edu.ph</strong> email address.";
                             break;
                         } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
                             $hasError = true;
@@ -118,19 +144,16 @@ if (isset($_POST['import_student'])) {
                             break;
                         } else {
                             // skip if email or student id is already in the database
-                            if ($dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email' OR sid = '$studentId'")->num_rows > 0) {
+                            if ($dbCon->query("SELECT * FROM userdetails WHERE email = '$email' OR sid = '$studentId'")->num_rows > 0) {
                                 $skippedStudentData++;
 
                                 $hasWarning = true;
-                                $warning = "Skipped $skippedStudentData student data because the student ID or email address already exists!";
+                                $warning = "Skipped $skippedStudentData student data" . (($skippedStudentData > 1) ? 's' : '') . " because the" . (($skippedStudentData > 1) ? 'ir' : '') . " student ID or email address already exists!";
 
                                 continue;
                             }
 
-                            // check if password is already encrypted, if not, encrypt it
-                            if (strlen($password) < 60) {
-                                $password = crypt($password, '$6$Crypt$');
-                            }
+                            $password = constant("USER_DEFAULT_PASSWORD");
 
                             $query .= "(
                                 '$firstName',
@@ -140,7 +163,7 @@ if (isset($_POST['import_student'])) {
                                 '$contact',
                                 '$birthday',
                                 '$email',
-                                '$password',
+                                '" . crypt($password, '$6$Crypt$') . "',
                                 '$yearLevel',
                                 'student',
                                 '$studentId'
@@ -164,6 +187,17 @@ if (isset($_POST['import_student'])) {
                             $message = "Failed to import students!";
                         }
                     }
+
+                    // unset entered values
+                    unset($studentId);
+                    unset($firstName);
+                    unset($middleName);
+                    unset($lastName);   
+                    unset($gender);
+                    unset($contact);
+                    unset($birthday);
+                    unset($email);
+                    unset($yearLevel);
                 } else {
                     $hasError = true;
                     $hasSuccess = false;
@@ -172,6 +206,11 @@ if (isset($_POST['import_student'])) {
 
                 // delete the file after importing
                 @unlink($fileDestination);
+
+                // delete the folder if it exists, this is to prevent the users from accessing the upload folder
+                if (is_dir('uploads')) {
+                    @rmdir('uploads');
+                }
             } else {
                 $hasError = true;
                 $hasSuccess = false;
@@ -187,7 +226,7 @@ if (isset($_POST['import_student'])) {
         $hasSuccess = false;
         $message = "Invalid file type. Only <strong>EXCEL</strong> and <strong>CSV</strong> files are allowed!";
     }
-}
+} */
 
 // Create new student
 if (isset($_POST['create_student'])) {
@@ -196,11 +235,12 @@ if (isset($_POST['create_student'])) {
     $middleName = $dbCon->real_escape_string($_POST['middle_name']);
     $lastName = $dbCon->real_escape_string($_POST['last_name']);
     $gender = $dbCon->real_escape_string($_POST['gender']);
-    $contact = $dbCon->real_escape_string($_POST['contact']);
+    $contact = str_replace("-", "", $dbCon->real_escape_string($_POST['contact']));
     $birthday = $dbCon->real_escape_string($_POST['birthday']);
     $email = filter_var($dbCon->real_escape_string($_POST['email']), FILTER_VALIDATE_EMAIL);
-    $password = $dbCon->real_escape_string($_POST['password']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
+    $course = $dbCon->real_escape_string($_POST['course']);
+    $section = $dbCon->real_escape_string($_POST['section']);
 
     if (!$email) {
         $hasError = true;
@@ -209,17 +249,29 @@ if (isset($_POST['create_student'])) {
     } else if(!str_ends_with($email, "@cvsu.edu.ph")) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Please enter a valid email address. It should end with <strong>@cvsu.edu.ph</strong>";
+        $message = "Please use the student's <strong>@cvsu.edu.ph</strong> email address.";
     } else if (!str_starts_with($contact, "09") || strlen($contact) != 11) {
         $hasError = true;
         $hasSuccess = false;
         $message = "Please enter a valid contact number. It should start with <strong>09</strong> and has <strong>11 digits</strong>.";
-    } else if ($dbCon->query("SELECT * FROM ap_userdetails WHERE sid = '$studentId' OR email = '$email'")->num_rows > 0) {
+    } else if ($dbCon->query("SELECT * FROM userdetails WHERE sid = '$studentId' OR email = '$email'")->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
         $message = "A student with the same Student ID or email address already exists!";
     } else {
-        $query = "INSERT INTO ap_userdetails(firstName, middleName, lastName, email, password, gender, contact,  birthday, year_level, roles, sid) VALUES(
+        // Auto generate password using uuid to prevent collision and with at least 8 characters    
+        // $password = substr(md5(uniqid()), 0, 8);
+
+        // randomly insert at least 1-3 special character to the password
+        // $specialChars = ['!', '@', '#', '$', '&', '_', '?'];
+        // $specialCharCount = rand(1, 3);
+        // for($i = 0; $i < $specialCharCount; $i++) {
+        //     $password = substr_replace($password, $specialChars[rand(0, count($specialChars) - 1)], rand(0, strlen($password) - 1), 0);
+        // }
+
+        $password = constant("USER_DEFAULT_PASSWORD");
+
+        $query = "INSERT INTO userdetails(firstName, middleName, lastName, email, password, gender, contact,  birthday, year_level, roles, sid) VALUES(
             '$firstName',
             '$middleName',
             '$lastName',
@@ -227,7 +279,7 @@ if (isset($_POST['create_student'])) {
             '" . crypt($password, '$6$Crypt$') . "',
             '$gender',
             '$contact',
-            '$birthday',
+            '" . date('Y-m-d', strtotime($birthday)) . "',
             '$yearLevel',
             'student',
             '$studentId'
@@ -235,9 +287,38 @@ if (isset($_POST['create_student'])) {
         $result = $dbCon->query($query);
 
         if ($result) {
+            $studentId = $dbCon->insert_id;
+            $dbCon->query("INSERT INTO section_students(section_id, student_id) VALUES('$section', '$studentId')");
+
+            // get the email template
+            $template = getNewAccountMailTemplate(
+                $email, 
+                "$firstName $middleName $lastName", 
+                $password, 
+                "Welcome to CvSU Grading System", 
+                constant('APP_URL'), 
+                "We've sent you this email to notify you that we have created your account and you may login using this email address and this generated password. Under no circumstances are you to share this password to anyone. You may change your password once you've logged in.", 
+                date('Y')
+            );
+
+            // send the email
+            sendMail($email, 'CvSU Grading System', $template);
+
             $hasError = false;
             $hasSuccess = true;
-            $message = "Successfully added a new student!";
+            $message = "Successfully added a new student and successfully notified the student!";
+
+            // unset entered values
+            unset($studentId);
+            unset($firstName);
+            unset($middleName);
+            unset($lastName);   
+            unset($gender);
+            unset($contact);
+            unset($birthday);
+            unset($email);
+            unset($password);
+            unset($yearLevel);
         } else {
             $hasError = true;
             $hasSuccess = false;
@@ -245,6 +326,9 @@ if (isset($_POST['create_student'])) {
         }
     }
 }
+
+$coursesQuery = $dbCon->query("SELECT * FROM courses");
+$courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <main class="w-screen h-screen overflow-scroll flex">
@@ -255,14 +339,14 @@ if (isset($_POST['create_student'])) {
         <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
             <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold">Create Student</h2>
-                <form class="flex flex-col gap-4 w-full " method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4 w-full mb-8" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
-                    <?php if ($hasWarning) { ?>
+                    <!-- <?php // if ($hasWarning) { ?>
                         <div role="alert" class="alert alert-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                             <span><?= $warning ?></span>
                         </div>
-                    <?php } ?>
+                    <?php // } ?> -->
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -285,78 +369,81 @@ if (isset($_POST['create_student'])) {
                     <!-- Student ID -->
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Student ID</span>
-                        <input class="input input-bordered" name="student_id" placeholder="Enter Student ID" required />
+                        <input class="input input-bordered" name="student_id" placeholder="Enter Student ID" value="<?= $studentId ?? "" ?>" required />
                     </label>
 
                     <!-- Name -->
                     <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">First Name</span>
-                            <input class="input input-bordered" name="first_name" placeholder="Enter First name" required />
+                            <input class="input input-bordered" name="first_name" placeholder="Enter First name" value="<?= $firstName ?? "" ?>" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Middle Name</span>
-                            <input class="input input-bordered" name="middle_name" placeholder="Enter Middle Name" />
+                            <input class="input input-bordered" name="middle_name" placeholder="Enter Middle Name" value="<?= $middleName ?? "" ?>" />
                         </label>
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Last Name</span>
-                            <input class="input input-bordered" name="last_name" placeholder="Enter Last name" required />
+                            <input class="input input-bordered" name="last_name" placeholder="Enter Last name" value="<?= $lastName ?? "" ?>" required />
                         </label>
                     </div>
 
                     <!-- Details -->
                     <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Gender</span>
+                            <span class="font-bold text-[18px]">Sex</span>
                             <select class="select select-bordered" name="gender" required>
-                                <option value="" selected disabled>Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
+                                <option value="" selected disabled>Select Sex</option>
+                                <option value="male" <?php if(isset($gender) && strtolower($gender) == 'male') { ?> selected <?php } ?>>Male</option>
+                                <option value="female" <?php if(isset($gender) && strtolower($gender) == 'female') { ?> selected <?php } ?>>Female</option>
                             </select>
                         </label>
 
-                        <label class="flex flex-col gap-2">
+                        <label class="flex flex-col gap-2" x-data>
                             <span class="font-bold text-[18px]">Contact</span>
-                            <input class="input input-bordered" name="contact" required />
+                            <input x-mask="9999-999-9999" @input="enforcePrefix" type="tel" class="input input-bordered" name="contact" placeholder="0912-345-6789" value="<?= $contact ?? "" ?>" required />
                         </label>
 
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Birthdate</span>
-                            <input class="input input-bordered" type="date" name="birthday" value="1900-01-01" required />
+                            <input class="input input-bordered" type="date" name="birthday" value="2001-01-01" value="<?= $birthday ?? "" ?>" required />
                         </label>
                     </div>
-
-
 
                     <!-- Account -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Email</span>
-                            <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" required />
-                        </label>
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Email</span>
+                        <input type="email" placeholder="Enter email" class="input input-bordered w-full" type="email" name="email" value="<?= $email ?? "" ?>" required />
+                    </label>
 
-                        <label class="flex flex-col gap-2" x-data="{show: true}">
-                            <span class="font-bold text-[18px]">Password</span>
-                            <div class="relative">
-                                <input type="password" placeholder="Enter Password" class="input input-bordered w-full" name="password" x-bind:type="show ? 'password' : 'text'" required />
-                                <button type="button" class="btn btn-ghost absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5" @click="show = !show">
-                                    <i x-show="!show" class='bx bx-hide'></i>
-                                    <i x-show="show" class='bx bx-show'></i>
-                                </button>
-                            </div>
-                        </label>
-                    </div>
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Course</span>
+                        <select class="select select-bordered" name="course" required>
+                            <option value="" selected disabled>Select course</option>
+
+                            <?php foreach($courses as $course): ?>
+                                <option value="<?= $course['id'] ?>"><?= $course['course'] ?> (<?= $course['course_code'] ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </label>
 
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Year level</span>
-                        <select class="select select-bordered" name="year_level" required>
+                        <select class="select select-bordered" name="year_level" required disabled>
                             <option value="" selected disabled>Select year level</option>
-                            <option value="1st year">1st year</option>
-                            <option value="2nd year">2nd year</option>
-                            <option value="3rd year">3rd year</option>
-                            <option value="4th year">4th year</option>
-                            <option value="4th year">5th year</option>
+                            <option value="1st year" <?php if(isset($yearLevel) && strtolower($yearLevel) == '1st year') { ?> selected <?php } ?>>1st year</option>
+                            <option value="2nd year" <?php if(isset($yearLevel) && strtolower($yearLevel) == '2nd year') { ?> selected <?php } ?>>2nd year</option>
+                            <option value="3rd year" <?php if(isset($yearLevel) && strtolower($yearLevel) == '3rd year') { ?> selected <?php } ?>>3rd year</option>
+                            <option value="4th year" <?php if(isset($yearLevel) && strtolower($yearLevel) == '4th year') { ?> selected <?php } ?>>4th year</option>
+                            <option value="5th year" <?php if(isset($yearLevel) && strtolower($yearLevel) == '5th year') { ?> selected <?php } ?>>5th year</option>
+                        </select>
+                    </label>
+
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Section</span>
+                        <select class="select select-bordered" name="section" required disabled>
+                            <option value="" selected disabled>Select section</option>
                         </select>
                     </label>
 
@@ -367,10 +454,10 @@ if (isset($_POST['create_student'])) {
                     </div>
                 </form>
 
-                <div class="divider">OR</div>
+                <!-- <div class="divider">OR</div>
 
-                <!-- Form with file upload input for importing xlsx or csv filee -->
-                <form class="flex flex-col gap-4 w-full" method="post" action="<?= $_SERVER['PHP_SELF'] ?>" enctype="multipart/form-data">
+                Form with file upload input for importing xlsx or csv filee
+                <form class="flex flex-col gap-4 w-full mb-8" method="post" action="<?= $_SERVER['PHP_SELF'] ?>" enctype="multipart/form-data">
                     <h2 class="text-center text-[28px] font-bold">Import Students</h2>
                     <p class="text-center text-[16px]">You can import students by uploading a <strong>CSV</strong> or <strong>EXCEL</strong> file.</p>
                     <label class="flex flex-col gap-2 mb-4">
@@ -385,8 +472,80 @@ if (isset($_POST['create_student'])) {
                         <a href="../manage-student.php" class="btn btn-error text-base">Cancel</a>
                         <button class="btn btn-success text-base" name="import_student">Import</button>
                     </div>
-                </form>
+                </form> -->
             </div>
         </div>
     </section>
 </main>
+
+<script>
+    const titleCase = (string) => string.split(' ').map((str) => (str.substr(0, 1).toUpperCase() + str.substring(1))).join(' ');
+
+    const updateSectionOptions = async () => {
+        const yearLevel = titleCase(document.querySelector("select[name='year_level']").value);
+        const courseId = document.querySelector("select[name='course']").value;
+        const section = document.querySelector("select[name='section']");
+
+        // Remove all options
+        section.innerHTML = "<option value='' selected disabled>Loading sections...</option>";
+
+        // Disable section
+        section.setAttribute('disabled', '');
+
+        // Fetch all available section from selected course and year level
+        const sections = await fetch(`<?= $_SERVER['PHP_SELF'] ?>?courseId=${courseId}&yearLevel=${yearLevel}`, {
+            headers: {
+                "X-Requested-With": "XMLHttpRequest",
+                "content-type": "application/json"
+            }})
+            .then(res => res.json());
+
+        // If there are sections found, display them all
+        if(sections.length > 0) {
+            section.removeAttribute('disabled');
+            section.innerHTML = "<option value='' selected disabled>Select sections</option>";
+
+            sections.forEach(sec => {
+                const option = document.createElement('option');
+                option.setAttribute('value', sec.id);
+
+                const textNode = document.createTextNode(sec.name);
+                option.appendChild(textNode);
+                section.appendChild(option);
+            });
+        } else {
+            section.setAttribute('disabled', '');
+
+            const option = document.createElement('option');
+            option.setAttribute('value', '');
+            option.setAttribute('selected', '');
+            option.setAttribute('disabled', '');
+
+            const textNode = document.createTextNode('No available sections')
+            option.appendChild(textNode);
+            section.appendChild(option);
+        }
+    }
+
+    document.querySelector("select[name='course']").addEventListener('change', (e) => {
+        const yearLevel = document.querySelector("select[name='year_level']:disabled");
+
+        if(yearLevel) {
+            yearLevel.removeAttribute('disabled');
+        } else {
+            updateSectionOptions();
+        }
+    });
+
+    document.querySelector("select[name='year_level']").addEventListener('change', (e) => {
+        updateSectionOptions()
+    });
+
+    function enforcePrefix(e) {
+        let currentValue = e.target.value;
+
+        if (!currentValue.startsWith("09")) {
+            e.target.value = "09" + currentValue.substring(2);
+        }
+    }
+</script>
