@@ -2,11 +2,14 @@
 session_start();
 // kung walang session mag reredirect sa login //
 
+require("../../vendor/autoload.php");
 require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
+require('../../utils/grades.php');
+require('../../utils/files.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
     exit();
 }
 
@@ -16,189 +19,249 @@ require_once("../../components/header.php");
 // error and success handlers
 $hasError = false;
 $hasSuccess = false;
+$hasWarning = false;
+$hasSearch = false;
+$warning = "";
 $message = "";
 
-// Submit and compute final grades
-if (isset($_POST['submit-grades'])) {
+if(isset($_POST['search-subject'])) {
+    $hasSearch = true;
+    $search = $_POST['search-subject'];
+}
+
+// Submit grade release request
+if (isset($_POST['submit-release-grade-request'])) {
     $subject = $dbCon->real_escape_string($_POST['subject']);
-    $section = $dbCon->real_escape_string($_POST['section']);
     $term = $dbCon->real_escape_string($_POST['term']);
-    $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
-    $schoolYear = $dbCon->real_escape_string($_POST['school_year']);
+    $file = $_FILES['file'];
 
-    // Get all students in the section
-    $studentsQuery = "SELECT * FROM ap_section_students WHERE section_id = $section";
-    $studentsQueryResult = $dbCon->query($studentsQuery);
-    $students = $studentsQueryResult->fetch_all(MYSQLI_ASSOC);
+    // Get active school year
+    $schoolYearsQuery = $dbCon->query("SELECT * FROM school_year WHERE status='active'");
 
-    // Get all activities in the section
-    $activitiesQuery = "SELECT 
-        ap_activities.*,
-        ap_subjects.name as subjectName,
-        ap_subjects.id as subjectId,
-        ap_student_grades.grade as studentGrade, 
-        ap_student_grades.student_id as studentId
-        FROM ap_activities 
-        INNER JOIN ap_student_grades ON ap_student_grades.activity_id = ap_activities.id
-        INNER JOIN ap_subjects ON ap_activities.subject = ap_subjects.id
-        WHERE ap_activities.section=$section AND ap_activities.school_year=$schoolYear AND ap_activities.term='$term' AND ap_activities.year_level='$yearLevel' AND ap_activities.subject=$subject AND ap_activities.instructor = " . AuthController::user()->id;
+    if ($schoolYearsQuery->num_rows > 0) {
+        $schoolYear = $schoolYearsQuery->fetch_assoc();
 
-    $activitiesQueryResult = $dbCon->query($activitiesQuery);
-    $activities = $activitiesQueryResult->fetch_all(MYSQLI_ASSOC);
+        // Get file details
+        $fileName = $file['name'];
+        $fileTmpName = $file['tmp_name'];
+        $fileSize = $file['size'];
+        $fileError = $file['error'];
+        $fileType = $file['type'];
 
-    if (count($activities) == 0) {
-        $hasError = true;
-        $message = "No activities found!";
-    } else {
-        // compute average score of each studen for each activity in a subject
-        foreach ($students as $key => $student) {
-            $studentId = $student['student_id'];
-            $studentScore = 0;
-            $totalScore = 0;
+        // Get file extension
+        $fileExt = explode('.', $fileName);
+        $fileActualExt = strtolower(end($fileExt));
+        $allowed = ['pdf'];
 
-            foreach ($activities as $key => $activity) {
-                if ($studentId == $activity['studentId']) {
-                    $studentScore += $activity['studentGrade'];
-                    $totalScore += $activity['max_score'];
-                }
-            }
+        // Check if the extension and the mimetype is of a PDF File
+        if (in_array($fileActualExt, $allowed) && $fileType === 'application/pdf') {
+            $maxFileSize = (1024 * 1024) * 10; // 10 MB
+            $actualFileSize = $fileSize / (1024 * 1024);
 
-            if ($totalScore == 0) {
-                $finalGrade = 0;
-            } else {
-                $averageScore = $studentScore / $totalScore;
-                $finalGrade = $averageScore * 100;
-            }
+            // Check if file size is equal or less than 10 MB
+            if ($actualFileSize <= $maxFileSize && $actualFileSize > 0) {
+                
+                // Check if the uploaded pdf file is valid
+                if (validatePDFFile($fileTmpName)) {
+                    // Get current directory
+                    $currentDir = dirname($_SERVER['PHP_SELF']);
+                    $firstDir = explode('/', trim($currentDir, '/'));
 
-            // check if grade with the same school_year, student, subject and year_level already exist. If so, update it, otherwise insert new grade
-            $checkGradeQuery = "SELECT * FROM ap_student_final_grades WHERE school_year = $schoolYear AND student = $studentId AND subject = $subject AND year_level = '$yearLevel' AND term='$term'";
-            $checkGradeQueryResult = $dbCon->query($checkGradeQuery);
-            $checkGrade = $checkGradeQueryResult->fetch_assoc();
+                    // Create new file name and assign new file path
+                    $instructor = AuthController::user();
+                    $newFileName = "Instructor Grade Sheet " . date("Y-m-d-h-i-s") . ".pdf";
+                    $newFilePath = str_repeat("../", count($firstDir) - 1) . "uploads/$newFileName";
 
-            if ($checkGrade) {
-                $updateGradeQuery = "UPDATE ap_student_final_grades SET grade = $finalGrade WHERE school_year = $schoolYear AND student = $studentId AND subject = $subject AND year_level = '$yearLevel', term='$term'";
-                $updateGradeQueryResult = $dbCon->query($updateGradeQuery);
+                    // Upload file
+                    if (@move_uploaded_file($fileTmpName, $newFilePath)) {
+                        // Get subject details
+                        $subjectDataQuery = $dbCon->query("SELECT * FROM subjects WHERE id = '$subject'");
+                        $subjectData = $subjectDataQuery->fetch_assoc();
+                        
+                        // Check if instructor already has an existing request (pending or approved or grade-released) with the same subject, term and school year
+                        $checkRequestQuery = $dbCon->query("SELECT * FROM instructor_grade_release_requests WHERE 
+                            instructor_id='{$instructor->id}' AND 
+                            subject_id='$subject' AND 
+                            term='$term' AND 
+                            school_year='$schoolYear[id]' AND
+                            status IN ('approved', 'pending', 'grade-released')
+                        ");
 
-                if ($updateGradeQueryResult) {
-                    $hasSuccess = true;
-                    $message = "Grades submitted successfully!";
+                        if ($checkRequestQuery->num_rows == 0) {
+
+                            $checkRejectedRequestQuery = $dbCon->query("SELECT * FROM instructor_grade_release_requests WHERE 
+                                instructor_id='{$instructor->id}' AND 
+                                subject_id='$subject' AND 
+                                term='$term' AND 
+                                school_year='$schoolYear[id]' AND
+                                status = 'rejected'
+                                ORDER BY updated_at DESC
+                            ");
+
+                            // Check if instructor already have a rejected request, if so, update its status and the pdf file
+                            if ($checkRejectedRequestQuery->num_rows > 0) {
+                                $rejectedRequest = $checkRejectedRequestQuery->fetch_assoc();
+                                $rejectedID = $rejectedRequest['id'];
+                                $rejectedPDFFile = str_repeat("../", count($firstDir) - 1) . "uploads/$rejectedRequest[grade_sheet_file]";
+
+                                // Delete the rejected PDF file
+                                @unlink($rejectedPDFFile);
+
+                                // Update the status and pdf file of the rejected request
+                                $updateRequestQuery = $dbCon->query("UPDATE 
+                                    instructor_grade_release_requests 
+                                    SET grade_sheet_file = '$newFileName', status='pending' 
+                                    WHERE id = '$rejectedID'
+                                ");
+
+                                if ($updateRequestQuery) {
+                                    $hasSuccess = true;
+                                    $message = "Grade release request for <strong>($subjectData[code]) $subjectData[name]</strong>@<strong>$term</strong> has been sent to the admin successfully and is currently pending for approval.";
+                                } else {
+                                    $hasError = true;
+                                    $message = "Failed to send grade release request for <strong>($subjectData[code]) $subjectData[name]</strong>@<strong>$term</strong> to the admin.";
+                                    
+                                    // Delete the uploaded pdf file
+                                    @unlink($newFilePath);
+                                }
+                            } else {
+                                // Create a new release request
+                                $newRequest = $dbCon->query("INSERT INTO instructor_grade_release_requests(instructor_id, subject_id, grade_sheet_file, file_uid, school_year, term) VALUES (
+                                    '{$instructor->id}',
+                                    '$subject',
+                                    '$newFileName',
+                                    '" . md5(uniqid()) . "',
+                                    '$schoolYear[id]',
+                                    '$term'
+                                )");
+
+                                if ($newRequest) {
+                                    $hasSuccess = true;
+                                    $message = "Grade release request for <strong>($subjectData[code]) $subjectData[name]</strong>@<strong>$term</strong> has been sent to the admin successfully and is currently pending for approval.";
+                                } else {
+                                    $hasError = true;
+                                    $message = "Failed to send grade release request for <strong>($subjectData[code]) $subjectData[name]</strong>@<strong>$term</strong> to the admin.";
+
+                                    // Delete the uploaded pdf file
+                                    @unlink($newFilePath);
+                                }
+                            }
+
+                        } else {
+                            $hasError = true;
+                            $message = "Request aborted, you already have a <strong>pending/approved</strong> request or you have already <strong>released</strong> the grades with the same subject, semester and school year!";
+
+                            // Delete the uploaded pdf file
+                            @unlink($newFilePath);
+                        }
+                    } else {
+                        $hasError = true;
+                        $message = "Upload failed! Failed to upload PDF file to the server!";
+                    }
                 } else {
                     $hasError = true;
-                    $message = "Something went wrong. Please try again!";
+                    $message = "Invalid PDF file uploaded! Please upload a valid PDF file.";
                 }
-            } else {
-                $insertGradeQuery = "INSERT INTO ap_student_final_grades (subject, term, year_level, section, student, school_year, grade) VALUES (
-                    $subject,
-                    '$term',
-                    '$yearLevel',
-                    $section,
-                    $studentId,
-                    $schoolYear,
-                    $finalGrade
-                )";
-                $insertGradeQueryResult = $dbCon->query($insertGradeQuery);
 
-                if ($insertGradeQueryResult) {
-                    $hasSuccess = true;
-                    $message = "Grades submitted successfully!";
-                } else {
-                    $hasError = true;
-                    $message = "Something went wrong. Please try again!";
-                }
+            } else {
+                $hasError = true;
+                $message = "Invalid file size! The size of the PDF file must not exceed <strong>10 MB</strong> and the file must not be <strong>EMPTY</strong>!";
             }
+        } else {
+            $hasError = true;
+            $message = "Invalid file type! Only PDF file is allowed to be uploaded";
         }
-    }
-}
-
-// Delete activity
-if (isset($_POST['delete-activity'])) {
-    $id = $dbCon->real_escape_string($_POST['id']);
-
-    $deleteQuery = "DELETE FROM ap_activities WHERE id = $id";
-    $result = $dbCon->query($deleteQuery);
-
-    if ($result) {
-        $hasSuccess = true;
-        $message = "Activity deleted successfully!";
     } else {
         $hasError = true;
-        $message = "Something went wrong. Please try again!";
+        $message = "Failed to send request to admin. There's no active school year and semester. Contact your admin to create new active school year and semester.";
     }
 }
 
-// pagination
-$limit = 10;
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
-$start = ($page - 1) * $limit;
-
-// total pages
-$result = $dbCon->query("SELECT COUNT(*) AS id FROM ap_activities WHERE instructor = '" . AuthController::user()->id . "'");
-$activitiesCount = $result->fetch_all(MYSQLI_ASSOC);
-$total = $activitiesCount[0]['id'];
-$pages = ceil($total / $limit);
-
-// get all activities
-$query = "SELECT 
-    ap_activities.*,
-    ap_subjects.name AS subject_name,
-    ap_courses.course AS course_name,
-    ap_sections.name AS section_name
-    FROM ap_activities 
-    INNER JOIN ap_subjects ON ap_activities.subject = ap_subjects.id
-    INNER JOIN ap_courses ON ap_activities.course = ap_courses.id
-    INNER JOIN ap_school_year ON ap_activities.school_year = ap_school_year.id
-    INNER JOIN ap_sections ON ap_activities.section = ap_sections.id
-    WHERE ap_activities.instructor = '" . AuthController::user()->id . "' LIMIT $start, $limit";
-
-$sectionsQuery = "SELECT
-    ap_subjects.*,
-    ap_sections.id as sectionId,
-    ap_sections.name as sectionName,
-    ap_courses.course as courseName
-    FROM ap_sections 
-    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id 
-    JOIN ap_section_students ON ap_sections.id = ap_section_students.section_id
-    JOIN ap_courses ON ap_subjects.course = ap_courses.id
-    WHERE ap_sections.instructor = " . AuthController::user()->id . " GROUP BY ap_sections.subject";
-
-$sectionsQueryResult = $dbCon->query($sectionsQuery);
-$sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
-
-// Count all students in each section that the instructor is handling
-$studentsCount = 0;
-foreach ($sections as $key => $section) {
-    $countStudentsQuery = "SELECT COUNT(*) as count FROM ap_section_students WHERE section_id = " . $section['sectionId'];
-    $countStudentsQueryResult = $dbCon->query($countStudentsQuery);
-    $countStudents = $countStudentsQueryResult->fetch_assoc();
-    $studentsCount += $countStudents['count'];
+// Get all subjects that the instructor is handling
+if($hasSearch) {
+    $subjectsQuery = "SELECT
+        subject_instructors.*,
+        subjects.name as name,
+        subjects.year_level as year_level,
+        subjects.code as code,
+        courses.course AS course,
+        courses.course_code AS course_code
+        FROM subject_instructors
+        LEFT JOIN subjects ON subject_instructors.subject_id = subjects.id
+        LEFT JOIN courses ON subjects.course = courses.id
+        WHERE subject_instructors.instructor_id='" . AuthController::user()->id . "' AND subjects.name LIKE '%$search%'
+    ";
+} else {
+    $subjectsQuery = "SELECT
+        subject_instructors.*,
+        subjects.name as name,
+        subjects.year_level as year_level,
+        subjects.code as code,
+        courses.course AS course,
+        courses.course_code AS course_code
+        FROM subject_instructors
+        LEFT JOIN subjects ON subject_instructors.subject_id = subjects.id
+        LEFT JOIN courses ON subjects.course = courses.id
+        WHERE subject_instructors.instructor_id='" . AuthController::user()->id . "'";
 }
 
-// fetch all subjects
-$subjectsQuery = "SELECT * FROM ap_subjects";
+// fetch all grading criterias
+$gradingCriteriasQuery = $dbCon->query("SELECT * FROM grading_criterias WHERE instructor = " . AuthController::user()->id);
 
-// fetch all school years
-$schoolYearsQuery = "SELECT * FROM ap_school_year";
+$subjectsResult = $dbCon->query($subjectsQuery);
+$subjects = $subjectsResult->fetch_all(MYSQLI_ASSOC);
+
+if (count($subjects) == 0) {
+    $hasWarning = true;
+    $warning = "There are no subjects assigned to you. Contact your admins to have them assign you a subject.";
+}
 ?>
 
 
-<main class="h-[95%] overflow-x-hidden flex">
+<main class="h-screen overflow-x-auto flex">
     <?php require_once("../layout/sidebar.php")  ?>
-    <section class="border w-full px-4">
+    <section class=" w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
+        
         <div class="px-4 flex justify-between flex-col gap-4">
 
             <!-- Table Header -->
-            <div class="flex justify-between items-center">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-3">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">Activities</h1>
+                    <h1 class="text-[24px] font-semibold">Manage Activities (Select Subject)</h1>
                 </div>
 
-                <div class="flex gap-4">
-                    <label for="submit-modal" class="btn">Submit</label>
-                    <a href="./create/activities.php" class="btn">Create</a>
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center">
+                    <!-- Release Grades -->
+                    <label for="submit-modal" class="btn w-full md:w-auto" <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled <?php endif; ?>>Release Grades</label>
+
+                    <!-- Search bar -->
+                    <form class="w-[300px]" method="POST" action="<?= $_SERVER['PHP_SELF'] ?>" autocomplete="off">   
+                        <label for="default-search" class="mb-2 text-sm font-medium text-gray-900 sr-only dark:text-white">Search</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </div>
+                            <input type="search" name="search-subject" id="default-search" class="block w-full p-4 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search subject" value="<?= $hasSearch ? $search : '' ?>" required>
+                            <button type="submit" class="text-white absolute end-2.5 bottom-2.5 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <svg class="w-4 h-4 text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
+
+            <?php if ($hasWarning) { ?>
+                <div role="alert" class="alert alert-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <span><?= $warning ?></span>
+                </div>
+            <?php } ?>
 
             <?php if ($hasError) { ?>
                 <div role="alert" class="alert alert-error mb-8">
@@ -219,161 +282,68 @@ $schoolYearsQuery = "SELECT * FROM ap_school_year";
             <?php } ?>
 
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
-                    <thead>
-                        <tr>
-                            <td class="bg-slate-500 text-white">ID</td>
-                            <td class="bg-slate-500 text-white">Name</td>
-                            <td class="bg-slate-500 text-white">Term</td>
-                            <td class="bg-slate-500 text-white">Students</td>
-                            <td class="bg-slate-500 text-white">Subject</td>
-                            <td class="bg-slate-500 text-white">Course</td>
-                            <td class="bg-slate-500 text-white">Section</td>
-                            <td class="bg-slate-500 text-white">Passing Rate</td>
-                            <td class="bg-slate-500 text-white">Max Score</td>
-                            <td class="bg-slate-500 text-white">Status</td>
-                            <td class="bg-slate-500 text-white text-center">Action</td>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php $activityResult = $dbCon->query($query); ?>
-                        <?php while ($row = $activityResult->fetch_assoc()) : ?>
-                            <tr>
-                                <td><?= $row['id'] ?></td>
-                                <td><?= $row['name'] ?></td>
-                                <td><?= $row['term'] ?></td>
-                                <td><?= $studentsCount ?></td>
-                                <td><?= $row['subject_name'] ?></td>
-                                <td><?= $row['course_name'] ?></td>
-                                <td><?= $row['section_name'] ?></td>
-                                <td><?= $row['passing_rate'] * 100 ?>%</td>
-                                <td><?= $row['max_score'] ?></td>
-                                <td>
-                                    <div class="badge p-4 bg-blue-300 text-black">
-                                        On going
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="flex justify-center items-center gap-2">
-                                        <a class="btn btn-sm" href="./view/activities.php?id=<?= $row['id'] ?>">View</a>
-                                        <a class="btn btn-sm" href="./update/activities.php?id=<?= $row['id'] ?>">Edit</a>
-                                        <label for="delete-activity-<?= $row['id'] ?>" class="btn btn-sm">Delete</label>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endwhile; ?>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
-                    <i class='bx bx-chevron-left'></i>
-                </a>
-
-                <button class="btn btn-sm" type="button">Page <?= $page ?> of <?= $pages ?></button>
-
-                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
-                    <i class='bx bxs-chevron-right'></i>
-                </a>
+            <div class=' overflow-hidden sm:pr-[48px] sm:grid sm:grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 p-4 mt-8'>
+                <?php if($subjectsResult->num_rows > 0): ?>
+                    <?php foreach($subjects as $key => $subject): ?>
+                        <a href="./view/activities.php?subjectId=<?= $subject['subject_id'] ?>" class="">
+                            <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                                <h1 class='text-[32px] font-semibold text-center cursor-pointer'><?= $subject['name'] ?></h1> <!-- Section name -->
+                                <span><?= $subject['course_code'] ?> (<?= $subject['year_level'] ?>)</span> <!-- Course code -->
+                                <span><?= $subject['code'] ?></span> <!-- Subject code -->
+                            </div>
+                        </a>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="flex justify-center items-center h-[300px] rounded-[5px] border border-gray-400 p-4 flex-col gap-2 mb-4">
+                        <h1 class="text-[32px] font-semibold text-center">No subjects found</h1>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <?php $activityResult = $dbCon->query($query); ?>
-    <?php while ($row = $activityResult->fetch_assoc()) : ?>
-        <!-- Delete Modal -->
-        <input type="checkbox" id="delete-activity-<?= $row['id'] ?>" class="modal-toggle" />
-        <div class="modal" role="dialog">
-            <div class="modal-box border border-error border-2">
-                <h3 class="text-lg font-bold text-error">Notice!</h3>
-                <p class="py-4">Are you sure you want to proceed? This action cannot be undone. Deleting this information will permanently remove it from the system. Ensure that you have backed up any essential data before confirming.</p>
-
-                <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
-
-                    <label class="btn" for="delete-activity-<?= $row['id'] ?>">Close</label>
-                    <button class="btn btn-error" name="delete-activity">Delete</button>
-                </form>
-            </div>
-            <label class="modal-backdrop" for="delete-activity-<?= $row['id'] ?>">Close</label>
-        </div>
-    <?php endwhile; ?>
-
+    <!-- Grade Release Request modal -->
     <input type="checkbox" id="submit-modal" class="modal-toggle" />
     <div class="modal" role="dialog">
         <div class="modal-box">
-            <form method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+            <h3 class="font-semibold text-center text-lg mb-4">Grade Release Request</h3>
+            <form method="post" enctype="multipart/form-data">
                 <label class="flex flex-col gap-2">
                     <span class="font-bold text-[18px]">Subject</span>
                     <select class="select select-bordered" name="subject" required>
                         <!-- Display all the subject related to the instructor -->
                         <option value="" selected disabled>Select Subject </option>
 
-                        <?php $subjectsQueryResult = $dbCon->query($subjectsQuery); ?>
-                        <?php while ($subject = $subjectsQueryResult->fetch_assoc()) : ?>
-                            <option value="<?= $subject['id'] ?>"><?= $subject['name'] ?></option>
-                        <?php endwhile; ?>
+                        <?php foreach ($subjects as $subject) : ?>
+                            <option value="<?= $subject['subject_id'] ?>">(<?= $subject['code'] ?>) <?= $subject['name'] ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </label>
 
                 <label class="flex flex-col gap-2 my-4">
-                    <span class="font-bold text-[18px]">Section</span>
-                    <select class="select select-bordered" name="section" required>
-                        <!-- Display all the subject related to the instructor -->
-                        <option value="" selected disabled>Select Section </option>
-
-                        <?php $sectionsQueryResult = $dbCon->query($sectionsQuery); ?>
-                        <?php while ($section = $sectionsQueryResult->fetch_assoc()) : ?>
-                            <option value="<?= $section['sectionId'] ?>"><?= $section['sectionName'] ?></option>
-                        <?php endwhile; ?>
-                    </select>
-                </label>
-
-                <label class="flex flex-col gap-2 my-4">
-                    <span class="font-bold text-[18px]">Term</span>
+                    <span class="font-bold text-[18px]">Semester</span>
                     <select class="select select-bordered" name="term" required>
                         <!--Display all the Semister here-->
                         <option value="" selected disabled>Select Semester</option>
                         <option value="1st Sem">1st Sem</option>
                         <option value="2nd Sem">2nd Sem</option>
-                        <option value="3rd Sem">3rd Sem</option>
-                    </select>
-                </label>
-
-                <label class="flex flex-col gap-2">
-                    <span class="font-bold text-[18px]">Year level</span>
-                    <select class="select select-bordered" name="year_level" required>
-                        <!--Display all the Year here-->
-                        <option value="" selected disabled>Select Year level</option>
-                        <option value="1st Year">1st Year</option>
-                        <option value="2nd Year">2nd Year</option>
-                        <option value="3rd Year">3rd Year</option>
-                        <option value="4th Year">4th Year</option>
+                        <option value="Midyear">Midyear</option>
                     </select>
                 </label>
 
                 <label class="flex flex-col gap-2 my-4">
-                    <span class="font-bold text-[18px]">School Year</span>
-                    <select class="select select-bordered" name="school_year" required>
-                        <!-- Display all the subject related to the instructor -->
-                        <option value="" selected disabled>Select School Year </option>
-
-                        <?php $schoolYearsQueryResult = $dbCon->query($schoolYearsQuery); ?>
-                        <?php while ($schoolYear = $schoolYearsQueryResult->fetch_assoc()) : ?>
-                            <option value="<?= $schoolYear['id'] ?>"><?= $schoolYear['school_year'] ?></option>
-                        <?php endwhile; ?>
-                    </select>
+                    <span class="font-bold text-[18px]">Grade Sheet (PDF File)</span>
+                    <input type="file" name="file" class="file-input file-input-sm md:file-input-md file-input-bordered w-full" accept="application/pdf" required />
+                    <div class="label">
+                        <span class="label-text-alt text-error">Only <kbd class="p-1">*.pdf</kbd> files are allowed</span>
+                    </div>
                 </label>
 
-                <div class="flex justify-end gap-4 items-center my-4">
+                <div class="flex justify-end gap-4 items-center mt-4">
                     <label class="btn btn-error" for="submit-modal">Close</label>
-                    <button class="btn btn-success" name="submit-grades">Submit Grades</button>
+                    <button class="btn btn-success" name="submit-release-grade-request">Submit Request</button>
                 </div>
             </form>
-
         </div>
         <label class="modal-backdrop" for="submit-modal">Close</label>
     </div>

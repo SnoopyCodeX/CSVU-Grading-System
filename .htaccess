@@ -1,5 +1,5 @@
-Options +MultiViews
-RewriteEngine On
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^([^\.]+)$ $1.php [NC,L]
+php_flag display_errors On
+php_flag display_startup_errors On
+php_value error_reporting -1
+
+OPTIONS -Indexes

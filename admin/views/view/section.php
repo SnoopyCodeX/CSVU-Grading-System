@@ -6,7 +6,7 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -21,33 +21,33 @@ $message = "";
 // Get id from url
 $id = $dbCon->real_escape_string($_GET['id']) ? $dbCon->real_escape_string($_GET['id']) : header("Location: ../manage-sections.php");
 
-// Fetch section details query joining ap_userdetails, ap_sections, ap_subjects, ap_schoolyear and ap_courses tables
+// Fetch section details query joining userdetails, sections, subjects, schoolyear and courses tables
 $sectionQuery = "SELECT 
-    ap_sections.id, 
-    ap_sections.name AS sectionName,
-    ap_sections.term AS term,
-    ap_sections.year_level AS yearLevel,
-    ap_subjects.name AS subjectName, 
-    ap_school_year.school_year AS schoolYear, 
-    ap_courses.course AS courseName,
-    ap_courses.course_code AS courseCode,
-    CONCAT(ap_userdetails.firstName, ' ', ap_userdetails.middleName, ' ', ap_userdetails.lastName) AS instructorName
-    FROM ap_sections 
-    INNER JOIN ap_subjects ON ap_sections.subject = ap_subjects.id 
-    INNER JOIN ap_school_year ON ap_sections.school_year = ap_school_year.id 
-    INNER JOIN ap_courses ON ap_sections.course = ap_courses.id
-    INNER JOIN ap_userdetails ON ap_sections.instructor = ap_userdetails.id
-    WHERE ap_sections.id = $id";
+    sections.id, 
+    sections.name AS sectionName,
+    sections.term AS term,
+    sections.year_level AS yearLevel,
+    subjects.name AS subjectName, 
+    school_year.school_year AS schoolYear, 
+    courses.course AS courseName,
+    courses.course_code AS courseCode,
+    CONCAT(userdetails.firstName, ' ', userdetails.middleName, ' ', userdetails.lastName) AS instructorName
+    FROM sections 
+    INNER JOIN subjects ON sections.subject = subjects.id 
+    INNER JOIN school_year ON sections.school_year = school_year.id 
+    INNER JOIN courses ON sections.course = courses.id
+    INNER JOIN userdetails ON sections.instructor = userdetails.id
+    WHERE sections.id = $id";
 
-// Fetch all students query joining ap_userdetails and ap_section_students tables
+// Fetch all students query joining userdetails and section_students tables
 $studentsQuery = "SELECT
-    ap_section_students.id,
-    ap_section_students.student_id AS studentId,
-    CONCAT(ap_userdetails.firstName, ' ', ap_userdetails.middleName, ' ', ap_userdetails.lastName) AS studentName
+    section_students.id,
+    section_students.student_id AS studentId,
+    CONCAT(userdetails.firstName, ' ', userdetails.middleName, ' ', userdetails.lastName) AS studentName
     FROM
-    ap_section_students
-    INNER JOIN ap_userdetails ON ap_section_students.student_id = ap_userdetails.id
-    WHERE ap_section_students.section_id = $id
+    section_students
+    INNER JOIN userdetails ON section_students.student_id = userdetails.id
+    WHERE section_students.section_id = $id
 ";
 
 // Prefetch section query

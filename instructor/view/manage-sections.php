@@ -4,13 +4,34 @@ session_start();
 
 require("../../configuration/config.php");
 require '../../auth/controller/auth.controller.php';
+require '../../utils/humanizer.php';
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../public/login");
+    header("Location: ../../public/login.php");
     exit();
 }
 
 // pag meron session mag rerender yung dashboard//
+
+// Count all subjects that the instructor is handling
+$subjectsQuery = $dbCon->query("SELECT 
+    subject_instructors.*,
+    subjects.year_level as year_level,
+    subjects.name as name,
+    subjects.code as code,
+    subjects.units as units,
+    subjects.credits_units as credits_units,
+    subjects.term as term,
+    courses.course_code as course,
+    courses.course_code as course_code
+    FROM subject_instructors
+    LEFT JOIN subjects ON subject_instructors.subject_id = subjects.id
+    LEFT JOIN courses ON subjects.course = courses.id
+    WHERE subject_instructors.instructor_id = " . AuthController::user()->id
+);
+$subjects = $subjectsQuery->fetch_all(MYSQLI_ASSOC);
+$subjectsCount = count($subjects);
+
 
 // pagination
 $limit = 10;
@@ -18,28 +39,29 @@ $page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start = ($page - 1) * $limit;
 
 // total pages
-$result2 = mysqli_query($dbCon, "SELECT COUNT(*) AS id FROM ap_sections WHERE instructor = " . AuthController::user()->id);
+$result2 = mysqli_query($dbCon, "SELECT COUNT(*) as count FROM subject_instructor_sections WHERE subject_instructor_sections.instructor_id = " . AuthController::user()->id . " GROUP BY subject_instructor_sections.section_id");
 $sectionsCount = mysqli_fetch_array($result2);
-$total = $sectionsCount['id'];
+$total = $sectionsCount['count'];
 $pages = ceil($total / $limit);
 
-// get all sections that the instructor is handling. the sections are in ap_sections table and has a column referencing to ap_userdetails table where the instructor's details are stored. use join to get the instructor's details.
-$sectionQuery = "SELECT 
-    ap_sections.*,
-    ap_userdetails.firstName,
-    ap_userdetails.lastName,
-    ap_userdetails.middleName,
-    ap_subjects.name as subjectName
-    FROM ap_sections 
-    JOIN ap_userdetails ON ap_sections.instructor = ap_userdetails.id 
-    JOIN ap_subjects ON ap_sections.subject = ap_subjects.id
-    WHERE ap_sections.instructor = " . AuthController::user()->id;
+// get all sections that the instructor is handling. 
+$sectionsQuery = "SELECT
+    sections.*,
+    courses.id as course_id,
+    courses.course_code as course_code,
+    courses.course as course_name
+    FROM subject_instructor_sections
+    LEFT JOIN sections ON subject_instructor_sections.section_id = sections.id
+    LEFT JOIN courses ON sections.course = courses.id
+    WHERE subject_instructor_sections.instructor_id = " . AuthController::user()->id . " GROUP BY subject_instructor_sections.section_id LIMIT $start, $limit";
+$sectionsQueryResult = $dbCon->query($sectionsQuery);
+$sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
 
 require_once("../../components/header.php");
 ?>
 
 
-<main class="flex overflow-hidden">
+<main class="h-screen flex overflow-x-auto md:overflow-hidden">
     <?php require_once("../layout/sidebar.php")  ?>
     <section class="h-screen w-full px-4">
         <?php require_once("../layout/topbar.php") ?>
@@ -49,51 +71,70 @@ require_once("../../components/header.php");
             <div class="flex justify-between items-center">
                 <!-- Table Header -->
                 <div class="flex justify-between items-center">
-                    <h1 class="text-[32px] font-bold">Sections</h1>
+                    <h1 class="text-[24px] font-semibold">Assigned Sections</h1>
                 </div>
             </div>
 
             <!-- Table Content -->
-            <div class="overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
-                <table class="table table-md table-pin-rows table-pin-cols ">
+            <div class="overflow-x-auto md:overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
+                <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white">ID</td>
-                            <td class="bg-slate-500 text-white">Name</td>
-                            <td class="bg-slate-500 text-white">Term</td>
-                            <td class="bg-slate-500 text-white">Students</td>
-                            <td class="bg-slate-500 text-white">Subject</td>
-                            <td class="bg-slate-500 text-white">Instructor</td>
-                            <td class="bg-slate-500 text-white">Status</td>
+                            <td class="bg-slate-500 text-white text-center">Course / Year Level / Section</td>
+                            <td class="bg-slate-500 text-white text-center">Course</td>
+                            <td class="bg-slate-500 text-white text-center">Year Level</td>
+                            <td class="bg-slate-500 text-white text-center">Students</td>
+                            <td class="bg-slate-500 text-white text-center">Status</td>
+                            <td class="bg-slate-500 text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php
-                        $sectionQueryResult = $dbCon->query($sectionQuery);
-                        while ($row = $sectionQueryResult->fetch_assoc()) {
-                        ?>
+                        <?php if (count($sections) > 0) : ?>
+                            <?php foreach($sections as $row) { ?>
+                                <tr>
+                                    <td class="text-center"><?= $row['course_code'] ?> <?= str_split($row['year_level'])[0] ?>-<?= $row['name'] ?></td>
+                                    <td class="text-center"><?= $row['course_code'] ?></td>
+                                    <td class="text-center"><?= $row['year_level'] ?></td>
+                                    <td class="text-center"><?php 
+                                        // Only count students that are enrolled to the instructor's subjects
+                                        $studentsQuery = $dbCon->query("SELECT * FROM section_students WHERE section_id = {$row['id']}");
+                                        $students = $studentsQuery->fetch_all(MYSQLI_ASSOC);
+                                        $filteredStudents = [];
+
+                                        foreach ($subjects as $subject) {
+                                            foreach ($students as $student) {
+                                                $studentEnrolledSubjectsQuery = $dbCon->query("SELECT * FROM student_enrolled_subjects WHERE student_id = " . $student['student_id']);
+                                                $studentEnrolledSubjects = $studentEnrolledSubjectsQuery->fetch_all(MYSQLI_ASSOC);
+        
+                                                $enrolledSubjectIds = array_map(fn($enrolledSubject) => $enrolledSubject['subject_id'], $studentEnrolledSubjects);
+        
+                                                if (in_array($subject['subject_id'], $enrolledSubjectIds)) {
+                                                    $filteredStudents[] = $student;
+                                                    continue;
+                                                }
+                                            }
+                                        }
+        
+                                        $filteredStudents = removeDuplicates($filteredStudents, 'student_id');
+                                        echo count($filteredStudents);
+                                    ?></td>
+                                    <td class="text-center">
+                                        <span class='badge p-4 bg-blue-300 text-black'>
+                                            On going
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="./view/section_students.php?sectionId=<?= $row['id'] ?>&courseId=<?= $row['course_id'] ?>&yearLevel=<?= $row['year_level'] ?>" class="btn btn-info btn-sm">
+                                            Students
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        <?php else : ?>
                             <tr>
-                                <th><?= $row['id'] ?></th>
-                                <td><?= $row['name'] ?></td>
-                                <td><?= $row['term'] ?></td>
-                                <!-- Student Count -->
-                                <td><?= $dbCon->query("SELECT COUNT(*) as count FROM ap_section_students JOIN ap_sections ON ap_section_students.section_id = ap_sections.id WHERE ap_section_students.section_id={$row['id']}")->fetch_assoc()['count'] ?></td>
-                                <!-- Subject Name -->
-                                <td><?= $row['subjectName'] ?></td>
-                                <!-- Instructor Name -->
-                                <td>
-                                    <?= $row['lastName'] ?>,
-                                    <?= $row['firstName'] ?>
-                                    <?= $row['middleName'] ?>
-                                </td>
-                                <!-- Status -->
-                                <td>
-                                    <span class='badge p-4 bg-blue-300 text-black'>
-                                        On going
-                                    </span>
-                                </td>
+                                <td colspan="6" class="text-center">No sections to show</td>
                             </tr>
-                        <?php } ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -106,7 +147,7 @@ require_once("../../components/header.php");
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 >= $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>

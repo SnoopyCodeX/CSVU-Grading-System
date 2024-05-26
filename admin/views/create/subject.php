@@ -6,7 +6,7 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -23,18 +23,27 @@ if (isset($_POST['create_subject'])) {
     $course = $dbCon->real_escape_string($_POST['course']);
     $yearLevel = $dbCon->real_escape_string($_POST['year_level']);
     $subjectName = $dbCon->real_escape_string($_POST['subject_name']);
+    $subjectCode = $dbCon->real_escape_string($_POST['subject_code']);
     $units = $dbCon->real_escape_string($_POST['units']);
     $creditsUnits = $dbCon->real_escape_string($_POST['credits_units']);
     $term = $dbCon->real_escape_string($_POST['term']);
 
-    $subjectNameExistQuery = $dbCon->query("SELECT * FROM ap_subjects WHERE name = '$subjectName'");
+    $subjectCodeExistQuery = $dbCon->query("SELECT * FROM subjects WHERE code = '$subjectCode' AND course='$course'");
 
-    if ($subjectNameExistQuery->num_rows > 0) {
+    if ($subjectCodeExistQuery->num_rows > 0) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "Subject name already exists!";
+        $message = "Subject code already exists!";
+    } else if (!is_numeric($units) || intval($units) <= 0) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Subject units must be a numeric value and must be a positive integer greater than 0!";
+    } else if (!is_numeric($creditsUnits) || intval($creditsUnits) <= 0) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Subject credit units must be a numeric value and must be a positive integer greater than 0!";
     } else {
-        $query = "INSERT INTO ap_subjects (course, year_level, name, units, credits_units, term) VALUES ('$course', '$yearLevel', '$subjectName', '$units', '$creditsUnits', '$term')";
+        $query = "INSERT INTO subjects (course, year_level, name, code, units, credits_units, term) VALUES ('$course', '$yearLevel', '$subjectName', '$subjectCode', '$units', '$creditsUnits', '$term')";
         $result = mysqli_query($dbCon, $query);
 
         if ($result) {
@@ -50,18 +59,21 @@ if (isset($_POST['create_subject'])) {
 }
 
 // Prefetch all courses
-$courses = $dbCon->query("SELECT * FROM ap_courses");
+$courses = $dbCon->query("SELECT * FROM courses");
+
+// Prefetch all instructors
+$instructors = $dbCon->query("SELECT * FROM userdetails WHERE roles='instructor'");
 ?>
 
-<main class="w-screen h-screen overflow-scroll overflow-x-hidden flex">
+<main class="w-screen h-screen overflow-scroll overflow-scroll flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center">
-            <div class="flex justify-center items-center flex-col gap-4 p-4">
+        <div class="flex flex-col gap-4 justify-center items-center md:w-[700px] mx-auto">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold mb-8">Create Subject</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4 w-full" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -103,7 +115,7 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                     </label>
 
                     <!-- Name -->
-                    <div class="grid grid-cols-3 gap-4">
+                    <div class="grid md:grid-cols-3 gap-4">
                         <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Subject Name</span>
                             <input class="input input-bordered" placeholder="Enter Subject Name" name="subject_name" required />
@@ -118,26 +130,29 @@ $courses = $dbCon->query("SELECT * FROM ap_courses");
                             <span class="font-bold text-[18px]">Credits Units</span>
                             <input class="input input-bordered" placeholder="Enter Subject Credits" name="credits_units" required />
                         </label>
+                    </div>
 
-                        <label class="flex flex-col gap-2 col-span-3">
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Subject Code</span>
+                            <input class="input input-bordered" placeholder="Enter Subject Code" name="subject_code" required />
+                        </label>
+
+                        <label class="flex flex-col gap-2">
                             <span class="font-bold text-[18px]">Term</span>
-                            <select class="select select-bordered" name="term">
+                            <select class="select select-bordered" name="term" required>
                                 <option value="" selected disabled>Select Term</option>
                                 <option value="1st Sem">1st Sem</option>
                                 <option value="2nd Sem">2nd Sem</option>
-                                <option value="3rd Sem">3rd Sem</option>
+                                <option value="Midyear">Midyear</option>
                             </select>
                         </label>
                     </div>
 
-
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
-                        <div></div>
-                        <div class="flex flex-col gap-2">
-                            <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
-                            <button class="btn btn-success" name="create_subject">Create</button>
-                        </div>
+                        <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
+                        <button class="btn btn-success" name="create_subject">Create</button>
                     </div>
                 </form>
             </div>

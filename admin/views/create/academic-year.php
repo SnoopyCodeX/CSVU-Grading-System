@@ -6,7 +6,7 @@ require("../../../configuration/config.php");
 require('../../../auth/controller/auth.controller.php');
 
 if (!AuthController::isAuthenticated()) {
-    header("Location: ../../../public/login");
+    header("Location: ../../../public/login.php");
     exit();
 }
 
@@ -20,14 +20,29 @@ $message = "";
 
 // create new school year
 if (isset($_POST['create_school_year'])) {
-    $school_year = $_POST['school_year'];
+    $school_year = $dbCon->real_escape_string($_POST['school_year']);
+    $semester = strtolower($dbCon->real_escape_string($_POST['semester']));
+    $school_year_copy = str_replace(" ", "", $school_year);
+    $school_year_fragments = explode("-", $school_year_copy);
 
-    if ($dbCon->query("SELECT * FROM ap_school_year WHERE school_year = '$school_year'")->num_rows > 0) {
+    if (count($school_year_fragments) != 2) {
         $hasError = true;
         $hasSuccess = false;
-        $message = "School year already exists";
+        $message = "Invalid school year format. Please use the format 'YYYY - YYYY'";
+    } else if ($school_year_fragments[0] >= $school_year_fragments[1]) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Invalid school year format. First year should be less than the second year. Please use the format 'YYYY - YYYY'";
+    } else if (($school_year_fragments[1] - $school_year_fragments[0]) > 1) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "Invalid school year format. Range should only be 1 year. Please use the format 'YYYY - YYYY'";
+    } else if ($dbCon->query("SELECT * FROM school_year WHERE school_year = '$school_year' AND semester='$semester'")->num_rows > 0) {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "School year with the same semester already exists";
     } else {
-        $sql = "INSERT INTO ap_school_year (school_year) VALUES ('$school_year')";
+        $sql = "INSERT INTO school_year (school_year, semester, status) VALUES ('$school_year', '$semester', 'inactive')";
         $result = mysqli_query($dbCon, $sql);
 
         if ($result) {
@@ -43,15 +58,15 @@ if (isset($_POST['create_school_year'])) {
 }
 ?>
 
-<main class="w-screen h-screen overflow-hidden flex">
+<main class="w-screen h-screen overflow-x-auto flex">
     <?php require_once("../../layout/sidebar.php")  ?>
     <section class="border w-full px-4">
         <?php require_once("../../layout/topbar.php") ?>
 
-        <div class="flex flex-col gap-4 justify-center items-center h-[70%]">
-            <div class="flex justify-center items-center flex-col gap-4">
+        <div class="flex flex-col gap-4 justify-center items-center h-[70%] w-full">
+            <div class="flex justify-center items-center flex-col gap-4 w-full">
                 <h2 class="text-[38px] font-bold mb-8">Create School year</h2>
-                <form class="flex flex-col gap-4  px-[32px]  w-[1000px] mb-auto" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                <form class="flex flex-col gap-4  px-[32px]  w-full mx-[80px]" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
 
                     <?php if ($hasError) { ?>
                         <div role="alert" class="alert alert-error mb-8">
@@ -72,18 +87,18 @@ if (isset($_POST['create_school_year'])) {
                     <?php } ?>
 
                     <!-- Name -->
-                    <label class="flex flex-col gap-2">
+                    <label class="flex flex-col gap-2" x-data>
                         <span class="font-bold text-[18px]">School Year</span>
-                        <select class="select select-bordered" name="school_year" required>
-                            <option disabled="disabled" selected="selected">Select an option</option>
-                            // school year options 2022 - 2023 using item //
-                            <?php
-                            $earlyYear = 2022;
-                            $lateYear = 2030;
-                            for ($i = $earlyYear; $i <= $lateYear; $i++) {
-                                echo "<option value='$i - " . ($i + 1) . "'>$i - " . ($i + 1) . "</option>";
-                            }
-                            ?>
+                        <input x-mask="9999 - 9999" placeholder="<?= date('Y') ?> - <?= date('Y', strtotime('+ 1 year')) ?>" name="school_year" class="input input-bordered" required>
+                    </label>
+
+                    <label class="flex flex-col gap-2 mb-2">
+                        <span class="font-bold text-[18px]">Semester</span>
+                        <select class="select select-bordered" name="semester" required>
+                            <option disabled selected>Select an option</option>
+                            <option value="1st Sem">1st Semester</option>
+                            <option value="2nd Sem">2nd Semester</option>
+                            <option value="Midyear">Midyear</option>
                         </select>
                     </label>
 

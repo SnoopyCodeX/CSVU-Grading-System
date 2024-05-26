@@ -22,12 +22,12 @@ class AuthController {
         
         if(self::isAuthenticated() && isset($_SESSION['email'])) {
             $email = $dbCon->real_escape_string($_SESSION['email']);
-            $result = $dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'");
+            $result = $dbCon->query("SELECT * FROM userdetails WHERE email = '$email'");
             $user = $result->fetch_assoc();
 
             // check role
             if($user['roles'] == 'admin') {
-                $result = $dbCon->query("SELECT * FROM ap_userdetails WHERE email = '$email'");
+                $result = $dbCon->query("SELECT * FROM userdetails WHERE email = '$email'");
                 $user = $result->fetch_assoc();
             }
 

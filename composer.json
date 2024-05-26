@@ -1,0 +1,12 @@
+{
+    "name": "hopiesoberanya/cvsu-grading-sys",
+    "type": "project",
+    "require": {
+        "phpoffice/phpspreadsheet": "^2.0",
+        "phpmailer/phpmailer": "^6.9",
+        "fpdf/fpdf": "^1.86",
+        "setasign/fpdi": "^2.6",
+        "setasign/fpdf": "^1.8",
+        "smalot/pdfparser": "^2.9"
+    }
+}

@@ -32,7 +32,7 @@ class LoginHandler
     private function loginValidator($email, $password)
     {
         $pwd = crypt($password, '$6$Crypt$');
-        $sql = "SELECT * FROM ap_userdetails WHERE email='".$email."' AND password='" . $pwd. "'";
+        $sql = "SELECT * FROM userdetails WHERE email='".$email."' AND password='" . $pwd. "'";
         $result = $this->dbCon->query($sql);
         $fetch = mysqli_fetch_assoc($result);
 
@@ -41,7 +41,7 @@ class LoginHandler
         }
 
         return $fetch['roles'];
-    } //potek di na naman ako makalogin
+    }
 
     private function saveSession($userRole, $email)
     {
@@ -54,7 +54,18 @@ if (isset($_POST['login'])) {
     require "../configuration/config.php";
     $email = $dbCon->real_escape_string($_POST['email']);
     $password = $dbCon->real_escape_string($_POST['password']);
-    $loginHandler = new LoginHandler($dbCon);
-    $loginHandler->authenticateUser($email, $password);
+
+    if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        $hasError = true;
+        $message = "Invalid email format!";
+        return;
+    } else if (!str_ends_with($email, "@cvsu.edu.ph")) {
+        $hasError = true;
+        $message = "Invalid email address! Email address must end with <strong>@cvsu.edu.ph</strong>!";
+        return;
+    } else {
+        $loginHandler = new LoginHandler($dbCon);
+        $loginHandler->authenticateUser($email, $password);
+    }
 }
 ?>
