@@ -2,11 +2,11 @@
 session_start();
 // kung walang session mag reredirect sa login //
 
-require("../../../vendor/autoload.php");
-require("../../../configuration/config.php");
+require ("../../../vendor/autoload.php");
+require ("../../../configuration/config.php");
 require '../../../auth/controller/auth.controller.php';
-require('../../../utils/grades.php');
-require('../../../utils/files.php');
+require ('../../../utils/grades.php');
+require ('../../../utils/files.php');
 
 if (!AuthController::isAuthenticated()) {
     header("Location: ../../../public/login.php");
@@ -14,7 +14,7 @@ if (!AuthController::isAuthenticated()) {
 }
 
 // pag meron session mag rerender yung dashboard//
-require_once("../../../components/header.php");
+require_once ("../../../components/header.php");
 
 $subjectId = $dbCon->real_escape_string($_GET['subjectId'] ?? '');
 
@@ -80,7 +80,7 @@ if (isset($_POST['submit-release-grade-request'])) {
 
             // Check if file size is equal or less than 10 MB
             if ($actualFileSize <= $maxFileSize && $actualFileSize > 0) {
-                
+
                 // Check if the uploaded pdf file is valid
                 if (validatePDFFile($fileTmpName)) {
                     // Get current directory
@@ -97,7 +97,7 @@ if (isset($_POST['submit-release-grade-request'])) {
                         // Get subject details
                         $subjectDataQuery = $dbCon->query("SELECT * FROM subjects WHERE id = '$subject'");
                         $subjectData = $subjectDataQuery->fetch_assoc();
-                        
+
                         // Check if instructor already has an existing request (pending or approved or grade-released) with the same subject, term and school year
                         $checkRequestQuery = $dbCon->query("SELECT * FROM instructor_grade_release_requests WHERE 
                             instructor_id='{$instructor->id}' AND 
@@ -140,7 +140,7 @@ if (isset($_POST['submit-release-grade-request'])) {
                                 } else {
                                     $hasError = true;
                                     $message = "Failed to send grade release request for <strong>($subjectData[code]) $subjectData[name]</strong>@<strong>$term</strong> to the admin.";
-                                    
+
                                     // Delete the uploaded pdf file
                                     @unlink($newFilePath);
                                 }
@@ -463,83 +463,75 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
 ?>
 
 <style>
-    /* Style to hide number input arrows */
-    /* Chrome, Safari, Edge, Opera */
-    input[type=number]::-webkit-outer-spin-button,
-    input[type=number]::-webkit-inner-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
-
-    /* Firefox */
-    input[type=number] {
-        -moz-appearance: textfield;
-    }
+/* Style to hide number input arrows */
+/* Chrome, Safari, Edge, Opera */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
 </style>
 
-<main class="h-screen overflow-x-auto flex">
-    <?php require_once("../../layout/sidebar.php")  ?>
-    <section class=" w-full px-4">
-        <?php require_once("../../layout/topbar.php") ?>
-        
-        <div class="px-4 flex justify-between flex-col gap-4">
+<main class=" overflow-x-auto flex min-h-screen overflow-hidden">
+    <?php require_once ("../../layout/sidebar.php") ?>
+    <section class=" w-full px-4 overflow-hidden">
+        <?php require_once ("../../layout/topbar.php") ?>
+
+        <div class=" px-4 flex justify-between flex-col gap-4">
 
             <!-- Table Header -->
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <!-- Table Header -->
-                <div class="flex flex-col justify-start md:justify-center gap-2">
-                    <h1 class="text-[24px] font-semibold">Manage Activities</h1>
-                    <h1 class="text-md font-semibold">Subject: (<?= $currentSubject['code'] ?>) <?= $currentSubject['name'] ?></h1>
-                    <h1 class="text-md font-semibold">Course: (<?= $currentSubject['course_code'] ?>) <?= $currentSubject['course_name'] ?></h1>
-                </div>
 
-                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                    <button class="btn" onclick="filters.showModal()"><i class="<?= $hasFilter ? 'bx bxs-filter-alt' : 'bx bx-filter-alt' ?>"></i> Filters</button>
-                    <label for="submit-modal" class="btn" <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled <?php endif; ?>>Release Grades</label>
-                    <a href="../manage-activity.php" class="btn btn-info"><i class="bx bxs-chevron-left"></i> Go Back</a>
-                    <a onclick="create_activity_modal.showModal()" class="btn btn-success" <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled <?php endif; ?>><i class="bx bx-plus-circle"></i> Create</a>
-                </div>
-            </div>
 
             <?php if ($gradingCriteriasQuery->num_rows == 0) { ?>
-                <div role="alert" class="alert alert-error mb-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span class="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                        <span class='flex items-center'>Before you can create a new activity, you must first create your grading criteria.</span> 
-                        <div class='flex w-full justify-end items-center'>
-                            <a href='../manage-grading-criteria.php' class='btn btn'>
-                                <i class='bx bx-plus-circle'></i> Create
-                            </a>
-                        </div>
-                    </span>
-                </div>
+            <div role="alert" class="alert alert-error mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                    <span class='flex items-center'>Before you can create a new activity, you must first create your
+                        grading criteria.</span>
+                    <div class='flex w-full justify-end items-center'>
+                        <a href='../manage-grading-criteria.php' class='btn btn'>
+                            <i class='bx bx-plus-circle'></i> Create
+                        </a>
+                    </div>
+                </span>
+            </div>
             <?php } ?>
 
             <?php if ($hasWarning) { ?>
-                <div role="alert" class="alert alert-warning">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                    <span><?= $warning ?></span>
-                </div>
+            <div role="alert" class="alert alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <span><?= $warning ?></span>
+            </div>
             <?php } ?>
 
             <?php if ($hasError) { ?>
-                <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span><?= $message ?></span>
-                </div>
+            <div role="alert" class="alert alert-error mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><?= $message ?></span>
+            </div>
             <?php } ?>
 
             <?php if ($hasSuccess) { ?>
-                <div role="alert" class="alert alert-success mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span><?= $message ?></span>
-                </div>
+            <div role="alert" class="alert alert-success mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><?= $message ?></span>
+            </div>
             <?php } ?>
 
             <!-- Table Content -->
@@ -547,53 +539,58 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <td class="bg-slate-500 text-white text-center">Activity Name</td>
-                            <td class="bg-slate-500 text-white text-center">Type of Activity</td>
-                            <td class="bg-slate-500 text-white text-center">Year Level</td>
-                            <td class="bg-slate-500 text-white text-center">Semester</td>
-                            <td class="bg-slate-500 text-white text-center">Passing Rate</td>
-                            <td class="bg-slate-500 text-white text-center">Max Score</td>
-                            <td class="bg-slate-500 text-white text-center">Action</td>
+                            <td class="bg-[#276bae] text-white text-center">Activity Name</td>
+                            <td class="bg-[#276bae] text-white text-center">Type of Activity</td>
+                            <td class="bg-[#276bae] text-white text-center">Year Level</td>
+                            <td class="bg-[#276bae] text-white text-center">Semester</td>
+                            <td class="bg-[#276bae] text-white text-center">Passing Rate</td>
+                            <td class="bg-[#276bae] text-white text-center">Max Score</td>
+                            <td class="bg-[#276bae] text-white text-center">Action</td>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $activityResult = $dbCon->query($query); ?>
-                        <?php if ($activityResult->num_rows > 0) : ?>
-                            <?php while ($row = $activityResult->fetch_assoc()) : ?>
-                                <tr>
-                                    <td class="text-center"><?= $row['name'] ?></td>
-                                    <td class="text-center"><?= $row['criteria_name'] ?></td>
-                                    <td class="text-center"><?= $row['year_level'] ?></td>
-                                    <td class="text-center"><?= $row['term'] ?></td>
-                                    <td class="text-center"><?= $row['passing_rate'] * 100 ?>%</td>
-                                    <td class="text-center"><?= $row['max_score'] ?></td>
-                                    <td>
-                                        <div class="flex justify-center items-center gap-2">
-                                            <a class="btn btn-sm" href="./activity_scores.php?id=<?= $row['id'] ?>&subjectId=<?= $subjectId ?><?= $page > 1 ? '&page=' . $page : '' ?>">Scores</a>
-                                            <label for="update-activity-<?= $row['id'] ?>" class="btn btn-info btn-sm">Edit</label>
-                                            <label for="delete-activity-<?= $row['id'] ?>" class="btn btn-error btn-sm">Delete</label>
-                                        </div>
-                                    </td>
-                                </tr>
-                            <?php endwhile; ?>
-                        <?php else : ?>
-                            <tr>
-                                <td class="text-center" colspan="11">No activities to show</td>
-                            </tr>
+                        <?php if ($activityResult->num_rows > 0): ?>
+                        <?php while ($row = $activityResult->fetch_assoc()): ?>
+                        <tr>
+                            <td class="text-center"><?= $row['name'] ?></td>
+                            <td class="text-center"><?= $row['criteria_name'] ?></td>
+                            <td class="text-center"><?= $row['year_level'] ?></td>
+                            <td class="text-center"><?= $row['term'] ?></td>
+                            <td class="text-center"><?= $row['passing_rate'] * 100 ?>%</td>
+                            <td class="text-center"><?= $row['max_score'] ?></td>
+                            <td>
+                                <div class="flex justify-center items-center gap-2">
+                                    <a class="btn btn-sm"
+                                        href="./activity_scores.php?id=<?= $row['id'] ?>&subjectId=<?= $subjectId ?><?= $page > 1 ? '&page=' . $page : '' ?>">Scores</a>
+                                    <label for="update-activity-<?= $row['id'] ?>"
+                                        class="btn btn-info btn-sm">Edit</label>
+                                    <label for="delete-activity-<?= $row['id'] ?>"
+                                        class="btn btn-error btn-sm">Delete</label>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>
+                        <?php else: ?>
+                        <tr class="hover">
+                            <td class="text-center" colspan="11">No activities to show</td>
+                        </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
+            <div class="flex gap-4 justify-end items-center pb-4">
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+                    <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
                 <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
+                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                    <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -601,70 +598,78 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
     </section>
 
     <?php $activityResult = $dbCon->query($query); ?>
-    <?php while ($row = $activityResult->fetch_assoc()) : ?>
-        <!-- Update Modal -->
-        <input type="checkbox" id="update-activity-<?= $row['id'] ?>" class="modal-toggle" />
-        <div class="modal" role="dialog">
-            <div class="modal-box">
-                <h3 class="text-lg font-semibold text-center">Update Activity</h3>
+    <?php while ($row = $activityResult->fetch_assoc()): ?>
+    <!-- Update Modal -->
+    <input type="checkbox" id="update-activity-<?= $row['id'] ?>" class="modal-toggle" />
+    <div class="modal" role="dialog">
+        <div class="modal-box">
+            <h3 class="text-lg font-semibold text-center">Update Activity</h3>
 
-                <form class="flex flex-col gap-4 mt-4" method="post">
-                    <input type="hidden" name="activity_id" value="<?= $row['id'] ?>">
+            <form class="flex flex-col gap-4 mt-4" method="post">
+                <input type="hidden" name="activity_id" value="<?= $row['id'] ?>">
+
+                <label class="flex flex-col gap-2">
+                    <span class="font-bold text-[18px]">Activity Name</span>
+                    <input class="input input-bordered" placeholder="Activity name" name="activity_name"
+                        value="<?= $row['name'] ?>" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?>
+                        disabled <?php endif; ?> />
+                </label>
+
+                <label class="flex flex-col col-span gap-2">
+                    <span class="font-bold text-[18px]">Type of Activity</span>
+                    <select class="select select-bordered" name="type" required
+                        <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?>>
+                        <!--Display all the Course here-->
+                        <option value="" selected disabled>Select Type</option>
+
+                        <?php foreach ($gradingCriterias as $criteria) { ?>
+                        <option value="<?= $criteria['id'] ?>" <?php if ($criteria['id'] == $row['type']): ?> selected
+                            <?php endif; ?>><?= $criteria['criteria_name'] ?></option>
+                        <?php } ?>
+                    </select>
+                </label>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <label class="flex flex-col gap-2">
+                        <span class="font-bold text-[18px]">Passing Rate</span>
+                        <input type="number" class="input input-bordered passing-rate" placeholder="EG: 10%"
+                            name="passing_rate" min="1" max="100" value="<?= ($row['passing_rate'] * 100) ?>" required
+                            <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
+                    </label>
 
                     <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Activity Name</span>
-                        <input class="input input-bordered" placeholder="Activity name" name="activity_name" value="<?= $row['name'] ?>" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
+                        <span class="font-bold text-[18px]">Max Score</span>
+                        <input type="number" class="input input-bordered" name="max_score" min="0" pattern="[0-9]+"
+                            value="<?= $row['max_score'] ?>" required
+                            <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
                     </label>
+                </div>
 
-                    <label class="flex flex-col col-span gap-2">
-                        <span class="font-bold text-[18px]">Type of Activity</span>
-                        <select class="select select-bordered" name="type" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?>>
-                            <!--Display all the Course here-->
-                            <option value="" selected disabled>Select Type</option>
-
-                            <?php foreach ($gradingCriterias as $criteria) { ?>
-                                <option value="<?= $criteria['id'] ?>" <?php if ($criteria['id'] == $row['type']): ?> selected <?php endif; ?>><?= $criteria['criteria_name'] ?></option>
-                            <?php } ?>
-                        </select>
-                    </label>
-
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Passing Rate</span>
-                            <input type="number" class="input input-bordered passing-rate" placeholder="EG: 10%" name="passing_rate" min="1" max="100" value="<?= ($row['passing_rate'] * 100) ?>" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
-                        </label>
-
-                        <label class="flex flex-col gap-2">
-                            <span class="font-bold text-[18px]">Max Score</span>
-                            <input type="number" class="input input-bordered" name="max_score" min="0" pattern="[0-9]+" value="<?= $row['max_score'] ?>" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
-                        </label>
-                    </div>
-
-                    <div class="flex justify-end items-center gap-4 mt-4">
-                        <label class="btn" for="update-activity-<?= $row['id'] ?>">Cancel</label>
-                        <button class="btn btn-info" name="update-activity">Update</button>
-                    </div>
-                </form>
-            </div>
-            <label class="modal-backdrop" for="update-activity-<?= $row['id'] ?>">Close</label>
+                <div class="flex justify-end items-center gap-4 mt-4">
+                    <label class="btn" for="update-activity-<?= $row['id'] ?>">Cancel</label>
+                    <button class="btn btn-info" name="update-activity">Update</button>
+                </div>
+            </form>
         </div>
-        
-        <!-- Delete Modal -->
-        <input type="checkbox" id="delete-activity-<?= $row['id'] ?>" class="modal-toggle" />
-        <div class="modal" role="dialog">
-            <div class="modal-box border border-error border-2">
-                <h3 class="text-lg font-bold text-error">Delete Activity</h3>
-                <p class="py-4">Are you sure you want to delete this activity? This action cannot be undone.</p>
+        <label class="modal-backdrop" for="update-activity-<?= $row['id'] ?>">Close</label>
+    </div>
 
-                <form class="flex justify-end gap-4 items-center" method="post">
-                    <input type="hidden" name="id" value="<?= $row['id'] ?>">
+    <!-- Delete Modal -->
+    <input type="checkbox" id="delete-activity-<?= $row['id'] ?>" class="modal-toggle" />
+    <div class="modal" role="dialog">
+        <div class="modal-box border border-error border-2">
+            <h3 class="text-lg font-bold text-error">Delete Activity</h3>
+            <p class="py-4">Are you sure you want to delete this activity? This action cannot be undone.</p>
 
-                    <label class="btn" for="delete-activity-<?= $row['id'] ?>">Close</label>
-                    <button class="btn btn-error" name="delete-activity">Delete</button>
-                </form>
-            </div>
-            <label class="modal-backdrop" for="delete-activity-<?= $row['id'] ?>">Close</label>
+            <form class="flex justify-end gap-4 items-center" method="post">
+                <input type="hidden" name="id" value="<?= $row['id'] ?>">
+
+                <label class="btn" for="delete-activity-<?= $row['id'] ?>">Close</label>
+                <button class="btn btn-error" name="delete-activity">Delete</button>
+            </form>
         </div>
+        <label class="modal-backdrop" for="delete-activity-<?= $row['id'] ?>">Close</label>
+    </div>
     <?php endwhile; ?>
 
     <!-- Grade Release Request modal -->
@@ -679,8 +684,9 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                         <!-- Display all the subject related to the instructor -->
                         <option value="" selected disabled>Select Subject </option>
 
-                        <?php foreach ($subjects as $subject) : ?>
-                            <option value="<?= $subject['subject_id'] ?>">(<?= $subject['code'] ?>) <?= $subject['name'] ?></option>
+                        <?php foreach ($subjects as $subject): ?>
+                        <option value="<?= $subject['subject_id'] ?>">(<?= $subject['code'] ?>) <?= $subject['name'] ?>
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -698,9 +704,12 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
 
                 <label class="flex flex-col gap-2 my-4">
                     <span class="font-bold text-[18px]">Grade Sheet (PDF File)</span>
-                    <input type="file" name="file" class="file-input file-input-sm md:file-input-md file-input-bordered w-full" accept="application/pdf" required />
+                    <input type="file" name="file"
+                        class="file-input file-input-sm md:file-input-md file-input-bordered w-full"
+                        accept="application/pdf" required />
                     <div class="label">
-                        <span class="label-text-alt text-error">Only <kbd class="p-1">*.pdf</kbd> files are allowed</span>
+                        <span class="label-text-alt text-error">Only <kbd class="p-1">*.pdf</kbd> files are
+                            allowed</span>
                     </div>
                 </label>
 
@@ -724,20 +733,22 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                     <select class="select select-bordered" name="filter-criteria">
                         <option value="" selected disabled>Select type</option>
 
-                        <?php foreach ($gradingCriterias as $criteria) : ?>
-                            <option value="<?= $criteria['id'] ?>" <?php if ($hasFilter && $filterCriteria == $criteria['id']) : ?> selected <?php endif; ?>><?= $criteria['criteria_name'] ?></option>
+                        <?php foreach ($gradingCriterias as $criteria): ?>
+                        <option value="<?= $criteria['id'] ?>"
+                            <?php if ($hasFilter && $filterCriteria == $criteria['id']): ?> selected <?php endif; ?>>
+                            <?= $criteria['criteria_name'] ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
-                
+
                 <!-- <label class="flex flex-col gap-2">
                     <span class="font-bold text-[18px]">Course</span>
                     <select class="select select-bordered" name="filter-course">
                         <option value="" selected disabled>Select course</option>
 
-                        <?php while ($course = $coursesQuery->fetch_assoc()) : ?>
+                        <?php while ($course = $coursesQuery->fetch_assoc()): ?>
 
-                            <option value="<?= $course['id'] ?>" <?php if ($hasFilter && $filterCourse == $course['id']) : ?> selected <?php endif; ?>><?= $course['course_code'] ?></option>
+                            <option value="<?= $course['id'] ?>" <?php if ($hasFilter && $filterCourse == $course['id']): ?> selected <?php endif; ?>><?= $course['course_code'] ?></option>
 
                         <?php endwhile; ?>
                     </select>
@@ -748,11 +759,11 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                     <select class="select select-bordered" name="filter-yearlevel">
                         <option value="" selected disabled>Select year level</option>
 
-                        <option value="1st Year" <?php if ($hasFilter && $filterYearLevel == '1st Year') : ?> selected <?php endif; ?>>1st Year</option>
-                        <option value="2nd Year" <?php if ($hasFilter && $filterYearLevel == '2nd Year') : ?> selected <?php endif; ?>>2nd Year</option>
-                        <option value="3rd Year" <?php if ($hasFilter && $filterYearLevel == '3rd Year') : ?> selected <?php endif; ?>>3rd Year</option>
-                        <option value="4th Year" <?php if ($hasFilter && $filterYearLevel == '4th Year') : ?> selected <?php endif; ?>>4th Year</option>
-                        <option value="5th Year" <?php if ($hasFilter && $filterYearLevel == '5th Year') : ?> selected <?php endif; ?>>5th Year</option>
+                        <option value="1st Year" <?php if ($hasFilter && $filterYearLevel == '1st Year'): ?> selected <?php endif; ?>>1st Year</option>
+                        <option value="2nd Year" <?php if ($hasFilter && $filterYearLevel == '2nd Year'): ?> selected <?php endif; ?>>2nd Year</option>
+                        <option value="3rd Year" <?php if ($hasFilter && $filterYearLevel == '3rd Year'): ?> selected <?php endif; ?>>3rd Year</option>
+                        <option value="4th Year" <?php if ($hasFilter && $filterYearLevel == '4th Year'): ?> selected <?php endif; ?>>4th Year</option>
+                        <option value="5th Year" <?php if ($hasFilter && $filterYearLevel == '5th Year'): ?> selected <?php endif; ?>>5th Year</option>
                     </select>
                 </label> -->
 
@@ -761,9 +772,12 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                     <select class="select select-bordered" name="filter-semester">
                         <option value="" selected disabled>Select semester</option>
 
-                        <option value="1st Sem" <?php if ($hasFilter && $filterSemester == '1st Sem') : ?> selected <?php endif; ?>>1st Semester</option>
-                        <option value="2nd Sem" <?php if ($hasFilter && $filterSemester == '2nd Sem') : ?> selected <?php endif; ?>>2nd Semester</option>
-                        <option value="Midyear" <?php if ($hasFilter && $filterSemester == 'Midyear') : ?> selected <?php endif; ?>>Midyear</option>
+                        <option value="1st Sem" <?php if ($hasFilter && $filterSemester == '1st Sem'): ?> selected
+                            <?php endif; ?>>1st Semester</option>
+                        <option value="2nd Sem" <?php if ($hasFilter && $filterSemester == '2nd Sem'): ?> selected
+                            <?php endif; ?>>2nd Semester</option>
+                        <option value="Midyear" <?php if ($hasFilter && $filterSemester == 'Midyear'): ?> selected
+                            <?php endif; ?>>Midyear</option>
                     </select>
                 </label>
 
@@ -786,17 +800,19 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
             <form class="flex flex-col gap-4 mt-4" method="post">
                 <label class="flex flex-col gap-2">
                     <span class="font-bold text-[18px]">Activity Name</span>
-                    <input class="input input-bordered" placeholder="Activity name" name="activity_name" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
+                    <input class="input input-bordered" placeholder="Activity name" name="activity_name" required
+                        <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
                 </label>
 
                 <label class="flex flex-col col-span gap-2">
                     <span class="font-bold text-[18px]">Type of Activity</span>
-                    <select class="select select-bordered" name="type" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?>>
+                    <select class="select select-bordered" name="type" required
+                        <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?>>
                         <!--Display all the Course here-->
                         <option value="" selected disabled>Select Type</option>
 
                         <?php foreach ($gradingCriterias as $row) { ?>
-                            <option value="<?= $row['id'] ?>"><?= $row['criteria_name'] ?></option>
+                        <option value="<?= $row['id'] ?>"><?= $row['criteria_name'] ?></option>
                         <?php } ?>
                     </select>
                 </label>
@@ -804,12 +820,16 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
                 <div class="grid md:grid-cols-2 gap-4">
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Passing Rate</span>
-                        <input type="number" class="input input-bordered passing-rate" placeholder="EG: 10%" name="passing_rate" min="1" max="100" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
+                        <input type="number" class="input input-bordered passing-rate" placeholder="EG: 10%"
+                            name="passing_rate" min="1" max="100" required
+                            <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
                     </label>
 
                     <label class="flex flex-col gap-2">
                         <span class="font-bold text-[18px]">Max Score</span>
-                        <input type="number" class="input input-bordered" name="max_score" min="0" value="1" pattern="[0-9]+" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?> />
+                        <input type="number" class="input input-bordered" name="max_score" min="0" value="1"
+                            pattern="[0-9]+" required <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled
+                            <?php endif; ?> />
                     </label>
                 </div>
 
@@ -826,17 +846,17 @@ $currentSubject = $currentSubjectQuery->fetch_assoc();
 </main>
 
 <script>
-    document.querySelector("input[name='passing_rate']").addEventListener("input", function(e) {
-        if (parseInt(e.target.value) > 100) {
-            e.target.value = "100";
-        } else if (parseInt(e.target.value) < 1) {
-            e.target.value = "1";
-        }
-    })
+document.querySelector("input[name='passing_rate']").addEventListener("input", function(e) {
+    if (parseInt(e.target.value) > 100) {
+        e.target.value = "100";
+    } else if (parseInt(e.target.value) < 1) {
+        e.target.value = "1";
+    }
+})
 
-    document.querySelector("input[name='max_score']").addEventListener("input", function(e) {
-        if (parseInt(e.target.value) < 1) {
-            e.target.value = "1";
-        }
-    })
+document.querySelector("input[name='max_score']").addEventListener("input", function(e) {
+    if (parseInt(e.target.value) < 1) {
+        e.target.value = "1";
+    }
+})
 </script>

@@ -81,6 +81,19 @@ if (in_array('Asia/Manila', $tzList)) {
         font-size: 1rem;
         line-height: 1.5;
     }
+
+    @media (min-width: 768px) {
+        :root {
+            font-size: calc(1rem + ((1vw - 7.68px) * 0.6944));
+            min-height: 0vw;
+        }
+    }
+
+    @media (min-width: 1920px) {
+        :root {
+            font-size: 24px;
+        }
+    }
     </style>
 </head>
 

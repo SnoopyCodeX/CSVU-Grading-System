@@ -1,11 +1,11 @@
-<?php 
+<?php
 
 session_start();
 // kung walang session mag reredirect sa login //
 
-require("../../../configuration/config.php");
+require ("../../../configuration/config.php");
 require '../../../auth/controller/auth.controller.php';
-require("../../../utils/grades.php");
+require ("../../../utils/grades.php");
 
 if (!AuthController::isAuthenticated()) {
     header("Location: ../../../public/login.php");
@@ -13,7 +13,7 @@ if (!AuthController::isAuthenticated()) {
 }
 
 // pag meron session mag rerender yung dashboard//
-require_once("../../../components/header.php");
+require_once ("../../../components/header.php");
 
 // error and success handlers
 $hasError = false;
@@ -22,7 +22,7 @@ $hasSearch = false;
 $hasFilter = false;
 $message = "";
 
-if(!isset($_GET['subject'])) {
+if (!isset($_GET['subject'])) {
     header("Location: ../");
     exit();
 }
@@ -64,7 +64,7 @@ if ($subjectQuery->num_rows > 0) {
         WHERE subject_instructor_sections.instructor_id = " . AuthController::user()->id . " AND subject_instructor_sections.subject_id = $subject[subject_id]";
     $sectionsQueryResult = $dbCon->query($sectionsQuery);
     $sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
-    
+
     $students = [];
 
     // get all students handled by the instructor
@@ -81,7 +81,7 @@ if ($subjectQuery->num_rows > 0) {
             INNER JOIN userdetails ON section_students.student_id = userdetails.id
             WHERE section_students.section_id = " . $section['id'] . " GROUP BY section_students.student_id"
         );
-        
+
         while ($row = $studentsQuery->fetch_assoc()) {
             // ONly show students that are enrolled to the subject
             $enrolledSubjectQuery = $dbCon->query("SELECT * FROM student_enrolled_subjects WHERE subject_id = $subject[subject_id] AND student_id = $row[student_id]");
@@ -96,9 +96,9 @@ if ($subjectQuery->num_rows > 0) {
 ?>
 
 <main class="h-screen overflow-x-auto md:overflow-x-hidden flex">
-    <?php require_once("../../layout/sidebar.php")  ?>
+    <?php require_once ("../../layout/sidebar.php") ?>
     <section class="w-full px-4">
-        <?php require_once("../../layout/topbar.php") ?>
+        <?php require_once ("../../layout/topbar.php") ?>
         <div class="px-4 flex justify-between flex-col gap-4">
 
             <!-- Table Header -->
@@ -112,47 +112,51 @@ if ($subjectQuery->num_rows > 0) {
             </div>
 
             <!-- Table Content -->
-            <div class="overflow-x-auto md:overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
+            <div class="overflow-x-auto md:overflow-x-hidden border border-gray-300 rounded-md"
+                style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
-                            <th class="bg-slate-500 text-white text-center">Student ID</th>
-                            <th class="bg-slate-500 text-white text-center">Student</th>
-                            <th class="bg-slate-500 text-white text-center">Course</th>
-                            <th class="bg-slate-500 text-white text-center">Year Level</th>
-                            <th class="bg-slate-500 text-white text-center">Semester</th>
-                            <th class="bg-slate-500 text-white text-center">Grade</th>
+                            <th class="bg-[#276bae] text-white text-center">Student ID</th>
+                            <th class="bg-[#276bae] text-white text-center">Student</th>
+                            <th class="bg-[#276bae] text-white text-center">Course</th>
+                            <th class="bg-[#276bae] text-white text-center">Year Level</th>
+                            <th class="bg-[#276bae] text-white text-center">Semester</th>
+                            <th class="bg-[#276bae] text-white text-center">Grade</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (count($students) > 0) : ?>
-                            <?php foreach ($students as $student) : ?>
-                                <tr>
-                                    <td class="text-center"><?= $student['studentID'] ?></td>
-                                    <td class="text-center"><?= $student['studentName'] ?></td>
-                                    <td class="text-center"><?= $subject['course_name'] ?></td>
-                                    <td class="text-center"><?= $subject['year_level'] ?></td>
-                                    <td class="text-center"><?= $subject['term'] ?></td>
-                                    <td class="text-center">
-                                        <?php 
-                                            $computedGrade = number_format(computeStudentGradesFromSubject(
-                                                $dbCon, 
-                                                $student['subject_id'], 
-                                                $subject['course_id'], 
-                                                $student['student_id'], 
-                                                AuthController::user()->id, 
-                                                $schoolYear['id'], 
+                        <?php if (count($students) > 0): ?>
+                        <?php foreach ($students as $student): ?>
+                        <tr>
+                            <td class="text-center"><?= $student['studentID'] ?></td>
+                            <td class="text-center"><?= $student['studentName'] ?></td>
+                            <td class="text-center"><?= $subject['course_name'] ?></td>
+                            <td class="text-center"><?= $subject['year_level'] ?></td>
+                            <td class="text-center"><?= $subject['term'] ?></td>
+                            <td class="text-center">
+                                <?php
+                                        $computedGrade = number_format(
+                                            computeStudentGradesFromSubject(
+                                                $dbCon,
+                                                $student['subject_id'],
+                                                $subject['course_id'],
+                                                $student['student_id'],
+                                                AuthController::user()->id,
+                                                $schoolYear['id'],
                                                 $subject['term']
-                                            ), 2);
+                                            ),
+                                            2
+                                        );
                                         ?>
-                                        <?= $computedGrade == "-1.00" ? 'No activity scores' : $computedGrade ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else : ?>
-                            <tr>
-                                <td colspan="6" class="text-center">No students enrolled in this subject.</td>
-                            </tr>
+                                <?= $computedGrade == "-1.00" ? 'No activity scores' : $computedGrade ?>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php else: ?>
+                        <tr>
+                            <td colspan="6" class="text-center">No students enrolled in this subject.</td>
+                        </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -162,7 +166,7 @@ if ($subjectQuery->num_rows > 0) {
 </main>
 
 <script>
-    document.querySelector("select[name='filter-section']").addEventListener('change', function() {
-        document.querySelector("form#filter-section-form").submit();
-    });
+document.querySelector("select[name='filter-section']").addEventListener('change', function() {
+    document.querySelector("form#filter-section-form").submit();
+});
 </script>

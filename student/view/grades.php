@@ -523,21 +523,25 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
         <div class="px-4 flex justify-between flex-col gap-4 overflow-x-auto md:overflow-hidden">
 
             <?php if ($hasError) { ?>
-                <div role="alert" class="alert alert-error mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span><?= $message ?></span>
-                </div>
+            <div role="alert" class="alert alert-error mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><?= $message ?></span>
+            </div>
             <?php } ?>
 
             <?php if ($hasSuccess) { ?>
-                <div role="alert" class="alert alert-success mb-8">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span><?= $message ?></span>
-                </div>
+            <div role="alert" class="alert alert-success mb-8">
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                    viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span><?= $message ?></span>
+            </div>
             <?php } ?>
 
             <!-- <div id="alert-dialogs">
@@ -595,11 +599,11 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
                         </select>
                     </label>
 
-                    <button class="btn btn-info" 
-                        id="print-button" 
-                        <?php if (count($grades) > 0 && count($grades) == count($subjects)): ?> onclick="print_modal.showModal()" <?php endif; ?>
-                        <?php if (count($grades) == 0 || count($grades) != count($subjects)): ?> disabled <?php endif; ?>
-                    >
+                    <button class="btn btn-info" id="print-button"
+                        <?php if (count($grades) > 0 && count($grades) == count($subjects)): ?>
+                        onclick="print_modal.showModal()" <?php endif; ?>
+                        <?php if (count($grades) == 0 || count($grades) != count($subjects)): ?> disabled
+                        <?php endif; ?>>
                         <i class="bx bxs-printer"></i> Print
                     </button>
 
@@ -615,17 +619,18 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
             </div>
 
             <!-- Table Content -->
-            <div class="overflow-x-auto md:overflow-x-hidden border border-gray-300 rounded-md" style="height: calc(100vh - 250px)" id="printable-table">
+            <div class="overflow-x-auto md:overflow-x-hidden border border-gray-300 rounded-md"
+                style="height: calc(100vh - 250px)" id="printable-table">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
                         <tr>
                             <!-- <th class="bg-slate-500 text-white">ID</th> -->
-                            <th class="bg-slate-500 text-white text-center">Course Code</th>
-                            <th class="bg-slate-500 text-white text-center">Title</th>
-                            <th class="bg-slate-500 text-white text-center">Grade</th>
-                            <th class="bg-slate-500 text-white text-center">Comp</th>
-                            <th class="bg-slate-500 text-white text-center">Units</th>
-                            <th class="bg-slate-500 text-white text-center">Credit Units</th>
+                            <th class="bg-[#276bae] text-white text-center">Course Code</th>
+                            <th class="bg-[#276bae] text-white text-center">Title</th>
+                            <th class="bg-[#276bae] text-white text-center">Grade</th>
+                            <th class="bg-[#276bae] text-white text-center">Comp</th>
+                            <th class="bg-[#276bae] text-white text-center">Units</th>
+                            <th class="bg-[#276bae] text-white text-center">Credit Units</th>
                         </tr>
                     </thead>
                     <tbody id="grades-body">
@@ -633,15 +638,16 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
                         if (count($grades) > 0 && count($grades) == count($subjects)) {
                             foreach ($grades as $grade) {
                         ?>
-                                <tr>
-                                    <!-- <td><?= $grade[0] ?></td> -->
-                                    <td class="text-center"><?= $grade[1] ?></td>
-                                    <td class="text-center"><?= $grade[2] ?></td>
-                                    <td class="text-center"><?= is_string($grade[3]) ? $grade[3] : number_format($grade[3], 2) ?></td>
-                                    <td class="text-center"></td>
-                                    <td class="text-center"><?= $grade[5] ?></td>
-                                    <td class="text-center"><?= $grade[6] ?></td>
-                                </tr>
+                        <tr>
+                            <!-- <td><?= $grade[0] ?></td> -->
+                            <td class="text-center"><?= $grade[1] ?></td>
+                            <td class="text-center"><?= $grade[2] ?></td>
+                            <td class="text-center">
+                                <?= is_string($grade[3]) ? $grade[3] : number_format($grade[3], 2) ?></td>
+                            <td class="text-center"></td>
+                            <td class="text-center"><?= $grade[5] ?></td>
+                            <td class="text-center"><?= $grade[6] ?></td>
+                        </tr>
                         <?php
                             }
                         } else {
@@ -724,40 +730,42 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
 </dialog> -->
 
 <script>
-    const semesterFilter = document.getElementById('semester-filter');
-    const alertDialogs = document.getElementById('alert-dialogs');
-    const printButton = document.getElementById('print-button');
-    const requestButton = document.getElementById('request-button');
+const semesterFilter = document.getElementById('semester-filter');
+const alertDialogs = document.getElementById('alert-dialogs');
+const printButton = document.getElementById('print-button');
+const requestButton = document.getElementById('request-button');
 
-    semesterFilter.addEventListener('change', (e) => {
-        const selectedSemester = e.target.value;
-        const gradesBody = document.getElementById('grades-body');
+semesterFilter.addEventListener('change', (e) => {
+    const selectedSemester = e.target.value;
+    const gradesBody = document.getElementById('grades-body');
 
-        // Update value of hidden input in the print dialog
-        if(document.querySelector('#print-form'))
-            document.querySelector('#print-form').querySelector('input[name="semester-hidden"]').value = selectedSemester;
+    // Update value of hidden input in the print dialog
+    if (document.querySelector('#print-form'))
+        document.querySelector('#print-form').querySelector('input[name="semester-hidden"]').value =
+        selectedSemester;
 
-        // update values of input[name="term"] in the request form modal
-        if (document.getElementById('request-form-modal'))
-            document.getElementById('request-form-modal').querySelector('input[name="term"]').value = selectedSemester;
+    // update values of input[name="term"] in the request form modal
+    if (document.getElementById('request-form-modal'))
+        document.getElementById('request-form-modal').querySelector('input[name="term"]').value =
+        selectedSemester;
 
-        fetch(`<?= $_SERVER['PHP_SELF'] ?>`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    semester: selectedSemester,
-                    id: <?= $id ?>
-                }),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                let html = '';
+    fetch(`<?= $_SERVER['PHP_SELF'] ?>`, {
+            method: 'POST',
+            body: JSON.stringify({
+                semester: selectedSemester,
+                id: <?= $id ?>
+            }),
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            let html = '';
 
-                if (data.grades.length > 0 && data.grades.length == <?= count($subjects) ?>) {
-                    data.grades.forEach(grade => {
-                        html += `
+            if (data.grades.length > 0 && data.grades.length == <?= count($subjects) ?>) {
+                data.grades.forEach(grade => {
+                    html += `
                             <tr>
                                 <td>${grade[1]}</td>
                                 <td>${grade[2]}</td>
@@ -767,85 +775,85 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
                                 <td>${grade[6]}</td>
                             </tr>
                         `;
-                    });
+                });
 
-                    printButton.removeAttribute('disabled');
-                } else {
-                    html = `
+                printButton.removeAttribute('disabled');
+            } else {
+                html = `
                         <tr class="text-center">
                             <td colspan="6">Your grades from all your enrolled subjects hasn't been released yet.</td>
                         </tr>
                     `;
 
+                printButton.setAttribute('disabled', true);
+            }
+
+            // Disable print button if there is no grade request or the grade request is not approved
+            /* if (data.gradeRequest) {
+                if (data.gradeRequest.status == 'approved') {
+                    printButton.removeAttribute('disabled');
+                } else {
                     printButton.setAttribute('disabled', true);
                 }
+            } else {
+                printButton.setAttribute('disabled', true);
+            } */
 
-                // Disable print button if there is no grade request or the grade request is not approved
-                /* if (data.gradeRequest) {
-                    if (data.gradeRequest.status == 'approved') {
-                        printButton.removeAttribute('disabled');
-                    } else {
-                        printButton.setAttribute('disabled', true);
-                    }
-                } else {
-                    printButton.setAttribute('disabled', true);
-                } */
+            // Display alert dialogs based on the grade request status
+            /* if (data.gradeRequest) {
+                // clear the alert dialogs
+                alertDialogs.innerHTML = '';
 
-                // Display alert dialogs based on the grade request status
-                /* if (data.gradeRequest) {
-                    // clear the alert dialogs
-                    alertDialogs.innerHTML = '';
-
-                    if (data.gradeRequest.status == 'pending') {
-                        alertDialogs.innerHTML = `
-                            <div role="alert" class="alert alert-warning">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                                <span>Your request for the release of your grade is currently pending.</span>
-                            </div>
-                        `;
-
-                        requestButton.setAttribute('disabled', true);
-                        printButton.setAttribute('disabled', true);
-                    }
-
-                    if (data.gradeRequest.status == 'rejected') {
-                        alertDialogs.innerHTML = `
-                            <div role="alert" class="alert alert-error">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <span>Your request for the release of your grade is has been rejected by the admin, you may send another request to the admin.</span>
-                            </div>
-                        `;
-
-                        requestButton.removeAttribute('disabled');
-                        printButton.setAttribute('disabled', true);
-                    }
-
-                    if (data.gradeRequest.status == 'approved') {
-                        alertDialogs.innerHTML = `
-                            <div role="alert" class="alert alert-success">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                <span>Your request for the release of your grade has been approved by the admin, you may now be able to view and print your grade.</span>
-                            </div>
-                        `;
-
-                        printButton.removeAttribute('disabled');
-                        requestButton.setAttribute('disabled', true);
-                    }
-                } else {
+                if (data.gradeRequest.status == 'pending') {
                     alertDialogs.innerHTML = `
                         <div role="alert" class="alert alert-warning">
                             <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
-                            <span>You currently don't have permission to view and print out your grades. Please send a grade request and wait for the admin's approval.</span>
+                            <span>Your request for the release of your grade is currently pending.</span>
                         </div>
                     `;
 
+                    requestButton.setAttribute('disabled', true);
                     printButton.setAttribute('disabled', true);
+                }
+
+                if (data.gradeRequest.status == 'rejected') {
+                    alertDialogs.innerHTML = `
+                        <div role="alert" class="alert alert-error">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Your request for the release of your grade is has been rejected by the admin, you may send another request to the admin.</span>
+                        </div>
+                    `;
+
                     requestButton.removeAttribute('disabled');
+                    printButton.setAttribute('disabled', true);
+                }
 
-                    html = "<tr class='text-center'><td colspan='6'>No grades to show</td></tr>";
-                } */
+                if (data.gradeRequest.status == 'approved') {
+                    alertDialogs.innerHTML = `
+                        <div role="alert" class="alert alert-success">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                            <span>Your request for the release of your grade has been approved by the admin, you may now be able to view and print your grade.</span>
+                        </div>
+                    `;
 
-                gradesBody.innerHTML = html;
-            });
-    });
+                    printButton.removeAttribute('disabled');
+                    requestButton.setAttribute('disabled', true);
+                }
+            } else {
+                alertDialogs.innerHTML = `
+                    <div role="alert" class="alert alert-warning">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                        <span>You currently don't have permission to view and print out your grades. Please send a grade request and wait for the admin's approval.</span>
+                    </div>
+                `;
+
+                printButton.setAttribute('disabled', true);
+                requestButton.removeAttribute('disabled');
+
+                html = "<tr class='text-center'><td colspan='6'>No grades to show</td></tr>";
+            } */
+
+            gradesBody.innerHTML = html;
+        });
+});
 </script>
