@@ -2,8 +2,8 @@
 session_start();
 
 require "../configuration/config.php";
-require_once("../auth/controller/auth.controller.php");
-require_once("../utils/mailer.php");
+require_once ("../auth/controller/auth.controller.php");
+require_once ("../utils/mailer.php");
 
 $currentDir = dirname($_SERVER['PHP_SELF']);
 $FirstDir = explode('/', trim($currentDir, '/'));
@@ -25,7 +25,7 @@ if (isset($_POST['verify-email'])) {
     if (empty($email)) {
         $hasError = true;
         $message = "Email is required!";
-    } else if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } else if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $hasError = true;
         $message = "Invalid email address!";
     } else if (!str_ends_with($email, "@cvsu.edu.ph")) {
@@ -50,8 +50,8 @@ if (isset($_POST['verify-email'])) {
 
                 // Template for the email
                 $template = getResetPasswordMailTemplate(
-                    $email, 
-                    "{$user['firstName']} {$user['middleName']} {$user['lastName']}", 
+                    $email,
+                    "{$user['firstName']} {$user['middleName']} {$user['lastName']}",
                     constant('APP_URL') . "/server/public/reset-password.php?token=$token",
                     date('Y')
                 );
@@ -78,7 +78,7 @@ if (isset($_POST['verify-email'])) {
     }
 }
 
-require_once("../components/header.php");
+require_once ("../components/header.php");
 ?>
 
 <main class="h-screen">
@@ -97,25 +97,28 @@ require_once("../components/header.php");
                 <!-- Header -->
                 <div class="flex flex-col justify-center items-center gap-4 mb-4">
                     <h1 class="text-[32px] font-bold">Reset Password</h1>
-                    <span class="text-base text-center">Enter your university email address below. We'll send you an email containing a password reset link. The reset link will expire after 2 minutes if not used.</span>
                 </div>
 
                 <?php if ($hasError) { ?>
-                    <div role="alert" class="alert alert-error mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span><?= $message ?></span>
-                    </div>
+                <div role="alert" class="alert alert-error mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><?= $message ?></span>
+                </div>
                 <?php } ?>
 
                 <?php if ($hasSuccess) { ?>
-                    <div role="alert" class="alert alert-success mb-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        <span><?= $message ?></span>
-                    </div>
+                <div role="alert" class="alert alert-success mb-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><?= $message ?></span>
+                </div>
                 <?php } ?>
 
                 <!-- Form -->
@@ -124,17 +127,17 @@ require_once("../components/header.php");
                         <!-- Email -->
                         <label class="flex flex-col gap-2">
                             <span>Email</span>
-                            <input type="email" class="input input-bordered input-md" placeholder="Enter your email address" name="email" required />
+                            <input type="email" class="input input-bordered input-md"
+                                placeholder="Enter your email address" name="email" required />
                         </label>
 
                         <!-- Break -->
                         <span class="border border-black my-2"></span>
 
                         <!-- Verify button -->
-                        <button class="btn bg-[#1b651b] text-base text-white w-full" name="verify-email">Verify Email</button>
+                        <button class="btn bg-[#1b651b] text-base text-white w-full" name="verify-email">Verify
+                            Email</button>
 
-                        <!-- Go back button -->
-                        <a class="btn w-full" href="./login.php"><i class="bx bxs-chevron-left"></i> Go back</a>
                     </div>
                 </form>
             </div>

@@ -1,8 +1,8 @@
-<?php 
+<?php
 // constants
 $constants = [
     'DATABASE' => [
-        'DB_HOST' => 'localhost',
+        'DB_HOST' => 'localhost:3307',
         'DB_USER' => 'root',
         'DB_PASS' => '',
         'DB_NAME' => 'grading-sys'
@@ -25,8 +25,8 @@ $constants = [
 ];
 
 // define as constants
-foreach($constants as $constant => $values) {
-    foreach($values as $key => $value) {
+foreach ($constants as $constant => $values) {
+    foreach ($values as $key => $value) {
         define($key, $value);
     }
 }
