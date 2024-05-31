@@ -392,15 +392,15 @@ $instructors = $instructorsQueryResult->fetch_all(MYSQLI_ASSOC);
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-[24px] text-white" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -533,7 +533,7 @@ $instructors = $instructorsQueryResult->fetch_all(MYSQLI_ASSOC);
 
                 <!-- Actions -->
                 <div class="flex flex-col gap-2">
-                    <button class="btn btn-success text-white text-white" name="edit_course">Edit</button>
+                    <button class="btn bg-[#276bae] text-white" name="edit_course">Edit</button>
                     <label class="btn btn-error text-white text-white"
                         for="edit-course-<?= $course['id'] ?>">Cancel</label>
                 </div>

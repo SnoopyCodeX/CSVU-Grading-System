@@ -450,7 +450,7 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
                         <a href="../manage-student.php" class="btn btn-error text-base">Cancel</a>
-                        <button class="btn btn-success text-base" name="create_student">Create</button>
+                        <button class="btn bg-[#276bae] text-white text-base" name="create_student">Create</button>
                     </div>
                 </form>
 

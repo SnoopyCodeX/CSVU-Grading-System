@@ -125,7 +125,7 @@ $studentSelfData = $studentSelfDataQuery->fetch_assoc();
       </label>
 
       <div class="modal-action">
-        <button class="btn btn-success" name="change-password">Change password</button>
+        <button class="btn bg-[#276bae] text-white" name="change-password">Change password</button>
         <button class="btn btn-error" onclick="change_password_modal.close()">Cancel</button>
       </div>
     </form>

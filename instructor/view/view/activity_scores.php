@@ -19,12 +19,37 @@ $hasError = false;
 $hasWarning = false;
 $hasSuccess = false;
 $hasSaveError = false;
+$editMode = false;
+$editToken = "";
 $warning = "";
 $message = "";
 
 // get activity id
 $id = $dbCon->real_escape_string($_GET['id']) ? $dbCon->real_escape_string($_GET['id']) : header("Location: ../manage-activity.php");
 $subjectId = $dbCon->real_escape_string($_GET['subjectId'] ?? '') ? $dbCon->real_escape_string($_GET['subjectId']) : header("location: ../manage-activity.php");
+
+if (isset($_GET['action']) && strtolower($_GET['action']) == 'edit' && isset($_GET['token']) && !empty($_GET['token'])) {
+    $changeGradeQuery = $dbCon->query("SELECT * FROM instructor_change_grade_request WHERE instructor_id = " . AuthController::user()->id . " AND subject_id = $subjectId AND status = 'approved'");
+
+    if ($changeGradeQuery->num_rows > 0) {
+        $changeGradeDetails = $changeGradeQuery->fetch_assoc();
+        $changeGradeToken = md5($changeGradeDetails['token']);
+        $editToken = $dbCon->real_escape_string($_GET['token']);
+
+        if ($changeGradeToken === $editToken && $changeGradeDetails['status'] == 'approved') {
+            $editMode = true;
+
+            $hasWarning = true;
+            $warning = "You are in edit mode; once released, it cannot be undone.";
+        } else {
+            header("location: ../manage-change-grade-requests.php");
+            exit;
+        }
+    } else {
+        header("location: ../manage-change-grade-requests.php");
+        exit;
+    }
+}
 
 // get activity details
 $query = $dbCon->query("SELECT 
@@ -295,7 +320,7 @@ $hasGradeReleased = $gradeReleaseRequestQuery->num_rows > 0;
                                                     <td><?= $number++ ?></td>
                                                     <td><?= $row['studentFN'] ?> <?= $row['studentMN'] ?> <?= $row['studentLN'] ?></td>
                                                     <td x-data>
-                                                        <?php if ($hasGradeReleased): ?>
+                                                        <?php if ($hasGradeReleased && !$editMode): ?>
                                                             <label  class="input input-bordered text-center grade px-6 py-2"><?= $grades[$row['studentID']] ?? '0' ?></label>
                                                         <?php else: ?>
                                                             <input type="number" @input="enforceMinMax" name="grade_<?= $row['studentID'] ?>" class="input input-bordered text-center grade" placeholder="Score" min="0" max="<?= $activity['max_score'] ?>" value="<?= $grades[$row['studentID']] ?? '' ?>" required>
@@ -313,8 +338,8 @@ $hasGradeReleased = $gradeReleaseRequestQuery->num_rows > 0;
                             </div>
 
                             <div class="flex justify-start gap-4">
-                                <a class="btn btn-error text-base" href="./activities.php?subjectId=<?= $subjectId ?><?= isset($_GET['page']) ? '&page=' . $_GET['page'] : '' ?>">Go Back</a>
-                                <?php if (!$hasGradeReleased): ?>
+                                <a class="btn btn-error text-base" href="./activities.php?subjectId=<?= $subjectId ?><?= isset($_GET['page']) ? '&page=' . $_GET['page'] : '' ?><?= $editMode ? '&action=edit&token=' . $editToken : '' ?>">Go Back</a>
+                                <?php if (!$hasGradeReleased || $editMode): ?>
                                     <button class="btn btn-success text-base" name="save-scores" <?php if (count($students) == 0): ?> disabled <?php endif; ?>>Save</button>
                                 <?php endif; ?>
                             </div>

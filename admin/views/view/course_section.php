@@ -261,7 +261,7 @@ if ($hasSearch) {
                     </form>
 
                     <!-- Back button -->
-                    <a href="./course.php?id=<?= $courseId ?>" class="btn hover:bg-[#276bae] hover:text-white">
+                    <a href="./course.php?id=<?= $courseId ?>" class="btn bg-[#276bae] text-white">
                         <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
                             <title>left_fill</title>
                             <g id="left_fill" fill='none' fill-rule='evenodd'>
@@ -271,7 +271,8 @@ if ($hasSearch) {
                                     d='M7.94 13.06a1.5 1.5 0 0 1 0-2.12l5.656-5.658a1.5 1.5 0 1 1 2.121 2.122L11.122 12l4.596 4.596a1.5 1.5 0 1 1-2.12 2.122L7.938 13.06Z' />
                             </g>
                         </svg>
-                        Go Back</a>
+                        Go Back
+                    </a>
 
                     <!-- Create button -->
                     <label for="create-section" class="btn bg-[#276bae] text-white">
@@ -338,7 +339,7 @@ if ($hasSearch) {
                             <td class="text-center"><?= $section['term'] ?></td>
                             <td class="text-center"><?= $section['year_level'] ?></td>
                             <td class="flex justify-center gap-4">
-                                <a href="./section_students.php?courseId=<?= $courseId ?>&sectionId=<?= $section['id'] ?>&yearLevel=<?= $yearLevel ?>"
+                                <a href="./section_students.php?courseId=<?= $courseId ?>&sectionId=<?= $section['id'] ?>&yearLevel=<?= $yearLevel ?><?= $page >= 1 ? '&currentPage=' . $page : '' ?>"
                                     class="btn bg-[#276bae] text-white btn-sm">
                                     <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
                                         <title>user_3_fill</title>
@@ -396,15 +397,15 @@ if ($hasSearch) {
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -467,7 +468,7 @@ if ($hasSearch) {
 
                 <div class="grid grid-cols-2 gap-4">
                     <label class="btn" for="edit-section-<?= $section['id'] ?>">Close</label>
-                    <button class="btn btn-success" name="edit-section">Update</button>
+                    <button class="btn bg-[#276bae] text-white" name="edit-section">Update</button>
                 </div>
             </form>
         </div>

@@ -195,7 +195,7 @@ if (isset($_POST['create_instructor'])) {
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
                         <a href="../manage-instructor.php" class="btn btn-error text-base">Cancel</a>
-                        <button class="btn btn-success text-base" name="create_instructor">Create</button>
+                        <button class="btn bg-[#276bae] text-white text-base" name="create_instructor">Create</button>
                     </div>
                 </form>
             </div>

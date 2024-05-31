@@ -205,10 +205,10 @@ if ($hasSearch) {
                         </div>
                     </form>
 
-                    <a class="btn btn-info" href="../manage-subjects.php<?= !empty($prevPage) ? '?page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
+                    <a class="btn bg-[#276bae] text-white" href="../manage-subjects.php<?= !empty($prevPage) ? '?page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
 
                     <!-- Create button -->
-                    <button class="btn btn-success" onclick="add_instructor.showModal()"><i class="bx bx-plus-circle"></i> Assign Instructor</button>
+                    <button class="btn bg-[#276bae] text-white" onclick="add_instructor.showModal()"><i class="bx bx-plus-circle"></i> Assign Instructor</button>
                 </div>
             </div>
 
@@ -234,16 +234,16 @@ if ($hasSearch) {
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
-                            <th class="bg-slate-500 text-white text-center">Instructor Name</th>
-                            <th class="bg-slate-500 text-white text-center">Sections Handled</th>
-                            <th class="bg-slate-500 text-white text-center">Action</th>
+                        <tr class="hover">
+                            <th class="bg-[#276bae] text-white text-center">Instructor Name</th>
+                            <th class="bg-[#276bae] text-white text-center">Sections Handled</th>
+                            <th class="bg-[#276bae] text-white text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (count($filteredSelectedInstructors) > 0): ?>
                             <?php foreach($filteredSelectedInstructors as $instructor): ?>
-                                <tr>
+                                <tr class="hover">
                                     <td class="text-center"><?= "{$instructor['firstName']} {$instructor['middleName']} {$instructor['lastName']}" ?></td>
                                     <td class="text-center">
                                         <?php
@@ -268,7 +268,7 @@ if ($hasSearch) {
                                     </td>
                                     <td class="text-center">
                                         <div class="flex justify-center items-center gap-4">
-                                            <a href="./subject_instructor_sections.php?subject=<?= $subjectId ?>&instructor=<?= $instructor['id'] ?><?= !empty($prevPage) ? '&prev_page=' . $prevPage : '' ?>" class="btn btn-info btn-sm">Assign Section</a>
+                                            <a href="./subject_instructor_sections.php?subject=<?= $subjectId ?>&instructor=<?= $instructor['id'] ?><?= !empty($prevPage) ? '&prev_page=' . $prevPage : '' ?>" class="btn bg-[#276bae] text-white btn-sm">Assign Section</a>
                                             <label for="remove-instructor-<?= $instructor['id'] ?>"  class="btn btn-error btn-sm">Remove</label>
                                         </div>
                                     </td>
@@ -282,14 +282,14 @@ if ($hasSearch) {
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>

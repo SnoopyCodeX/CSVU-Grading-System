@@ -278,7 +278,7 @@ input.percentage[type=number] {
             <div class="overflow-x-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <td class="bg-[#276bae] text-white text-center">Subject Code</td>
                             <td class="bg-[#276bae] text-white text-center">Subject Name</td>
                             <td class="bg-[#276bae] text-white text-center">Year Level</td>
@@ -290,40 +290,40 @@ input.percentage[type=number] {
                     </thead>
                     <tbody>
                         <?php if (count($gradeReleaseRequests) > 0): ?>
-                        <?php foreach ($gradeReleaseRequests as $gradeReleaseRequest): ?>
-                        <tr>
-                            <td class="text-center"><?= $gradeReleaseRequest['code'] ?></td>
-                            <td class="text-center"><?= $gradeReleaseRequest['name'] ?></td>
-                            <td class="text-center"><?= $gradeReleaseRequest['year_level'] ?></td>
-                            <td class="text-center"><?= $gradeReleaseRequest['request_term'] ?></td>
-                            <td class="text-center">
-                                <?= date("h:i A \\| F d, Y", strtotime($gradeReleaseRequest['request_created_at'])) ?>
-                            </td>
-                            <td class="text-center">
-                                <span
-                                    class="badge p-4 <?= (($gradeReleaseRequest['request_status'] == 'pending') ? 'badge-warning' : (($gradeReleaseRequest['request_status'] == 'approved') ? 'badge-success' : (($gradeReleaseRequest['request_status'] == 'grade-released') ? 'badge-success' : 'badge-error'))) ?>"><?= $gradeReleaseRequest['request_status'] != 'grade-released' ? ucfirst($gradeReleaseRequest['request_status']) : 'Graded' ?></span>
-                            </td>
-                            <td class="flex gap-2 items-center justify-center">
-                                <a class="btn btn-sm btn-info"
-                                    href="./view/grade-sheet.php?uid=<?= $gradeReleaseRequest['request_file_uid'] ?>"
-                                    target="_blank">Grade Sheet</a>
-                                <button class="btn btn-sm btn-info"
-                                    onclick="view_grade_<?= $gradeReleaseRequest['request_id'] ?>.showModal()">View</button>
-                                <?php if (in_array($gradeReleaseRequest['request_status'], ['pending', 'rejected'])): ?>
-                                <label class="btn btn-sm btn-error"
-                                    for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">Cancel</label>
-                                <?php elseif ($gradeReleaseRequest['request_status'] == 'approved'): ?>
-                                <label class="btn btn-sm btn-success"
-                                    for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">Release
-                                    Grades</label>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
+                            <?php foreach ($gradeReleaseRequests as $gradeReleaseRequest): ?>
+                                <tr class="hover">
+                                    <td class="text-center"><?= $gradeReleaseRequest['code'] ?></td>
+                                    <td class="text-center"><?= $gradeReleaseRequest['name'] ?></td>
+                                    <td class="text-center"><?= $gradeReleaseRequest['year_level'] ?></td>
+                                    <td class="text-center"><?= $gradeReleaseRequest['request_term'] ?></td>
+                                    <td class="text-center">
+                                        <?= date("h:i A \\| F d, Y", strtotime($gradeReleaseRequest['request_created_at'])) ?>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge p-4 <?= (($gradeReleaseRequest['request_status'] == 'pending') ? 'badge-warning' : (($gradeReleaseRequest['request_status'] == 'approved') ? 'badge-success' : (($gradeReleaseRequest['request_status'] == 'grade-released') ? 'badge-success' : 'badge-error'))) ?>"><?= $gradeReleaseRequest['request_status'] != 'grade-released' ? ucfirst($gradeReleaseRequest['request_status']) : 'Graded' ?></span>
+                                    </td>
+                                    <td class="flex gap-2 items-center justify-center">
+                                        <a class="btn btn-sm bg-[#276bae] text-white"
+                                            href="./view/grade-sheet.php?uid=<?= $gradeReleaseRequest['request_file_uid'] ?>"
+                                            target="_blank">Grade Sheet</a>
+                                        <button class="btn btn-sm bg-[#276bae] text-white" onclick="view_grade_<?= $gradeReleaseRequest['request_id'] ?>.showModal()">View</button>
+
+                                        <?php if (in_array($gradeReleaseRequest['request_status'], ['pending', 'rejected'])): ?>
+                                            <label class="btn btn-sm btn-error"  for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">
+                                                Cancel
+                                            </label>
+                                        <?php elseif ($gradeReleaseRequest['request_status'] == 'approved'): ?>
+                                            <label class="btn btn-sm btn-success" for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">
+                                                Release Grades
+                                            </label>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         <?php else: ?>
-                        <tr>
-                            <td class="text-center" colspan="7">No grade requests to show</td>
-                        </tr>
+                            <tr>
+                                <td class="text-center" colspan="7">No grade requests to show</td>
+                            </tr>
                         <?php endif; ?>
                     </tbody>
                 </table>
@@ -331,14 +331,14 @@ input.percentage[type=number] {
 
             <!-- Pagination -->
             <div class="flex justify-end gap-4">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -348,104 +348,104 @@ input.percentage[type=number] {
 
     <!-- Modals -->
     <?php foreach ($gradeReleaseRequests as $gradeReleaseRequest): ?>
-    <!-- Release Grades Modal -->
-    <input type="checkbox" id="release-grades-<?= $gradeReleaseRequest['request_id'] ?>" class="modal-toggle" />
-    <div class="modal" role="dialog">
-        <div class="modal-box border border-success border-2">
-            <h3 class="text-lg font-bold text-success">Release Grades</h3>
-            <p class="py-4">By clicking <strong>Release</strong>, the
-                <strong><?= $gradeReleaseRequest['request_term'] ?> grades</strong> of all the students enrolled to
-                <strong>(<?= $gradeReleaseRequest['code'] ?>) <?= $gradeReleaseRequest['name'] ?></strong> will be
-                released and this action cannot be undone. Do you still wish to proceed?
-            </p>
+        <!-- Release Grades Modal -->
+        <input type="checkbox" id="release-grades-<?= $gradeReleaseRequest['request_id'] ?>" class="modal-toggle" />
+        <div class="modal" role="dialog">
+            <div class="modal-box border border-success border-2">
+                <h3 class="text-lg font-bold text-success">Release Grades</h3>
+                <p class="py-4">By clicking <strong>Release</strong>, the
+                    <strong><?= $gradeReleaseRequest['request_term'] ?> grades</strong> of all the students enrolled to
+                    <strong>(<?= $gradeReleaseRequest['code'] ?>) <?= $gradeReleaseRequest['name'] ?></strong> will be
+                    released and this action cannot be undone. Do you still wish to proceed?
+                </p>
 
-            <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <input type="hidden" name="request_id" value="<?= $gradeReleaseRequest['request_id'] ?>">
-                <input type="hidden" name="request_subject" value="<?= $gradeReleaseRequest['request_subject'] ?>">
-                <input type="hidden" name="request_term" value="<?= $gradeReleaseRequest['request_term'] ?>">
+                <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                    <input type="hidden" name="request_id" value="<?= $gradeReleaseRequest['request_id'] ?>">
+                    <input type="hidden" name="request_subject" value="<?= $gradeReleaseRequest['request_subject'] ?>">
+                    <input type="hidden" name="request_term" value="<?= $gradeReleaseRequest['request_term'] ?>">
 
-                <label class="btn" for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">No</label>
-                <button class="btn btn-success" name="release-grades">Release</button>
-            </form>
+                    <label class="btn" for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">No</label>
+                    <button class="btn btn-success" name="release-grades">Release</button>
+                </form>
+            </div>
+            <label class="modal-backdrop" for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">Close</label>
         </div>
-        <label class="modal-backdrop" for="release-grades-<?= $gradeReleaseRequest['request_id'] ?>">Close</label>
-    </div>
 
-    <!-- Delete Modal -->
-    <input type="checkbox" id="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>" class="modal-toggle" />
-    <div class="modal" role="dialog">
-        <div class="modal-box border border-error border-2">
-            <h3 class="text-lg font-bold text-error">Cancel Request</h3>
-            <p class="py-4">Are you sure you want to cancel this grade release request?</p>
+        <!-- Delete Modal -->
+        <input type="checkbox" id="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>" class="modal-toggle" />
+        <div class="modal" role="dialog">
+            <div class="modal-box border border-error border-2">
+                <h3 class="text-lg font-bold text-error">Cancel Request</h3>
+                <p class="py-4">Are you sure you want to cancel this grade release request?</p>
 
-            <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <input type="hidden" name="request_id" value="<?= $gradeReleaseRequest['request_id'] ?>">
+                <form class="flex justify-end gap-4 items-center" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                    <input type="hidden" name="request_id" value="<?= $gradeReleaseRequest['request_id'] ?>">
 
-                <label class="btn" for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">No</label>
-                <button class="btn btn-error" name="cancel-request">Yes, Cancel</button>
-            </form>
+                    <label class="btn" for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">No</label>
+                    <button class="btn btn-error" name="cancel-request">Yes, Cancel</button>
+                </form>
+            </div>
+            <label class="modal-backdrop" for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">Close</label>
         </div>
-        <label class="modal-backdrop" for="cancel-request-<?= $gradeReleaseRequest['request_id'] ?>">Close</label>
-    </div>
 
-    <!-- View modal -->
-    <dialog id="view_grade_<?= $gradeReleaseRequest['request_id'] ?>" class="modal modal-bottom sm:modal-middle">
-        <div class="modal-box">
-            <h3 class="font-bold text-lg">View Release Request</h3>
+        <!-- View modal -->
+        <dialog id="view_grade_<?= $gradeReleaseRequest['request_id'] ?>" class="modal modal-bottom sm:modal-middle">
+            <div class="modal-box">
+                <h3 class="font-bold text-lg">View Release Request</h3>
 
-            <form class="flex flex-col gap-4 mt-4" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Subject Code</span>
-                        <input class="input input-bordered" name="code" value="<?= $gradeReleaseRequest['code'] ?>"
-                            readonly required />
-                    </label>
+                <form class="flex flex-col gap-4 mt-4" method="post" action="<?= $_SERVER['PHP_SELF'] ?>">
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Subject Code</span>
+                            <input class="input input-bordered" name="code" value="<?= $gradeReleaseRequest['code'] ?>"
+                                readonly required />
+                        </label>
 
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Subject Name</span>
-                        <input class="input input-bordered" name="name" value="<?= $gradeReleaseRequest['name'] ?>"
-                            readonly required />
-                    </label>
-                </div>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Subject Name</span>
+                            <input class="input input-bordered" name="name" value="<?= $gradeReleaseRequest['name'] ?>"
+                                readonly required />
+                        </label>
+                    </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">School Year</span>
-                        <input class="input input-bordered" name="school_year"
-                            value="<?= $gradeReleaseRequest['school_year'] ?>" readonly required />
-                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">School Year</span>
+                            <input class="input input-bordered" name="school_year"
+                                value="<?= $gradeReleaseRequest['school_year'] ?>" readonly required />
+                        </label>
 
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Year Level</span>
-                        <input class="input input-bordered" name="year_level"
-                            value="<?= $gradeReleaseRequest['year_level'] ?>" readonly required />
-                    </label>
-                </div>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Year Level</span>
+                            <input class="input input-bordered" name="year_level"
+                                value="<?= $gradeReleaseRequest['year_level'] ?>" readonly required />
+                        </label>
+                    </div>
 
-                <div class="grid grid-cols-2 gap-3">
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Semester</span>
-                        <input class="input input-bordered" name="request_term"
-                            value="<?= $gradeReleaseRequest['request_term'] ?>" readonly required />
-                    </label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Semester</span>
+                            <input class="input input-bordered" name="request_term"
+                                value="<?= $gradeReleaseRequest['request_term'] ?>" readonly required />
+                        </label>
 
-                    <label class="flex flex-col gap-2">
-                        <span class="font-bold text-[18px]">Requested On</span>
-                        <input class="input input-bordered" name="request_created_at"
-                            value="<?= date("h:i A \\| F d, Y", strtotime($gradeReleaseRequest['request_created_at'])) ?>"
-                            readonly required />
-                    </label>
-                </div>
+                        <label class="flex flex-col gap-2">
+                            <span class="font-bold text-[18px]">Requested On</span>
+                            <input class="input input-bordered" name="request_created_at"
+                                value="<?= date("h:i A \\| F d, Y", strtotime($gradeReleaseRequest['request_created_at'])) ?>"
+                                readonly required />
+                        </label>
+                    </div>
 
-                <div class="flex justify-end items-center gap-4 mt-4">
-                    <button type="reset" onclick="view_grade_<?= $gradeReleaseRequest['request_id'] ?>.close()"
-                        class="btn btn-error">Close</button>
-                </div>
+                    <div class="flex justify-end items-center gap-4 mt-4">
+                        <button type="reset" onclick="view_grade_<?= $gradeReleaseRequest['request_id'] ?>.close()"
+                            class="btn btn-error">Close</button>
+                    </div>
+                </form>
+            </div>
+            <form method="dialog" class="modal-backdrop">
+                <button>close</button>
             </form>
-        </div>
-        <form method="dialog" class="modal-backdrop">
-            <button>close</button>
-        </form>
-    </dialog>
+        </dialog>
     <?php endforeach; ?>
 </main>

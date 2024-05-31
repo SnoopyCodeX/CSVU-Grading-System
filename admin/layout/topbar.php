@@ -126,7 +126,7 @@ if (isset($_POST['change-password'])) {
             </label>
 
             <div class="modal-action">
-                <button class="btn btn-success" name="change-password">Change password</button>
+                <button class="btn bg-[#276bae] text-white" name="change-password">Change password</button>
                 <button class="btn btn-error" onclick="change_password_modal.close()">Cancel</button>
             </div>
         </form>
@@ -210,6 +210,12 @@ if (isset($_POST['change-password'])) {
                     <a href="<?php echo $rootFolder; ?>/manage-grade-release-requests.php">
                         <i class='bx bxs-notepad text-[24px]'></i>
                         <span class="text-[18px]">Requests for Grade Release</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $rootFolder; ?>/grade-change-request.php">
+                        <i class='bx bx-briefcase-alt-2 text-[24px]'></i>
+                        <span class="text-[18px]">Change of Grade Requests</span>
                     </a>
                 </li>
                 <!-- <li>

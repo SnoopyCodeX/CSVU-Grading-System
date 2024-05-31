@@ -228,7 +228,7 @@ $fifthYearCount = intval($fifthYears->num_rows);
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 200px)">
                 <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <!-- <th class="bg-slate-500 text-white">ID</th> -->
                             <td class="bg-[#276BAE] text-white text-center">Student ID</td>
                             <td class="bg-[#276BAE] text-white text-center">Name</td>
@@ -244,7 +244,7 @@ $fifthYearCount = intval($fifthYears->num_rows);
                         if ($result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
                                 echo "
-                                    <tr>
+                                    <tr class='hover'>
                                         <td class='text-center'>{$row['sid']}</td>
                                         <td class='text-center'>{$row['firstName']} {$row['middleName']} {$row['lastName']}</th>
                                         <td class='text-center'>{$row['email']}</td>
@@ -269,8 +269,8 @@ $fifthYearCount = intval($fifthYears->num_rows);
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="bg-[#276bae] btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="bg-[#276bae] btn text-[24px] text-white" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
                         <title>left_fill</title>
@@ -283,9 +283,9 @@ $fifthYearCount = intval($fifthYears->num_rows);
                     </svg>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="bg-[#276bae] btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="bg-[#276bae] btn text-[24px] text-white" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
                         <title>right_fill</title>

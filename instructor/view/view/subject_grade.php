@@ -109,6 +109,11 @@ if ($subjectQuery->num_rows > 0) {
                     <span class="text-[18px]">Course: <?= $subject['course_name'] ?? "" ?></span>
                     <span class="text-[18px]">Year Level: <?= $subject['year_level'] ?? "" ?></span>
                 </div>
+
+                <a class="btn bg-[#276bae] text-white" href="../view-grades.php">
+                    <i class="bx bx-chevron-left"></i>
+                    Go Back
+                </a>
             </div>
 
             <!-- Table Content -->
@@ -116,7 +121,7 @@ if ($subjectQuery->num_rows > 0) {
                 style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <th class="bg-[#276bae] text-white text-center">Student ID</th>
                             <th class="bg-[#276bae] text-white text-center">Student</th>
                             <th class="bg-[#276bae] text-white text-center">Course</th>
@@ -128,7 +133,7 @@ if ($subjectQuery->num_rows > 0) {
                     <tbody>
                         <?php if (count($students) > 0): ?>
                         <?php foreach ($students as $student): ?>
-                        <tr>
+                        <tr class="hover">
                             <td class="text-center"><?= $student['studentID'] ?></td>
                             <td class="text-center"><?= $student['studentName'] ?></td>
                             <td class="text-center"><?= $subject['course_name'] ?></td>
@@ -136,19 +141,19 @@ if ($subjectQuery->num_rows > 0) {
                             <td class="text-center"><?= $subject['term'] ?></td>
                             <td class="text-center">
                                 <?php
-                                        $computedGrade = number_format(
-                                            computeStudentGradesFromSubject(
-                                                $dbCon,
-                                                $student['subject_id'],
-                                                $subject['course_id'],
-                                                $student['student_id'],
-                                                AuthController::user()->id,
-                                                $schoolYear['id'],
-                                                $subject['term']
-                                            ),
-                                            2
-                                        );
-                                        ?>
+                                    $computedGrade = number_format(
+                                        computeStudentGradesFromSubject(
+                                            $dbCon,
+                                            $student['subject_id'],
+                                            $subject['course_id'],
+                                            $student['student_id'],
+                                            AuthController::user()->id,
+                                            $schoolYear['id'],
+                                            $subject['term']
+                                        ),
+                                        2
+                                    );
+                                ?>
                                 <?= $computedGrade == "-1.00" ? 'No activity scores' : $computedGrade ?>
                             </td>
                         </tr>

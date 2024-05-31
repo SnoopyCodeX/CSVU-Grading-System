@@ -623,7 +623,7 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
                 style="height: calc(100vh - 250px)" id="printable-table">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <!-- <th class="bg-slate-500 text-white">ID</th> -->
                             <th class="bg-[#276bae] text-white text-center">Course Code</th>
                             <th class="bg-[#276bae] text-white text-center">Title</th>
@@ -635,24 +635,24 @@ $areAllGradesFromSubjectsReleased = count($_grades) == count($subjects); */
                     </thead>
                     <tbody id="grades-body">
                         <?php
-                        if (count($grades) > 0 && count($grades) == count($subjects)) {
-                            foreach ($grades as $grade) {
+                            if (count($grades) > 0 && count($grades) == count($subjects)) {
+                                foreach ($grades as $grade) {
                         ?>
-                        <tr>
-                            <!-- <td><?= $grade[0] ?></td> -->
-                            <td class="text-center"><?= $grade[1] ?></td>
-                            <td class="text-center"><?= $grade[2] ?></td>
-                            <td class="text-center">
-                                <?= is_string($grade[3]) ? $grade[3] : number_format($grade[3], 2) ?></td>
-                            <td class="text-center"></td>
-                            <td class="text-center"><?= $grade[5] ?></td>
-                            <td class="text-center"><?= $grade[6] ?></td>
-                        </tr>
+                                    <tr class="hover">
+                                        <!-- <td><?= $grade[0] ?></td> -->
+                                        <td class="text-center"><?= $grade[1] ?></td>
+                                        <td class="text-center"><?= $grade[2] ?></td>
+                                        <td class="text-center">
+                                            <?= is_string($grade[3]) ? $grade[3] : number_format($grade[3], 2) ?></td>
+                                        <td class="text-center"></td>
+                                        <td class="text-center"><?= $grade[5] ?></td>
+                                        <td class="text-center"><?= $grade[6] ?></td>
+                                    </tr>
                         <?php
+                                }
+                            } else {
+                                echo "<tr class='text-center hover'><td colspan='6'>Your grades from all your enrolled subjects hasn't been released yet.</td></tr>";
                             }
-                        } else {
-                            echo "<tr class='text-center'><td colspan='6'>Your grades from all your enrolled subjects hasn't been released yet.</td></tr>";
-                        }
                         ?>
                     </tbody>
                 </table>

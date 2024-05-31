@@ -84,6 +84,19 @@ if (isset($_POST['delete-criteria'])) {
         $criteriaDeletedData = $criteriaIdExistsQuery->fetch_assoc();
 
         if ($deleteCriteriaQuery) {
+            // delete activities and its activity scores that are linked to this criteria
+            $activitiesQuery = $dbCon->query("SELECT * FROM activities WHERE type = $id");
+
+            if ($activitiesQuery->num_rows > 0) {
+                $activities = $activitiesQuery->fetch_all(MYSQLI_ASSOC);
+
+                foreach ($activities as $activity) {
+                    $dbCon->query("DELETE FROM activity_scores WHERE activity_id = {$activity['id']}");
+                }
+
+                $dbCon->query("DELETE FROM activities WHERE type = $id");
+            }
+
             $hasSuccess = true;
             $hasError = false;
             $message = "Successfully deleted '<strong>{$criteriaDeletedData['criteria_name']}</strong>' from your grading criterias!";
@@ -213,7 +226,7 @@ input.percentage[type=number] {
                 </div>
 
                 <div class="flex w-full justify-end items-center">
-                    <button class="btn bg-[#276bae] text-white w-full md:max-w-[120px]" onclick="criteria.showModal()"
+                    <button class="btn bg-[#276bae] text-white w-full md:max-w-[130px]" onclick="criteria.showModal()"
                         <?php if (($criteriasSum * 100) == 100): ?> disabled <?php endif; ?>>
 
                         <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
@@ -309,14 +322,14 @@ input.percentage[type=number] {
 
             <!-- Pagination -->
             <div class="flex gap-4 justify-end">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -373,7 +386,7 @@ input.percentage[type=number] {
                 <div class="flex justify-end items-center gap-4 mt-4">
                     <button type="reset" onclick="closeAndResetModal(<?= $row['id'] ?>)"
                         class="btn btn-error">Cancel</button>
-                    <button class="btn bg-[##276bae] text-white" name="update-criteria">Update</button>
+                    <button class="btn bg-[#276bae] text-white" name="update-criteria">Update</button>
                 </div>
             </form>
         </div>
@@ -408,7 +421,7 @@ input.percentage[type=number] {
 
                 <div class="flex justify-end items-center gap-4 mt-4">
                     <button type="reset" onclick="criteria.close()" class="btn btn-error">Cancel</button>
-                    <button class="btn bg-[##276bae] text-white" name="create">Create</button>
+                    <button class="btn bg-[#276bae] text-white" name="create">Create</button>
                 </div>
             </form>
         </div>

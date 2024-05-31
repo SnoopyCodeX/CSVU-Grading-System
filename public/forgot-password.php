@@ -135,9 +135,9 @@ require_once ("../components/header.php");
                         <span class="border border-black my-2"></span>
 
                         <!-- Verify button -->
-                        <button class="btn bg-[#1b651b] text-base text-white w-full" name="verify-email">Verify
-                            Email</button>
+                        <button class="btn bg-[#1b651b] text-white w-full" name="verify-email">Verify Email</button>
 
+                        <a class="btn bg-[#276bae] text-white w-full" href="./login.php"><i class="bx bx-chevron-left"></i> Go Back</a>
                     </div>
                 </form>
             </div>

@@ -188,7 +188,7 @@ if (isset($_POST['create-admin'])) {
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
                         <a href="../manage-admin.php" class="btn btn-error text-lg text-semibold text-white">Cancel</a>
-                        <button class="btn btn-success text-lg text-semibold text-white" name="create-admin">Create</button>
+                        <button class="btn bg-[#276bae] text-lg text-semibold text-white" name="create-admin">Create</button>
                     </div>
                 </form>
             </div>

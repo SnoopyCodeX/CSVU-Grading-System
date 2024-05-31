@@ -28,8 +28,35 @@ $hasError = false;
 $hasSuccess = false;
 $hasFilter = false;
 $hasWarning = false;
+$editMode = false;
+$schoolYearId = null;
+$editToken = "";
 $warning = "";
 $message = "";
+
+if (isset($_GET['action']) && strtolower($_GET['action']) == 'edit' && isset($_GET['token']) && !empty($_GET['token'])) {
+    $changeGradeQuery = $dbCon->query("SELECT * FROM instructor_change_grade_request WHERE instructor_id = " . AuthController::user()->id . " AND subject_id = $subjectId AND status = 'approved'");
+
+    if ($changeGradeQuery->num_rows > 0) {
+        $changeGradeDetails = $changeGradeQuery->fetch_assoc();
+        $changeGradeToken = md5($changeGradeDetails['token']);
+        $editToken = $dbCon->real_escape_string($_GET['token']);
+        $schoolYearId = $changeGradeDetails['school_year'];
+
+        if ($changeGradeToken === $editToken && $changeGradeDetails['status'] == 'approved') {
+            $editMode = true;
+
+            $hasWarning = true;
+            $warning = "You are in edit mode; once released, it cannot be undone.";
+         }else {
+            header("location: ../manage-change-grade-requests.php");
+            exit;
+        }
+    } else {
+        header("location: ../manage-change-grade-requests.php");
+        exit;
+    }
+}
 
 if (isset($_POST['apply-filter'])) {
     $filterCriteria = $dbCon->real_escape_string($_POST['filter-criteria'] ?? '');
@@ -47,6 +74,140 @@ if (isset($_POST['clear-filter'])) {
     unset($filterCourse);
     unset($filterYearLevel);
     unset($filterSemester);
+}
+
+// Edit Mode: Re-release grade
+if (isset($_POST['rerelease-grade'])) {
+    $schoolYearDataQuery = $dbCon->query("SELECT * FROM school_year WHERE id = $schoolYearId");
+    $schoolYearData = $schoolYearDataQuery->fetch_assoc();
+
+    // Get the data of the subject that the instructor is handling
+    $subjectQuery = $dbCon->query("SELECT 
+        subject_instructors.*,
+        subjects.year_level as year_level,
+        subjects.name as name,
+        subjects.code as code,
+        subjects.units as units,
+        subjects.credits_units as credits_units,
+        subjects.term as term,
+        courses.course_code as course,
+        courses.course_code as course_code,
+        courses.id as course_id
+        FROM subject_instructors
+        LEFT JOIN subjects ON subject_instructors.subject_id = subjects.id
+        LEFT JOIN courses ON subjects.course = courses.id
+        WHERE subject_instructors.instructor_id = " . AuthController::user()->id . " AND subject_instructors.subject_id = $subjectId"
+    );
+    $subjectData = $subjectQuery->fetch_assoc();
+
+    // Fetch assigned sections for the selected subject
+    $sectionsQuery = "SELECT
+        sections.*,
+        courses.course as courseName
+        FROM subject_instructor_sections
+        LEFT JOIN sections ON subject_instructor_sections.section_id = sections.id
+        LEFT JOIN courses ON sections.course = courses.id
+        WHERE subject_instructor_sections.instructor_id = " . AuthController::user()->id . " AND subject_instructor_sections.subject_id = $subjectId";
+    $sectionsQueryResult = $dbCon->query($sectionsQuery);
+    $sections = $sectionsQueryResult->fetch_all(MYSQLI_ASSOC);
+
+    if (count($sections) > 0) {
+        $sectionIds = array_map(fn($section) => $section['id'], $sections);
+
+        // Fetch all student from the section
+        $studentsQuery = $dbCon->query("SELECT
+            student_id
+            FROM section_students
+            WHERE section_id IN (" . implode(",", $sectionIds) . ") GROUP BY student_id
+        ");
+        $students = $studentsQuery->fetch_all(MYSQLI_ASSOC);
+
+        if (count($students) > 0) {
+            $someFailToRelease = false;
+            $studentsWithNoScores = [];
+
+            // Loop through each students
+            foreach ($students as $student) {
+                // Check if student is enrolled to the subject, if not, we will skip the student and not give grade to him/her
+                $enrolledSubjectQuery = $dbCon->query("SELECT 
+                    student_enrolled_subjects.*,
+                    CONCAT(userdetails.firstName, ' ', userdetails.middleName, ' ', userdetails.lastName) AS studentName
+                    FROM student_enrolled_subjects 
+                    LEFT JOIN userdetails ON student_enrolled_subjects.student_id = userdetails.id
+                    WHERE student_enrolled_subjects.subject_id = $subjectId AND student_enrolled_subjects.student_id = $student[student_id]
+                ");
+
+                if ($enrolledSubjectQuery->num_rows == 0) {
+                    continue;
+                }
+
+                $enrolledSubject = $enrolledSubjectQuery->fetch_assoc();
+
+                // Compute the grade of the student from this subject
+                $computedGrade = computeStudentGradesFromSubject($dbCon, $subjectId, $subjectData['course_id'], $student['student_id'], AuthController::user()->id, $schoolYearId, $schoolYearData['semester']);
+
+                // -1 means student has no activity score
+                if ($computedGrade != -1) {
+                    $computedGrade = number_format($computedGrade, 2);
+
+                    // Check if student already has a grade for this semester, year level, school year and subject
+                    $check = $dbCon->query("SELECT * FROM student_final_grades WHERE student='{$student['student_id']}' AND subject = '$subjectId' AND term = '$schoolYearData[semester]' AND school_year = '{$schoolYearId}'");
+
+                    // If student's final grade already exists, show error message
+                    if ($check->num_rows > 0) {
+                        $updateStudentFinalGradeQuery = $dbCon->query("UPDATE student_final_grades SET grade = '$computedGrade' WHERE student='{$student['student_id']}' AND subject = '$subjectId' AND term = '$schoolYearData[semester]' AND school_year = '{$schoolYearId}'");
+
+                        if (!$updateStudentFinalGradeQuery)
+                            $someFailToRelease = true;
+                    } else {
+                        $insertNewStudentGrade = $dbCon->query("INSERT INTO student_final_grades (subject, term, student, school_year, grade) VALUES(
+                            '$subjectId',
+                            '$schoolYearData[semester]',
+                            '{$student['student_id']}',
+                            '{$schoolYear['id']}',
+                            '$computedGrade'
+                        )");
+
+                        if (!$insertNewStudentGrade) {
+                            $someFailToRelease = true;
+                        }
+                    }
+                } else {
+                    $studentsWithNoScores[] = $enrolledSubject['studentName'];
+                    $hasError = true;
+                    $message = "Some students enrolled to <strong>($subjectData[code]) $subjectData[name]</strong> S.Y. <strong>$schoolYearData[school_year]@$schoolYearData[semester]</strong> does not have any scores on their activities yet. Students: <strong>" . implode(", ", $studentsWithNoScores) . "</strong>";
+                    continue;
+                }
+            }
+
+            if ($someFailToRelease) {
+                $message = "Succesfully rereleased all grades but some errors have occured during the process. You will automatically be redirected back.";
+                $hasError = false;
+                $hasSuccess = true;
+            } else if (!$hasError) {
+                $message = "Successfully rereleased all grades! You will automatically be redirected back.";
+                $hasSuccess = true;
+            }
+
+            if ($someFailToRelease || !$hasError) {
+                $updateRequestQuery = $dbCon->query("UPDATE instructor_change_grade_request SET status='grade-changed' WHERE id = " . $changeGradeDetails['id']);
+
+                if (!$updateRequestQuery) {
+                    $message .= " However, updating the status of your grade change request failed.";
+                }
+
+                header('Refresh: 3; URL=../manage-change-grade-requests.php');
+            }
+        } else {
+            $hasError = true;
+            $hasSuccess = false;
+            $message = "There are no students to grade in the sections that you are assigned for <strong>{$subjectData['name']}</strong> subject!";
+        }
+    } else {
+        $hasError = true;
+        $hasSuccess = false;
+        $message = "You have no sections handled for <strong>{$subjectData['name']}</strong> subject!";
+    }
 }
 
 // Submit grade release request
@@ -480,25 +641,50 @@ input[type=number]::-webkit-inner-spin-button {
         <div class=" px-4 flex justify-between flex-col gap-4">
 
             <!-- Table Header -->
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <!-- Table Header -->
+                <div class="flex flex-col justify-start md:justify-center gap-2">
+                    <h1 class="text-[24px] font-semibold">Manage Activities</h1>
+                    <h1 class="text-md font-semibold">Subject: (<?= $currentSubject['code'] ?>) <?= $currentSubject['name'] ?></h1>
+                    <h1 class="text-md font-semibold">Course: (<?= $currentSubject['course_code'] ?>) <?= $currentSubject['course_name'] ?></h1>
+                </div>
 
+                <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+                    <button class="btn bg-[#276bae] text-white" onclick="filters.showModal()"><i class="<?= $hasFilter ? 'bx bxs-filter-alt' : 'bx bx-filter-alt' ?>"></i> Filters</button>
+                    
+                    <?php if (!$editMode): ?>
+                        <label for="submit-modal" class="btn bg-[#276bae] text-white" <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled <?php endif; ?>>Release Grades</label>
+                    <?php endif; ?>
+
+                    <a href="<?= $editMode ? '../manage-change-grade-requests.php' : '../manage-activity.php' ?>" class="btn bg-[#276bae] text-white"><i class="bx bxs-chevron-left"></i> Go Back</a>
+
+                    <?php if ($editMode): ?>
+                        <label for="rerelease-modal" class="btn bg-[#276bae] text-white" <?php if ($gradingCriteriasQuery->num_rows == 0): ?> disabled <?php endif; ?>>Re-release Grades</label>
+                    <?php endif; ?>
+
+                    <?php if (!$editMode): ?>
+                        <a onclick="create_activity_modal.showModal()" class="btn bg-[#276bae] text-white" <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled <?php endif; ?>><i class="bx bx-plus-circle"></i> Create</a>
+                    <?php endif; ?>
+                </div>
+            </div>
 
             <?php if ($gradingCriteriasQuery->num_rows == 0) { ?>
-            <div role="alert" class="alert alert-error mb-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
-                    viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                <span class="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
-                    <span class='flex items-center'>Before you can create a new activity, you must first create your
-                        grading criteria.</span>
-                    <div class='flex w-full justify-end items-center'>
-                        <a href='../manage-grading-criteria.php' class='btn btn'>
-                            <i class='bx bx-plus-circle'></i> Create
-                        </a>
-                    </div>
-                </span>
-            </div>
+                <div role="alert" class="alert alert-error mb-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span class="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
+                        <span class='flex items-center'>Before you can create a new activity, you must first create your
+                            grading criteria.</span>
+                        <div class='flex w-full justify-end items-center'>
+                            <a href='../manage-grading-criteria.php' class='btn btn'>
+                                <i class='bx bx-plus-circle'></i> Create
+                            </a>
+                        </div>
+                    </span>
+                </div>
             <?php } ?>
 
             <?php if ($hasWarning) { ?>
@@ -538,7 +724,7 @@ input[type=number]::-webkit-inner-spin-button {
             <div class="overflow-x-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <td class="bg-[#276bae] text-white text-center">Activity Name</td>
                             <td class="bg-[#276bae] text-white text-center">Type of Activity</td>
                             <td class="bg-[#276bae] text-white text-center">Year Level</td>
@@ -552,7 +738,7 @@ input[type=number]::-webkit-inner-spin-button {
                         <?php $activityResult = $dbCon->query($query); ?>
                         <?php if ($activityResult->num_rows > 0): ?>
                         <?php while ($row = $activityResult->fetch_assoc()): ?>
-                        <tr>
+                        <tr class="hover">
                             <td class="text-center"><?= $row['name'] ?></td>
                             <td class="text-center"><?= $row['criteria_name'] ?></td>
                             <td class="text-center"><?= $row['year_level'] ?></td>
@@ -561,12 +747,15 @@ input[type=number]::-webkit-inner-spin-button {
                             <td class="text-center"><?= $row['max_score'] ?></td>
                             <td>
                                 <div class="flex justify-center items-center gap-2">
-                                    <a class="btn btn-sm"
-                                        href="./activity_scores.php?id=<?= $row['id'] ?>&subjectId=<?= $subjectId ?><?= $page > 1 ? '&page=' . $page : '' ?>">Scores</a>
-                                    <label for="update-activity-<?= $row['id'] ?>"
-                                        class="btn btn-info btn-sm">Edit</label>
-                                    <label for="delete-activity-<?= $row['id'] ?>"
-                                        class="btn btn-error btn-sm">Delete</label>
+                                    <a class="btn btn-sm bg-[#276bae] text-white"
+                                        href="./activity_scores.php?id=<?= $row['id'] ?>&subjectId=<?= $subjectId ?><?= $page > 1 ? '&page=' . $page : '' ?><?= $editMode ? '&action=edit&token=' . $editToken : '' ?>">Scores</a>
+
+                                    <?php if (!$editMode): ?>
+                                        <label for="update-activity-<?= $row['id'] ?>"
+                                            class="btn btn-info btn-sm">Edit</label>
+                                        <label for="delete-activity-<?= $row['id'] ?>"
+                                            class="btn btn-error btn-sm">Delete</label>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
@@ -582,14 +771,14 @@ input[type=number]::-webkit-inner-spin-button {
 
             <!-- Pagination -->
             <div class="flex gap-4 justify-end items-center pb-4">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -647,7 +836,7 @@ input[type=number]::-webkit-inner-spin-button {
 
                 <div class="flex justify-end items-center gap-4 mt-4">
                     <label class="btn" for="update-activity-<?= $row['id'] ?>">Cancel</label>
-                    <button class="btn btn-info" name="update-activity">Update</button>
+                    <button class="btn bg-[#276bae] text-white" name="update-activity">Update</button>
                 </div>
             </form>
         </div>
@@ -671,6 +860,21 @@ input[type=number]::-webkit-inner-spin-button {
         <label class="modal-backdrop" for="delete-activity-<?= $row['id'] ?>">Close</label>
     </div>
     <?php endwhile; ?>
+
+    <!-- Re-release grade modal -->
+    <input type="checkbox" id="rerelease-modal" class="modal-toggle" />
+    <div class="modal" role="dialog">
+        <div class="modal-box border border-warning border-2">
+            <h3 class="text-lg font-bold text-warning">Re-release Grades</h3>
+            <p class="py-4">Are you sure you want to re-release the grades? This cannot be undone.</p>
+
+            <form class="flex justify-end gap-4 items-center" method="post">
+                <label class="btn" for="rerelease-modal">Close</label>
+                <button class="btn bg-[#276bae] text-white" name="rerelease-grade">Re-release</button>
+            </form>
+        </div>
+        <label class="modal-backdrop" for="rerelease-modal">Close</label>
+    </div>
 
     <!-- Grade Release Request modal -->
     <input type="checkbox" id="submit-modal" class="modal-toggle" />
@@ -715,7 +919,7 @@ input[type=number]::-webkit-inner-spin-button {
 
                 <div class="flex justify-end gap-4 items-center mt-4">
                     <label class="btn btn-error" for="submit-modal">Close</label>
-                    <button class="btn btn-success" name="submit-release-grade-request">Submit Request</button>
+                    <button class="btn bg-[#276bae] text-white" name="submit-release-grade-request">Submit Request</button>
                 </div>
             </form>
         </div>
@@ -783,7 +987,7 @@ input[type=number]::-webkit-inner-spin-button {
 
                 <div class="flex justify-end items-center gap-4 mt-4">
                     <button class="btn btn-error" name="clear-filter">Clear</button>
-                    <button class="btn btn-success" name="apply-filter">Apply</button>
+                    <button class="btn bg-[#276bae] text-white" name="apply-filter">Apply</button>
                 </div>
             </form>
         </div>
@@ -835,7 +1039,7 @@ input[type=number]::-webkit-inner-spin-button {
 
                 <div class="flex justify-end items-center gap-4 mt-4">
                     <button class="btn btn-error" type="button" onclick="create_activity_modal.close()">Cancel</button>
-                    <button class="btn btn-success" name="create-activity">Create</button>
+                    <button class="btn bg-[#276bae] text-white" name="create-activity">Create</button>
                 </div>
             </form>
         </div>

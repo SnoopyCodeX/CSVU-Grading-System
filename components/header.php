@@ -78,25 +78,24 @@ if (in_array('Asia/Manila', $tzList)) {
 
     body {
         font-family: 'Poppins', sans-serif;
-        font-size: 1rem;
-        line-height: 1.5;
+        font-size: 16px;
     }
 
     @media (min-width: 768px) {
         :root {
-            font-size: calc(1rem + ((1vw - 7.68px) * 0.6944));
+            font-size: 16px;
             min-height: 0vw;
         }
     }
 
     @media (min-width: 1920px) {
         :root {
-            font-size: 24px;
+            font-size: 16px;
         }
     }
     </style>
 </head>
 
-<body class="">
+<body>
     <!-- Preloader -->
     <?php include_once (str_repeat('../', count($firstDir) - 1) . 'components/preloader.php') ?>

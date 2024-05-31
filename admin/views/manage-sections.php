@@ -38,7 +38,7 @@ $coursesQuery = $dbCon->query("SELECT * FROM courses");
                 <?php if($coursesQuery->num_rows > 0): ?>
                     <?php while($course = $coursesQuery->fetch_assoc()): ?>
                         <a href="./view/course.php?id=<?= $course['id'] ?>" class="">
-                            <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                            <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                                 <h1 class='text-[32px] font-semibold text-center cursor-pointer'><?= $course['course'] ?></h1>
                                 <span class="text-[24px]"><?= $course['course_code'] ?></span>
                             </div>

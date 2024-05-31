@@ -300,15 +300,15 @@ $query = "SELECT * FROM school_year LIMIT $start, $limit";
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -360,7 +360,7 @@ $query = "SELECT * FROM school_year LIMIT $start, $limit";
                 </label>
 
                 <div class="flex gap-2 flex-col mt-4">
-                    <button class="btn btn-[#27ae60] w-full" name="update_school_year">Update</button>
+                    <button class="btn bg-[#276bae] text-white w-full" name="update_school_year">Update</button>
                     <label class="btn btn-error w-full" for="edit-school-year-<?= $row['id'] ?>">Close</label>
                 </div>
             </form>

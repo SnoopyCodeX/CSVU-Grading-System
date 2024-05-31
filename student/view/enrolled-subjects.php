@@ -44,7 +44,7 @@ $subjectsQueryResult = $dbCon->query($subjectsQuery);
 ?>
 
 
-<main class="overflow-x-auto md:overflow-hidden flex">
+<main class="overflow-x-auto flex">
     <?php require_once ("../layout/sidebar.php") ?>
     <section class="h-screen w-full px-4">
         <?php require_once ("../layout/topbar.php") ?>
@@ -118,15 +118,15 @@ $subjectsQueryResult = $dbCon->query($subjectsQuery);
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4 pb-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>

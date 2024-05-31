@@ -245,10 +245,10 @@ if ($hasSearch) {
                         </div>
                     </form>
 
-                    <a class="btn btn-info" href="./subject_instructors.php?subject=<?= $subjectId ?><?= !empty($prevPage) ? '&prev_page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
+                    <a class="btn bg-[#276bae] text-white" href="./subject_instructors.php?subject=<?= $subjectId ?><?= !empty($prevPage) ? '&prev_page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
                     
                     <!-- Create button -->
-                    <button class="btn btn-success" onclick="add_section.showModal()"><i class="bx bx-plus-circle"></i> Assign Section</button>
+                    <button class="btn bg-[#276bae] text-white" onclick="add_section.showModal()"><i class="bx bx-plus-circle"></i> Assign Section</button>
                 </div>
             </div>
 
@@ -274,15 +274,15 @@ if ($hasSearch) {
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
-                            <th class="bg-slate-500 text-white text-center">Course / Year Level / Section</th>
-                            <th class="bg-slate-500 text-white text-center">Action</th>
+                        <tr class="hover">
+                            <th class="bg-[#276bae] text-white text-center">Course / Year Level / Section</th>
+                            <th class="bg-[#276bae] text-white text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (count($handledSections) > 0): ?>
                             <?php foreach($handledSections as $handledSection): ?>
-                                <tr>
+                                <tr class="hover">
                                     <td class="text-center"><?= "{$handledSection['course_code']} " . str_split($handledSection['year_level'])[0] . "-{$handledSection['section_name']}" ?></td>
                                     <td class="text-center">
                                         <label for="remove-section-<?= $handledSection['section_id'] ?>"  class="btn btn-error btn-sm">Remove</label>
@@ -297,14 +297,14 @@ if ($hasSearch) {
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>

@@ -52,7 +52,7 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
 ?>
 
 
-<main class="overflow-x-auto md:overflow-hidden flex">
+<main class="overflow-x-auto flex">
     <?php require_once ("layout/sidebar.php") ?>
     <section class="h-screen w-full px-4">
         <?php require_once ("layout/topbar.php") ?>
@@ -95,7 +95,7 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
                 style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <!-- <td>ID</td> -->
                             <td class="bg-[#276bae] text-white text-center">Activity Name</td>
                             <td class="bg-[#276bae] text-white text-center">Term</td>
@@ -108,42 +108,42 @@ $activitiesQueryResult = $dbCon->query($activitiesQuery);
                     </thead>
                     <tbody>
                         <?php if ($activitiesQueryResult->num_rows > 0): ?>
-                        <?php while ($row = $activitiesQueryResult->fetch_assoc()) { ?>
-                        <tr>
-                            <!-- <td><?= $row['id'] ?></td> -->
-                            <td class="text-center"><?= $row['activityName'] ?></td>
-                            <td class="text-center"><?= $row['term'] ?></td>
-                            <td class="text-center"><?= $row['subjectName'] ?></td>
-                            <td class="text-center"><?= $row['instructorName'] ?></td>
-                            <td class="text-center"><?= $row['score'] ?></td>
-                            <td class="text-center"><?= $row['activityMaxScore'] ?></td>
-                            <td class="text-center">
-                                <div
-                                    class="badge p-4 text-base <?= ($row['score'] >= ($row['activityMaxScore'] * $row['activityPassingRate'])) ? "bg-green-400" : "bg-red-400" ?> text-black font-md">
-                                    <?= ($row['score'] >= ($row['activityMaxScore'] * $row['activityPassingRate'])) ? "Passed" : "Failed" ?>
-                                </div>
-                            </td>
-                        </tr>
-                        <?php } ?>
+                            <?php while ($row = $activitiesQueryResult->fetch_assoc()) { ?>
+                                <tr class="hover">
+                                    <!-- <td><?= $row['id'] ?></td> -->
+                                    <td class="text-center"><?= $row['activityName'] ?></td>
+                                    <td class="text-center"><?= $row['term'] ?></td>
+                                    <td class="text-center"><?= $row['subjectName'] ?></td>
+                                    <td class="text-center"><?= $row['instructorName'] ?></td>
+                                    <td class="text-center"><?= $row['score'] ?></td>
+                                    <td class="text-center"><?= $row['activityMaxScore'] ?></td>
+                                    <td class="text-center">
+                                        <div
+                                            class="badge p-4 text-base <?= ($row['score'] >= ($row['activityMaxScore'] * $row['activityPassingRate'])) ? "bg-green-400" : "bg-red-400" ?> text-black font-md">
+                                            <?= ($row['score'] >= ($row['activityMaxScore'] * $row['activityPassingRate'])) ? "Passed" : "Failed" ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
                         <?php else: ?>
-                        <tr>
-                            <td colspan="7" class="text-center">No activities found.</td>
-                        </tr>
+                            <tr>
+                                <td colspan="7" class="text-center">No activities found.</td>
+                            </tr>
                         <?php endif ?>
                     </tbody>
                 </table>
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4 pb-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>

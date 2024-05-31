@@ -67,7 +67,7 @@ if (isset($_POST['change-password'])) {
                     </div>
                 </div>
                 <ul tabindex="0"
-                    class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 fixed z-50 ">
+                    class="mt-3 z-[99] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52 fixed z-50 ">
                     <li><a onclick="change_password_modal.showModal()">Change Password</a></li>
                     <li><a onclick="logout_modal.showModal()">Logout</a></li>
                 </ul>
@@ -125,7 +125,7 @@ if (isset($_POST['change-password'])) {
             </label>
 
             <div class="modal-action">
-                <button class="btn btn-success" name="change-password">Change password</button>
+                <button class="btn bg-[#276bae] text-white" name="change-password">Change password</button>
                 <button class="btn btn-error" onclick="change_password_modal.close()">Cancel</button>
             </div>
         </form>
@@ -185,6 +185,12 @@ if (isset($_POST['change-password'])) {
                     <a href="<?php echo $rootFolder; ?>/manage-release-requests.php">
                         <i class='bx bx-briefcase-alt-2 text-[24px]'></i>
                         <span class="text-[18px]"> Release Requests</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="<?php echo $rootFolder; ?>/manage-change-grade-requests.php">
+                        <i class='bx bx-briefcase-alt-2 text-[24px]'></i>
+                        <span class="text-[18px]"> Change Grade Requests</span>
                     </a>
                 </li>
                 <li>

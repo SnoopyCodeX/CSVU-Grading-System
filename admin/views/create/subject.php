@@ -152,7 +152,7 @@ $instructors = $dbCon->query("SELECT * FROM userdetails WHERE roles='instructor'
                     <!-- Actions -->
                     <div class="grid grid-cols-2 gap-4">
                         <a href="../manage-subjects.php" class="btn btn-error text-base">Cancel</a>
-                        <button class="btn btn-success" name="create_subject">Create</button>
+                        <button class="btn bg-[#276bae] text-white" name="create_subject">Create</button>
                     </div>
                 </form>
             </div>

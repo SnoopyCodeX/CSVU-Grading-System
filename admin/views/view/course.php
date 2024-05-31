@@ -70,41 +70,41 @@ $fifthYearSectionCount = $fifthYearSectionCountQuery->fetch_assoc()['count'];
                 </div>
 
                 <div class="flex gap-4 px-4">
-                    <a class="btn btn-info" href="../manage-sections.php"><i class="bx bxs-chevron-left"></i> Go Back</a>
+                    <a class="btn bg-[#276bae] text-white" href="../manage-sections.php"><i class="bx bxs-chevron-left"></i> Go Back</a>
                 </div>
             </div>
 
             <div class='overflow-auto sm:pr-[48px] sm:grid sm:grid-cols-2 gap-4 md:grid-cols-2 lg:grid-cols-3 p-4 mt-8'>
                 <a href="./course_section.php?id=<?= $course['id'] ?>&yearLevel=1st Year" class="">
-                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                         <h1 class='text-[32px] font-semibold text-center cursor-pointer'>1st Year</h1>
                         <span class="text-[18px]"><?= $firstYearSectionCount ?> section<?= $firstYearSectionCount > 1 || $firstYearSectionCount == 0 ? 's' : '' ?></span>
                     </div>
                 </a>
 
                 <a href="./course_section.php?id=<?= $course['id'] ?>&yearLevel=2nd Year" class="">
-                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                         <h1 class='text-[32px] font-semibold text-center cursor-pointer'>2nd Year</h1>
                         <span class="text-[18px]"><?= $secondYearSectionCount ?> section<?= $secondYearSectionCount > 1 || $secondYearSectionCount == 0 ? 's' : '' ?></span>
                     </div>
                 </a>
 
                 <a href="./course_section.php?id=<?= $course['id'] ?>&yearLevel=3rd Year" class="">
-                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                         <h1 class='text-[32px] font-semibold text-center cursor-pointer'>3rd Year</h1>
                         <span class="text-[18px]"><?= $thirdYearSectionCount ?> section<?= $thirdYearSectionCount > 1 || $thirdYearSectionCount == 0 ? 's' : '' ?></span>
                     </div>
                 </a>
 
                 <a href="./course_section.php?id=<?= $course['id'] ?>&yearLevel=4th Year" class="">
-                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                         <h1 class='text-[32px] font-semibold text-center cursor-pointer'>4th Year</h1>
                         <span class="text-[18px]"><?= $fourthYearSectionCount ?> section<?= $fourthYearSectionCount > 1 || $fourthYearSectionCount == 0 ? 's' : '' ?></span>
                     </div>
                 </a>
 
                 <a href="./course_section.php?id=<?= $course['id'] ?>&yearLevel=5th Year" class="">
-                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4'>
+                    <div class='cursor-pointer hover:shadow-md h-[300px] rounded-[5px] rounded-[5px] border border-gray-400 flex justify-center items-center p-4 flex-col gap-2 mb-4 hover:bg-[#27ae60] hover:text-white'>
                         <h1 class='text-[32px] font-semibold text-center cursor-pointer'>5th Year</h1>
                         <span class="text-[18px]"><?= $fifthYearSectionCount ?> section<?= $fifthYearSectionCount > 1 || $fifthYearSectionCount == 0 ? 's' : '' ?></span>
                     </div>

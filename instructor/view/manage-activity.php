@@ -234,7 +234,7 @@ if (count($subjects) == 0) {
 
                 <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto items-center">
                     <!-- Release Grades -->
-                    <label for="submit-modal" class="btn w-full md:w-auto"
+                    <label for="submit-modal" class="btn bg-[#276bae] text-white w-full md:w-auto"
                         <?php if ($gradingCriteriasQuery->num_rows == 0 || count($subjects) == 0): ?> disabled
                         <?php endif; ?>>Release Grades</label>
 
@@ -337,8 +337,7 @@ if (count($subjects) == 0) {
                         <option value="" selected disabled>Select Subject </option>
 
                         <?php foreach ($subjects as $subject): ?>
-                        <option value="<?= $subject['subject_id'] ?>">(<?= $subject['code'] ?>) <?= $subject['name'] ?>
-                        </option>
+                            <option value="<?= $subject['subject_id'] ?>">(<?= $subject['code'] ?>) <?= $subject['name'] ?></option>
                         <?php endforeach; ?>
                     </select>
                 </label>
@@ -367,7 +366,7 @@ if (count($subjects) == 0) {
 
                 <div class="flex justify-end gap-4 items-center mt-4">
                     <label class="btn btn-error" for="submit-modal">Close</label>
-                    <button class="btn btn-success" name="submit-release-grade-request">Submit Request</button>
+                    <button class="btn bg-[#276bae] text-white" name="submit-release-grade-request">Submit Request</button>
                 </div>
             </form>
         </div>

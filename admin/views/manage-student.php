@@ -783,7 +783,8 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
                                 </g>
                             </svg>
 
-                            Import</button>
+                            Import
+                        </button>
 
                         <!-- Export Button -->
                         <div class="dropdown dropdown-end">
@@ -799,13 +800,22 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
                                     </g>
                                 </svg>
 
-                                Export</button>
+                                Export
+                            </button>
                             <ul tabindex="0"
                                 class="dropdown-content z-[99] menu p-2 shadow bg-base-100 rounded-box w-52">
-                                <li><label for="export_excel_modal" onclick="export_excel_modal.showModal()"><i
-                                            class="fa fa-file-excel"></i> Excel</label></li>
-                                <li><label for="export_csv_modal" onclick="export_csv_modal.showModal()"><i
-                                            class="fa fa-file-csv"></i> CSV</label></li>
+                                <li>
+                                    <label for="export_excel_modal" onclick="export_excel_modal.showModal()">
+                                        <i class="fa fa-file-excel"></i> 
+                                        Excel
+                                    </label>
+                                </li>
+                                <li>
+                                    <label for="export_csv_modal" onclick="export_csv_modal.showModal()">
+                                        <i class="fa fa-file-csv"></i> 
+                                        CSV
+                                    </label>
+                                </li>
                             </ul>
                         </div>
 
@@ -821,7 +831,8 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
                                 </g>
                             </svg>
 
-                            Create</a>
+                            Create
+                        </a>
                     </div>
                 </div>
             </div>
@@ -931,15 +942,15 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -1186,7 +1197,7 @@ $courses = $coursesQuery->fetch_all(MYSQLI_ASSOC);
                 <!-- Actions -->
                 <div class="grid grid-cols-2 gap-4">
                     <label for="edit-student-<?= $row['id'] ?>" class="btn btn-error text-base">Cancel</label>
-                    <button class="btn btn-success text-base" name="update_student">Update</button>
+                    <button class="btn bg-[#276bae] text-white text-base" name="update_student">Update</button>
                 </div>
             </form>
         </div>

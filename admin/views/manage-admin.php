@@ -184,7 +184,7 @@ if ($hasSearch) {
                     </form>
 
                     <!-- Create button -->
-                    <a href="./create/admin.php" class="btn btn-success"><i class="bx bx-plus-circle"></i> Create</a>
+                    <a href="./create/admin.php" class="btn bg-[#276bae] text-white"><i class="bx bx-plus-circle"></i> Create</a>
                 </div>
             </div>
 
@@ -235,11 +235,11 @@ if ($hasSearch) {
                             <!-- <th class="font-normal"><?= $admin['id'] ?></th> -->
                             <td class="font-normal text-center"><?= $admin['firstName'] ?> <?= $admin['middleName'] ?>
                                 <?= $admin['lastName'] ?></td>
-                            <th class="font-normal text-center"><?= $admin['email'] ?></th>
-                            <th class="font-normal text-center">
+                            <td class="font-normal text-center"><?= $admin['email'] ?></td>
+                            <td class="font-normal text-center">
                                 <?= ucfirst($admin['gender']) ?>
-                            </th>
-                            <th class="font-normal text-center"><?= $admin['contact'] ?></th>
+                            </td>
+                            <td class="font-normal text-center"><?= $admin['contact'] ?></td>
                             <td>
                                 <div class="flex gap-2 justify-center items-center">
                                     <label for="view-admin-<?= $admin['id'] ?>"
@@ -294,15 +294,15 @@ if ($hasSearch) {
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn btn-sm" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px] btn-sm" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
@@ -463,7 +463,7 @@ if ($hasSearch) {
                 <!-- Actions -->
                 <div class="grid grid-cols-2 gap-4">
                     <label for="edit-admin-<?= $admin['id'] ?>" class="btn btn-error text-base">Cancel</label>
-                    <button class="btn btn-success text-base" name="update-admin">Update</button>
+                    <button class="btn bg-[#276bae] text-white text-base" name="update-admin">Update</button>
                 </div>
             </form>
         </div>

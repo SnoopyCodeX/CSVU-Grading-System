@@ -39,6 +39,9 @@ if (isset($_POST['remove-student'])) {
         : 'Failed to remove student from this section.';
 }
 
+// Page from previous panel
+$prevPanelPage = $dbCon->real_escape_string($_GET['currentPage'] ?? '');
+
 // Year level
 $yearLevel = $dbCon->real_escape_string($_GET['yearLevel']);
 
@@ -164,6 +167,20 @@ if ($hasSearch) {
                 </div>
 
                 <div class="flex gap-4 md:px-4">
+                     <!-- Back button -->
+                     <a href="./course_section.php?id=<?= $courseId ?>&yearLevel=<?= $yearLevel ?><?= !empty($prevPanelPage) ? '&page=' . $prevPanelPage : '' ?>" class="btn bg-[#276bae] text-white">
+                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>
+                            <title>left_fill</title>
+                            <g id="left_fill" fill='none' fill-rule='evenodd'>
+                                <path
+                                    d='M24 0v24H0V0h24ZM12.593 23.258l-.011.002-.071.035-.02.004-.014-.004-.071-.035c-.01-.004-.019-.001-.024.005l-.004.01-.017.428.005.02.01.013.104.074.015.004.012-.004.104-.074.012-.016.004-.017-.017-.427c-.002-.01-.009-.017-.017-.018Zm.265-.113-.013.002-.185.093-.01.01-.003.011.018.43.005.012.008.007.201.093c.012.004.023 0 .029-.008l.004-.014-.034-.614c-.003-.012-.01-.02-.02-.022Zm-.715.002a.023.023 0 0 0-.027.006l-.006.014-.034.614c0 .012.007.02.017.024l.015-.002.201-.093.01-.008.004-.011.017-.43-.003-.012-.01-.01-.184-.092Z' />
+                                <path fill='currentColor'
+                                    d='M7.94 13.06a1.5 1.5 0 0 1 0-2.12l5.656-5.658a1.5 1.5 0 1 1 2.121 2.122L11.122 12l4.596 4.596a1.5 1.5 0 1 1-2.12 2.122L7.938 13.06Z' />
+                            </g>
+                        </svg>
+                        Go Back
+                    </a>
+
                     <!-- Search bar -->
                     <form class="w-full md:w-[300px]" method="POST" autocomplete="off">
                         <label for="default-search"
@@ -218,7 +235,7 @@ if ($hasSearch) {
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
+                        <tr class="hover">
                             <!-- <td class="bg-slate-500 text-white">ID</td> -->
                             <td class="bg-[#276bae] text-white text-center">Student ID</td>
                             <td class="bg-[#276bae] text-white text-center">Full Name</td>
@@ -235,7 +252,7 @@ if ($hasSearch) {
                         <?php $students = $dbCon->query($studentsQuery); ?>
                         <?php if ($students->num_rows > 0) { ?>
                         <?php while ($student = $students->fetch_assoc()) { ?>
-                        <tr>
+                        <tr class="hover">
                             <td class="text-center"><?= $student['sid'] ?></td>
                             <td class="text-center"><?= $student['fullName'] ?></td>
                             <td class="text-center"><?= $student['contact'] ?></td>
@@ -265,15 +282,15 @@ if ($hasSearch) {
             </div>
 
             <!-- Pagination -->
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>"
                     <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>"
                     <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>

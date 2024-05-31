@@ -324,10 +324,10 @@ $filteredEnrolledSubjects = array_map(function($enrolledSubject) use ($enrolledS
                         </div>
                     </form>
 
-                    <a class="btn btn-info" href="../manage-student.php<?= !empty($prevPage) ? '?page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
+                    <a class="btn bg-[#276bae] text-white" href="../manage-student.php<?= !empty($prevPage) ? '?page=' . $prevPage : '' ?>"><i class="bx bxs-chevron-left"></i> Go Back</a>
 
                     <!-- Create button -->
-                    <button class="btn btn-success" onclick="enroll_subject.showModal()"><i class="bx bx-plus-circle"></i> Enroll Subject</button>
+                    <button class="btn bg-[#276bae] text-white" onclick="enroll_subject.showModal()"><i class="bx bx-plus-circle"></i> Enroll Subject</button>
                 </div>
             </div>
 
@@ -353,20 +353,20 @@ $filteredEnrolledSubjects = array_map(function($enrolledSubject) use ($enrolledS
             <div class="overflow-auto border border-gray-300 rounded-md" style="height: calc(100vh - 250px)">
                 <table class="table table-zebra table-xs sm:table-sm md:table-md table-pin-rows table-pin-cols ">
                     <thead>
-                        <tr>
-                            <th class="bg-slate-500 text-white text-center">Subject Code</th>
-                            <th class="bg-slate-500 text-white text-center">Subject Name</th>
-                            <th class="bg-slate-500 text-white text-center">Year Level</th>
-                            <th class="bg-slate-500 text-white text-center">Semester</th>
-                            <th class="bg-slate-500 text-white text-center">Course / Year Level / Section</th>
-                            <th class="bg-slate-500 text-white text-center">Status</th>
-                            <th class="bg-slate-500 text-white text-center">Action</th>
+                        <tr class="hover">
+                            <th class="bg-[#276bae] text-white text-center">Subject Code</th>
+                            <th class="bg-[#276bae] text-white text-center">Subject Name</th>
+                            <th class="bg-[#276bae] text-white text-center">Year Level</th>
+                            <th class="bg-[#276bae] text-white text-center">Semester</th>
+                            <th class="bg-[#276bae] text-white text-center">Course / Year Level / Section</th>
+                            <th class="bg-[#276bae] text-white text-center">Status</th>
+                            <th class="bg-[#276bae] text-white text-center">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (count($filteredEnrolledSubjects) > 0): ?>
                             <?php foreach($filteredEnrolledSubjects as $enrolledSubject): ?>
-                                <tr>
+                                <tr class="hover">
                                     <td class="text-center"><?= $enrolledSubject['code'] ?></td>
                                     <td class="text-center"><?= $enrolledSubject['name'] ?></td>
                                     <td class="text-center"><?= ucwords($enrolledSubject['year_level']) ?></td>
@@ -414,14 +414,14 @@ $filteredEnrolledSubjects = array_map(function($enrolledSubject) use ($enrolledS
                     </tbody>
                 </table>
             </div>
-            <div class="flex justify-between items-center">
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
+            <div class="flex justify-end items-center gap-4">
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page - 1 ?>" <?php if ($page - 1 <= 0) { ?> disabled <?php } ?>>
                     <i class='bx bx-chevron-left'></i>
                 </a>
 
-                <button class="btn" type="button">Page <?= $page ?> of <?= $pages ?></button>
+                <button class="btn bg-[#276bae] text-white" type="button">Page <?= $page ?> of <?= $pages ?></button>
 
-                <a class="btn text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
+                <a class="btn bg-[#276bae] text-white text-[24px]" href="<?= $_SERVER['PHP_SELF'] ?>?page=<?= $page + 1 ?>" <?php if ($page + 1 > $pages) { ?> disabled <?php } ?>>
                     <i class='bx bxs-chevron-right'></i>
                 </a>
             </div>
@@ -512,7 +512,7 @@ $filteredEnrolledSubjects = array_map(function($enrolledSubject) use ($enrolledS
 
                 <div class="modal-action">
                     <button class="btn btn-sm md:btn-md btn-error text-base" type="button" onclick="enroll_subject.close()">Cancel</button>
-                    <button class="btn btn-sm md:btn-md btn-success text-base" name="enroll-subject" disabled>Enroll Subject</button>
+                    <button class="btn btn-sm md:btn-md bg-[#276bae] text-white text-base" name="enroll-subject" disabled>Enroll Subject</button>
                 </div>
             </form>
         </div>
